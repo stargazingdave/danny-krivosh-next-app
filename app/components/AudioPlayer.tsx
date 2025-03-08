@@ -49,9 +49,14 @@ export const AudioPlayer = ({ src }: { src: string }) => {
     return (
         <div className="flex items-center gap-2 p-4 w-full">
             {/* Play/Pause Button */}
-            <button onClick={togglePlay} className="text-white text-2xl">
+            <button onClick={togglePlay} className="text-white text-2xl cursor-pointer">
                 {isPlaying ? <IoPause /> : <IoPlay />}
             </button>
+
+            {/* Current Time */}
+            <p className="text-white text-sm">
+                {audioRef.current ? `${Math.floor(audioRef.current.currentTime / 60)}:${Math.floor(audioRef.current.currentTime % 60).toString().padStart(2, "0")}` : "Loading..."}
+            </p>
 
             {/* Progress Bar */}
             <input
@@ -70,6 +75,11 @@ export const AudioPlayer = ({ src }: { src: string }) => {
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
             />
+
+            {/* Total Duration */}
+            <p className="text-white text-sm">
+                {duration ? `${Math.floor(duration / 60)}:${Math.floor(duration % 60).toString().padStart(2, "0")}` : "Loading..."}
+            </p>
         </div>
     );
 };

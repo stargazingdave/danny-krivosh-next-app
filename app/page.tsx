@@ -177,7 +177,7 @@ export default function Home() {
   return (
     <div className="flex flex-col font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col">
-        <SongGrid songs={songs} youtubeSongs={youtubeSongs} />
+        <SongGrid nativeSongs={songs} youtubeSongs={youtubeSongs} />
       </main>
     </div>
   );
