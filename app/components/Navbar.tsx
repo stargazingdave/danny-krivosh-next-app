@@ -40,16 +40,21 @@ export const Navbar: FC = () => {
 
     return <div className="w-full">
         <nav className="flex justify-between items-center p-4">
-            <div className="text-5xl font-light font-aguafina p-2">Danny Krivosh</div>
+            <div
+                className="text-5xl font-light font-aguafina p-2 cursor-pointer"
+                onClick={() => router.push("/")}
+            >
+                Danny Krivosh
+            </div>
             <div className="flex gap-4">
                 {tabs.map((tab) => (
                     <button
                         key={tab.name}
                         className={`cursor-pointer border-transparent border-b hover:border-white transition-all duration-700 ${activeTab.name === tab.name
-                                ? tab.name === "home"
-                                    ? "text-white text-2xl"
-                                    : "text-white text-3xl"
-                                : "text-gray-500"
+                            ? tab.name === "home"
+                                ? "text-white text-2xl"
+                                : "text-white text-3xl"
+                            : "text-gray-500"
                             }`}
                         onClick={() => onTabClick(tab)}
                     >
