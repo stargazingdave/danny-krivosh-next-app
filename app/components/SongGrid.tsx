@@ -17,9 +17,10 @@ export interface Song {
 
 interface SongGridProps {
     songs: Song[];
+    youtubeSongs: { id: string, embbed: string }[];
 }
 
-export const SongGrid: FC<SongGridProps> = ({ songs }) => {
+export const SongGrid: FC<SongGridProps> = ({ songs, youtubeSongs }) => {
     const [activeSong, setActiveSong] = useState<string | null>(null);
 
     return (
@@ -51,6 +52,21 @@ export const SongGrid: FC<SongGridProps> = ({ songs }) => {
                         <h2 className="text-lg font-semibold text-white">{song.title}</h2>
                         <Song song={song} activeSong={activeSong} setActiveSong={setActiveSong} />
                     </div>
+                </div>
+            ))}
+
+            {/* YouTube Songs */}
+            {youtubeSongs.map((song) => (
+                <div
+                    className="relative h-32 bg-white/10 backdrop-blur-lg rounded-lg overflow-hidden hover:bg-neutral-800 transition-all duration-300"
+                    style={{
+                        boxShadow: "-1px -1px 8px 0.5px #555555",
+                    }}
+                >
+                    <div
+                        className="relative w-full aspect-video"
+                        dangerouslySetInnerHTML={{ __html: song.embbed }}
+                    />
                 </div>
             ))}
         </div>
