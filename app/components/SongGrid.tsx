@@ -5,23 +5,13 @@ import { IoIosPlay } from 'react-icons/io';
 import { AudioPlayer } from './AudioPlayer';
 import Image from 'next/image';
 import { FaRandom } from 'react-icons/fa';
+import Checkbox from './Checkbox';
+import Dropdown from './Dropdown';
+import { NativeSong, YouTubeSong, Song as SongType } from '../types/Song';
+import { Song } from './Song';
+import { RecyclingBin } from './RecyclingBin';
 
-export interface NativeSong {
-    id: string;
-    title: string;
-    description: string;
-    length: number;
-    url: string;
-    generes: string[];
-    image?: string;
-}
 
-export interface YouTubeSong {
-    id: string;
-    embbed: string;
-}
-
-export type Song = (NativeSong & { type: 'native' }) | (YouTubeSong & { type: 'youtube' });
 
 interface SongGridProps {
     nativeSongs: NativeSong[];
@@ -29,18 +19,41 @@ interface SongGridProps {
 }
 
 export const SongGrid: FC<SongGridProps> = ({ nativeSongs, youtubeSongs }) => {
-    const [songs, setSongs] = useState<Song[]>([
+    const [songs, setSongs] = useState<SongType[]>([
         ...nativeSongs.map((song) => ({ ...song, type: 'native' as const })),
         ...youtubeSongs.map((song) => ({ ...song, type: 'youtube' as const })),
     ]);
     const [activeSong, setActiveSong] = useState<string | null>(null);
+    const [random, setRandom] = useState(false);
+
+    const [recycledSongs, setRecycledSongs] = useState<SongType[]>([]);
+
+    const addSongToRecycle = (song: SongType) => {
+        setRecycledSongs([...recycledSongs, song]);
+    }
+
+    const setOriginalOrder = () => {
+        setSongs([
+            ...nativeSongs.map((song) => ({ ...song, type: 'native' as const })),
+            ...youtubeSongs.map((song) => ({ ...song, type: 'youtube' as const })),
+        ]);
+        setRandom(false);
+    };
+
+    const setRandomOrder = () => {
+        setSongs([...songs].sort(() => Math.random() - 0.5));
+        setRandom(true);
+    };
 
     return <div className='flex flex-col items-center justify-center'>
-        <FaRandom
-            className="text-neutral-500 hover:text-white text-2xl cursor-pointer"
-            onClick={() => setSongs([...songs].sort(() => Math.random() - 0.5))}
-        />
-        <div className="box-border relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-4">
+        <div className='fixed bottom-0 right-0 w-full z-50'>
+            <RecyclingBin initSongs={recycledSongs} addSong={addSongToRecycle} />
+        </div>
+        <div className='flex gap-4'>
+            <Checkbox label="Original" checked={!random} onChange={() => setOriginalOrder()} />
+            <Checkbox label="Random" checked={random} onChange={() => setRandomOrder()} />
+        </div>
+        <div className="box-border relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-4 z-10">
             {songs.map((song, index) => {
                 if (song.type === 'native') {
                     return <div
@@ -49,6 +62,8 @@ export const SongGrid: FC<SongGridProps> = ({ nativeSongs, youtubeSongs }) => {
                         style={{
                             boxShadow: "-1px -1px 4px 1px #77777777",
                         }}
+                        draggable="true"
+                        onDragStart={(e) => e.dataTransfer.setData("song", JSON.stringify(song))}
                     >
                         {/* Background Image */}
                         {
@@ -89,56 +104,3 @@ export const SongGrid: FC<SongGridProps> = ({ nativeSongs, youtubeSongs }) => {
     </div>
 };
 
-interface SongProps {
-    song: NativeSong;
-    activeSong: string | null;
-    setActiveSong: (id: string) => void;
-}
-
-const Song: FC<SongProps> = ({ song, activeSong, setActiveSong }) => {
-    const audioRef = useRef<HTMLAudioElement>(null);
-    const [duration, setDuration] = useState<number | null>(null);
-
-
-    useEffect(() => {
-        const audioElement = audioRef.current;
-        if (audioElement) {
-            const updateDuration = () => {
-                setDuration(audioElement.duration);
-                console.log("Duration Loaded:", audioElement.duration);
-            };
-
-            // Ensure the audio loads metadata
-            audioElement.load(); // Force metadata to load
-            audioElement.addEventListener("loadedmetadata", updateDuration);
-
-            return () => {
-                audioElement.removeEventListener("loadedmetadata", updateDuration);
-            };
-        }
-    }, [song.url]);
-
-    return (
-        <div>
-            {activeSong === song.id ? (
-                <div className="h-24 flex flex-col justify-between">
-                    <p className="text-gray-300 text-sm">{song.description}</p>
-                    <AudioPlayer src={song.url} />
-                </div>
-            ) : (
-                <div className="flex flex-col h-24 items-center justify-center">
-                    <audio ref={audioRef} src={song.url} />
-
-                    {/* Display Song Duration */}
-                    <p className='absolute top-8 left-2'>
-                        {duration ? `${Math.floor(duration / 60)}:${Math.floor(duration % 60).toString().padStart(2, "0")}` : "Loading..."}
-                    </p>
-                    <IoIosPlay
-                        className="w-14 h-14 text-white opacity-80 hover:opacity-100 transition-all duration-300 cursor-pointer"
-                        onClick={() => setActiveSong(song.id)}
-                    />
-                </div>
-            )}
-        </div>
-    );
-};
