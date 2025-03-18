@@ -58,7 +58,7 @@ export const Navbar: FC = () => {
         <div className="w-full h-16">
             <nav className="flex justify-end items-center p-4">
                 <div
-                    className="fixed left-4 top-4 text-6xl font-light font-aguafina p-2 cursor-pointer shadow-md"
+                    className="fixed left-4 top-4 text-4xl sm:text-6xl font-light font-aguafina p-2 cursor-pointer shadow-md"
                     onClick={() => router.push("/")}
                 >
                     Danny Krivosh

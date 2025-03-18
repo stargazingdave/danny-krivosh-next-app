@@ -15,13 +15,11 @@ import { RecyclingBin } from './RecyclingBin';
 
 interface SongGridProps {
     nativeSongs: NativeSong[];
-    youtubeSongs: YouTubeSong[];
 }
 
-export const SongGrid: FC<SongGridProps> = ({ nativeSongs, youtubeSongs }) => {
+export const SongGrid: FC<SongGridProps> = ({ nativeSongs }) => {
     const [songs, setSongs] = useState<SongType[]>([
         ...nativeSongs.map((song) => ({ ...song, type: 'native' as const })),
-        ...youtubeSongs.map((song) => ({ ...song, type: 'youtube' as const })),
     ]);
     const [activeSong, setActiveSong] = useState<string | null>(null);
     const [random, setRandom] = useState(false);
@@ -35,7 +33,6 @@ export const SongGrid: FC<SongGridProps> = ({ nativeSongs, youtubeSongs }) => {
     const setOriginalOrder = () => {
         setSongs([
             ...nativeSongs.map((song) => ({ ...song, type: 'native' as const })),
-            ...youtubeSongs.map((song) => ({ ...song, type: 'youtube' as const })),
         ]);
         setRandom(false);
     };
@@ -53,12 +50,12 @@ export const SongGrid: FC<SongGridProps> = ({ nativeSongs, youtubeSongs }) => {
             <Checkbox label="Original" checked={!random} onChange={() => setOriginalOrder()} />
             <Checkbox label="Random" checked={random} onChange={() => setRandomOrder()} />
         </div>
-        <div className="box-border relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-4 z-10">
+        <div className="w-full box-border relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-4 z-10">
             {songs.map((song, index) => {
                 if (song.type === 'native') {
                     return <div
                         key={song.id}
-                        className="relative h-32 bg-white/10 backdrop-blur-lg rounded-lg overflow-hidden hover:bg-neutral-500 transition-all duration-300"
+                        className="relative min-h-32 sm:min-h-44 md:min-h-50 w-full bg-white/10 backdrop-blur-lg rounded-lg overflow-hidden hover:bg-neutral-500 transition-all duration-300"
                         style={{
                             boxShadow: "-1px -1px 4px 1px #77777777",
                         }}
@@ -82,7 +79,12 @@ export const SongGrid: FC<SongGridProps> = ({ nativeSongs, youtubeSongs }) => {
                         {/* Content */}
                         <div className="relative z-10 flex flex-col h-full p-2">
                             <h2 className="text-lg font-semibold text-white">{song.title}</h2>
-                            <Song song={song} activeSong={activeSong} setActiveSong={setActiveSong} />
+                            {
+                                song.url
+                                ? <Song song={song} activeSong={activeSong} setActiveSong={setActiveSong} />
+                                : <p className="text-sm text-gray-300">Coming Soon</p>
+                            }
+                            
                         </div>
                     </div>
                 } else if (song.type === 'youtube') {

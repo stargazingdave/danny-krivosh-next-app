@@ -1,7 +1,7 @@
 import { SongGrid } from "./components/SongGrid";
 
 export default function Home() {
-  
+
 
   const songs = [
     {
@@ -9,7 +9,7 @@ export default function Home() {
       title: "Answers None",
       description: "Instrumental, Atmospheric, Noise",
       length: 180,
-      url: "https://strifed.wordpress.com/wp-content/uploads/2012/02/danny_krivosh_-_answers_none.mp3",
+      url: "/song_files/answers_none.mp3",
       generes: ["rock", "pop"],
       image: "/song_images/answers-none.webp",
     },
@@ -18,7 +18,7 @@ export default function Home() {
       title: "8",
       description: "Instrumental, rock",
       length: 240,
-      url: "https://strifed.wordpress.com/wp-content/uploads/2012/06/theonewithmoremushroomo1.mp3",
+      url: "/song_files/8.mp3",
       generes: ["rock"],
       image: "/song_images/8.webp",
     },
@@ -27,16 +27,16 @@ export default function Home() {
       title: "A Reflection of You",
       description: "Slowbeat, rock, psychedelic",
       length: 200,
-      url: "https://example.com/song3.mp3",
+      url: "/song_files/a_reflection_of_you.mp3",
       generes: ["rock"],
       image: "/song_images/a-reflection-of-you.jpg",
     },
     {
       id: "4",
-      title: "No Country",
+      title: "Yours Truly",
       description: "Instrumental, folk",
       length: 220,
-      url: "https://example.com/song4.mp3",
+      url: "/song_files/yours_truly.mp3",
       generes: ["rock", "pop"],
       image: "/song_images/no-country.jpg",
     },
@@ -45,16 +45,16 @@ export default function Home() {
       title: "Under",
       description: "Metal, Atmospheric",
       length: 190,
-      url: "https://example.com/song5.mp3",
+      url: "/song_files/under.mp3",
       generes: ["pop"],
       image: "/song_images/under.webp",
     },
     {
       id: "6",
-      title: "Poor Man's Vision",
+      title: "Halomot Sheniganti",
       description: "Ballad, Rock",
       length: 210,
-      url: "https://example.com/song6.mp3",
+      url: "/song_files/halomot_sheniganti.mp3",
       generes: ["rock"],
       image: "/song_images/poor-mans-vision.webp",
     },
@@ -63,7 +63,7 @@ export default function Home() {
       title: "Serenade",
       description: "Atmospheric",
       length: 230,
-      url: "https://example.com/song7.mp3",
+      url: "/song_files/serenade.mp3",
       generes: ["rock", "pop"],
       image: "/song_images/serenade.webp",
     },
@@ -72,16 +72,16 @@ export default function Home() {
       title: "Son of God",
       description: "Acoustic, Ballad",
       length: 250,
-      url: "https://example.com/song8.mp3",
+      url: "",
       generes: ["pop"],
       image: "/song_images/son-of-god.webp",
     },
     {
       id: "9",
-      title: "Remain Unfold",
+      title: "Laundromat",
       description: "Electronic, Rock",
       length: 260,
-      url: "https://example.com/song9.mp3",
+      url: "/song_files/laundromat.mp3",
       generes: ["rock"],
       image: "/song_images/remain-unfold.jpg",
     },
@@ -90,7 +90,7 @@ export default function Home() {
       title: "Static",
       description: "Instrumental",
       length: 270,
-      url: "https://example.com/song10.mp3",
+      url: "/song_files/static.mp3",
       generes: ["rock", "pop"],
       image: "/song_images/static.webp",
     },
@@ -99,7 +99,7 @@ export default function Home() {
       title: "Taste",
       description: "Metal, Soundtrack",
       length: 280,
-      url: "https://example.com/song11.mp3",
+      url: "/song_files/taste.mp3",
       generes: ["pop"],
       image: "/song_images/taste.webp",
     },
@@ -108,7 +108,7 @@ export default function Home() {
       title: "The Extra Color",
       description: "Ballad, Rock",
       length: 290,
-      url: "https://example.com/song12.mp3",
+      url: "/song_files/the_extra_color.mp3",
       generes: ["rock"],
       image: "/song_images/the-extra-color.webp",
     },
@@ -117,7 +117,7 @@ export default function Home() {
       title: "Thought of a Kid (Part 1)",
       description: "Electronic, Rock",
       length: 300,
-      url: "https://example.com/song13.mp3",
+      url: "/song_files/thought_of_a_kid_p-1.mp3",
       generes: ["rock", "pop"],
       image: "/song_images/thought-of-a-kid-part-1.webp",
     },
@@ -126,7 +126,7 @@ export default function Home() {
       title: "Thought of a Kid (Part 2)",
       description: "Electronic, Mood",
       length: 310,
-      url: "https://example.com/song14.mp3",
+      url: "/song_files/thought_of_a_kid_p-2.mp3",
       generes: ["pop"],
       image: "/song_images/thought-of-a-kid-part-2.jpg",
     },
@@ -135,7 +135,7 @@ export default function Home() {
       title: "Use Art",
       description: "Slowbeat, Rock",
       length: 320,
-      url: "https://example.com/song15.mp3",
+      url: "/song_files/use_art.mp3",
       generes: ["rock"],
       image: "/song_images/use-art.webp",
     },
@@ -144,7 +144,7 @@ export default function Home() {
       title: "Vitality",
       description: "Instrumental, Electronic",
       length: 330,
-      url: "https://example.com/song16.mp3",
+      url: "/song_files/vitality.mp3",
       generes: ["rock", "pop"],
       image: "/song_images/vitality.webp",
     },
@@ -153,32 +153,59 @@ export default function Home() {
       title: "Feel",
       description: "Indie, Folk",
       length: 340,
-      url: "https://example.com/song17.mp3",
+      url: "",
       generes: ["pop"],
       image: "/song_images/feel.jpg",
     },
-  ];
-
-  const youtubeSongs = [
     {
       id: "18",
-      embbed: `<iframe width="100% !important" height="100% !important" src="https://www.youtube.com/embed/FNowo1KKQrM?si=EW0-VYQ10SCUGscy" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`,
+      title: "In & Out",
+      description: "Instrumental, Chillstep",
+      length: 350,
+      url: "/song_files/in_and_out.mp3",
+      generes: ["rock"],
+      image: "/song_images/in-and-out.webp",
     },
     {
       id: "19",
-      embbed: `<iframe width="100% !important" height="100% !important" src="https://www.youtube.com/embed/vCXx68kyJTg?si=EP_1cYgpU_UoHZTL" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`
+      title: "Reason 1",
+      description: "Rock",
+      length: 360,
+      url: "/song_files/reason_1.mp3",
+      generes: ["rock", "pop"],
+      image: "/song_images/reason-1.jpg",
     },
     {
       id: "20",
-      embbed: `<iframe width="100% !important" height="100% !important" src="https://www.youtube.com/embed/jLyXCHVmGAI?si=wSd2UR1w6HQgDXl7" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`
-    }
-  ]
+      title: "Otto Hapachad",
+      description: "Neo-Racict, Punk-Metal",
+      length: 370,
+      url: "/song_files/otto_hapachad.mp3",
+      generes: ["pop"],
+      image: "/song_images/otto-hapachad.png",
+    },
+    {
+      id: "21",
+      title: "DIEM",
+      description: "Worldly, Atmospheric, Heavy Rock",
+      length: 380,
+      url: "/song_files/diem.mp3",
+      generes: ["rock"],
+      image: "/song_images/diem.png",
+    },
+    {
+      id: "22",
+      title: "Erev Rav",
+      description: "Noise, Metal, Trash, New-Wave",
+      length: 390,
+      url: "/song_files/erev_rav.mp3",
+      generes: ["rock", "pop"],
+      image: "/song_images/erev-rav.png",
+    },
+  ];
 
-  return (
-    <div className="flex flex-col font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col">
-        <SongGrid nativeSongs={songs} youtubeSongs={youtubeSongs} />
-      </main>
-    </div>
-  );
+
+  return <div className="p-4">
+    <SongGrid nativeSongs={songs} />
+  </div>;
 }
