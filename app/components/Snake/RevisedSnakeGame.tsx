@@ -11,9 +11,9 @@ import { TbPillFilled } from "react-icons/tb";
 const GRID_HEIGHT = 20;
 const GRID_WIDTH = 36;
 const CELL_SIZE = 20;
-const INITIAL_SPEED = 5;
-const MAX_SPEED = 20;
-const MIN_SPEED = 1;
+const INITIAL_SPEED = 1;
+const MAX_SPEED = 10;
+const MIN_SPEED = 0.2;
 
 type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT";
 type Key = Direction | "Escape" | "Enter";
@@ -61,7 +61,7 @@ const scoreMap: Record<ScoreType, { score: number; color: string }> = {
     pill: { score: 15, color: '#590b02' },
 };
 
-export const SnakeGame: React.FC = () => {
+export const RevisedSnakeGame: React.FC = () => {
     const { setSnakeOpen } = useAppContext();
     const [gameStatus, setGameStatus] = useState<'ready' | 'running' | 'gameOver'>('ready');
     const [snake, setSnake] = useState([{ x: 10, y: 10 }]);
@@ -81,7 +81,6 @@ export const SnakeGame: React.FC = () => {
     const pillColorIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const directionQueueRef = useRef<Direction[]>([]);
     const wallTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const selfTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const hasRestartedRef = useRef(false); // <-- fix stuck game
 
     const restartGame = () => {
@@ -99,7 +98,6 @@ export const SnakeGame: React.FC = () => {
         directionQueueRef.current = [];
         setLatestEvent(null);
         if (wallTimeoutRef.current) clearTimeout(wallTimeoutRef.current);
-        if (selfTimeoutRef.current) clearTimeout(selfTimeoutRef.current);
     };
 
     const getSnakeCellColor = (event: EventType | null) => {
@@ -119,15 +117,7 @@ export const SnakeGame: React.FC = () => {
                 setSnakeColors([]);
                 setSnakeColor(snakeColorMap.default);
             }, 3000);
-        } else if (event === 'foodEaten') {
-            setSnakeColor(snakeColorMap.foodEaten);
-        } else if (event === 'bottleEaten') {
-            setSnakeColor(snakeColorMap.bottleEaten);
         }
-
-        setTimeout(() => {
-            setSnakeColor(snakeColorMap.default);
-        }, 1000);
     };
 
     useEffect(() => {
@@ -153,7 +143,7 @@ export const SnakeGame: React.FC = () => {
 
             if (directionOptions.includes(newKey) && gameStatus === 'running') {
                 const last = directionQueueRef.current.at(-1) || direction;
-                if (newKey !== last && directionQueueRef.current.length < 3) directionQueueRef.current.push(newKey as Direction);
+                if (newKey !== last) directionQueueRef.current.push(newKey as Direction);
             }
         };
         window.addEventListener("keydown", handleKeyDown);
@@ -202,27 +192,15 @@ export const SnakeGame: React.FC = () => {
             }
 
             if (isSelfCollision) {
-                if (!selfTimeoutRef.current) {
-                    selfTimeoutRef.current = setTimeout(() => {
-                        const retryHead = { ...snake[0] };
-                        if (currentDirection === "UP") retryHead.y--;
-                        else if (currentDirection === "DOWN") retryHead.y++;
-                        else if (currentDirection === "LEFT") retryHead.x--;
-                        else if (currentDirection === "RIGHT") retryHead.x++;
-                        const stillSelfCollision = currentSnake.some((s, i) => i > 0 && s.x === retryHead.x && s.y === retryHead.y);
-                        if (stillSelfCollision) setGameStatus('gameOver');
-                        selfTimeoutRef.current = null;
-                    }, 150);
-                }
+                setGameStatus('gameOver');
                 return;
             }
 
             const newSnake = [head, ...currentSnake];
 
-            // Check if snake eats food
             if (head.x === food.x && head.y === food.y) {
                 setFood(getRandomPosition());
-                setSpeed(prev => Math.min(prev + 0.5, MAX_SPEED));
+                setSpeed(prev => Math.min(prev + 0.3, MAX_SPEED));
                 setLatestEvent('foodEaten');
                 if (!showBottle) setShowBottle(getRandomBottle());
                 if (!showPill) setShowPill(getRandomPill());
@@ -230,15 +208,13 @@ export const SnakeGame: React.FC = () => {
                 newSnake.pop();
             }
 
-            // Check if snake eats bottle
             if (head.x === bottle.x && head.y === bottle.y && showBottle) {
                 setBottle(getRandomPosition());
                 setLatestEvent('bottleEaten');
                 setShowBottle(false);
-                setSpeed(Math.min(Math.random() * (MAX_SPEED - MIN_SPEED - Math.random() * 6) + MIN_SPEED, MAX_SPEED));
+                setSpeed(Math.min(speed + 2, MAX_SPEED));
             }
 
-            // Check if snake eats pill
             if (head.x === pill.x && head.y === pill.y && showPill) {
                 setPill(getRandomPosition());
                 setLatestEvent('pillEaten');

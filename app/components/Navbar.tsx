@@ -2,9 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { FC, ReactNode, useEffect, useState } from "react";
-import SnakeGame from "./Snake/SnakeGame";
+import { SnakeGame } from "./Snake/SnakeGame";
 import { GiSnakeTongue } from "react-icons/gi";
 import { useAppContext } from "../AppContext";
+import { RevisedSnakeGame } from "./Snake/RevisedSnakeGame";
 
 type Tab = {
     name: string;
@@ -87,6 +88,7 @@ export const Navbar: FC = () => {
                 </div>
 
                 {/* Overlay for Snake Game */}
+                {/* {snakeOpen ? <RevisedSnakeGame /> : ""} */}
                 {snakeOpen ? <SnakeGame /> : ""}
             </nav>
 
