@@ -8,7 +8,8 @@ import { HiX } from "react-icons/hi";
 const GRID_HEIGHT = 20;
 const GRID_WIDTH = 36;
 const CELL_SIZE = 20; // Pixels per cell
-const INITIAL_SPEED = 80; // Movement speed in ms
+const INITIAL_SPEED = 70; // Movement speed in ms
+const MAX_SPEED = 100;
 
 type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT";
 
@@ -26,6 +27,7 @@ export const SnakeGame: React.FC = () => {
     const [direction, setDirection] = useState<Direction>("RIGHT");
     const [isGameOver, setIsGameOver] = useState(false);
     const [foodEaten, setFoodEaten] = useState<boolean>(false);
+    const [bottleEaten, setBottleEaten] = useState<boolean>(false);
     const [speed, setSpeed] = useState<number>(INITIAL_SPEED);
     const [bottle, setBottle] = useState(getRandomPosition);
     const [countForBottle, setCountForBottle] = useState<number>(0);
@@ -104,20 +106,33 @@ export const SnakeGame: React.FC = () => {
 
                 // Check if food eaten
                 if (head.x === food.x && head.y === food.y) {
+                    const newSpeed = speed + 5 > MAX_SPEED ? MAX_SPEED : speed + 5;
                     setFood(getRandomPosition());
-                    setSpeed((prev) => prev - 5);
+                    setSpeed(newSpeed);
                     setCountForBottle((prev) => prev + 1);
                     setFoodEaten(true);
                     setTimeout(() => setFoodEaten(false), 1000);
+                    console.log(`New speed: ${newSpeed}`);
                 } else {
                     newSnake.pop();
+                }
+
+                // Check if bottle eaten
+                if (head.x === bottle.x && head.y === bottle.y) {
+                    const newSpeed = Math.floor(Math.random() * (MAX_SPEED - INITIAL_SPEED + 1)) + INITIAL_SPEED;
+                    setBottle(getRandomPosition());
+                    setCountForBottle(0);
+                    setSpeed(newSpeed);
+                    setBottleEaten(true);
+                    setTimeout(() => setBottleEaten(false), 1000);
+                    console.log(`New speed: ${newSpeed}`);
                 }
 
                 return newSnake;
             });
         };
 
-        const interval = setInterval(moveSnake, speed);
+        const interval = setInterval(moveSnake, MAX_SPEED - speed);
         return () => clearInterval(interval);
     }, [direction, food, isGameOver]);
 
@@ -149,7 +164,7 @@ export const SnakeGame: React.FC = () => {
                     </button>
                 </div>
                 <div
-                    className="grid bg-black"
+                    className={`grid ${bottleEaten ? 'bg-[#590b02]' : 'bg-black'} transition-colors ease-out`}
                     style={{
                         width: GRID_WIDTH * CELL_SIZE,
                         height: GRID_HEIGHT * CELL_SIZE,
