@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { FC, ReactNode, useEffect, useState } from "react";
 import SnakeGame from "./Snake/SnakeGame";
-import Image from "next/image";
 import { GiSnakeTongue } from "react-icons/gi";
+import { useAppContext } from "../AppContext";
 
 type Tab = {
     name: string;
@@ -13,6 +13,10 @@ type Tab = {
 };
 
 export const Navbar: FC = () => {
+    const {
+        snakeOpen,
+        setSnakeOpen
+    } = useAppContext()
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<Tab>({
         name: "home",
@@ -20,10 +24,9 @@ export const Navbar: FC = () => {
         onClick: () => router.push('/'),
     });
 
-    const [snakeActive, setSnakeActive] = useState(false);
 
     const tabs: Tab[] = [
-        { name: "snake", label: <GiSnakeTongue size={25}/>, onClick: () => setSnakeActive(true) },
+        { name: "snake", label: <GiSnakeTongue size={25} />, onClick: () => setSnakeOpen(true) },
         { name: "home", label: "Home", onClick: () => router.push('/') },
         { name: "about", label: "About", onClick: () => router.push('/about') },
     ];
@@ -35,7 +38,7 @@ export const Navbar: FC = () => {
 
     // Disable scrolling when snake is active
     useEffect(() => {
-        if (snakeActive) {
+        if (snakeOpen) {
             document.body.style.overflow = "hidden";
         } else {
             document.body.style.overflow = "auto";
@@ -44,13 +47,13 @@ export const Navbar: FC = () => {
         return () => {
             document.body.style.overflow = "auto";
         };
-    }, [snakeActive]);
+    }, [snakeOpen]);
 
     // Close game on Escape key
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
-                setSnakeActive(false);
+                setSnakeOpen(false);
             }
         };
         window.addEventListener("keydown", handleKeyDown);
@@ -84,24 +87,7 @@ export const Navbar: FC = () => {
                 </div>
 
                 {/* Overlay for Snake Game */}
-                {snakeActive ? (
-                    <div
-                        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-90 z-50"
-                        onClick={() => setSnakeActive(false)} // Clicking outside closes the game
-                    >
-                        <div className="relative p-4 bg-gray-900 rounded-md shadow-lg" onClick={(e) => e.stopPropagation()}>
-                            <button
-                                onClick={() => setSnakeActive(false)}
-                                className="absolute top-2 right-2 text-white text-lg font-bold"
-                            >
-                                ✕
-                            </button>
-                            <SnakeGame />
-                        </div>
-                    </div>
-                ) : (
-                    ""
-                )}
+                {snakeOpen ? <SnakeGame /> : ""}
             </nav>
 
 

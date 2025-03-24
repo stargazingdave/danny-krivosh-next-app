@@ -6,6 +6,7 @@ import Checkbox from './Checkbox';
 import { NativeSong, Song as SongType } from '../types/Song';
 import { Song } from './Song';
 import { RecyclingBin } from './RecyclingBin';
+import { useAppContext } from '../AppContext';
 
 
 
@@ -14,6 +15,10 @@ interface SongGridProps {
 }
 
 export const SongGrid: FC<SongGridProps> = ({ nativeSongs }) => {
+    const {
+        snakeOpen
+    } = useAppContext();
+
     const [songs, setSongs] = useState<SongType[]>([
         ...nativeSongs.map((song) => ({ ...song, type: 'native' as const })),
     ]);
@@ -39,9 +44,13 @@ export const SongGrid: FC<SongGridProps> = ({ nativeSongs }) => {
     };
 
     return <div className='flex flex-col items-center justify-center'>
-        <div className='fixed bottom-0 right-0 w-full z-50'>
-            <RecyclingBin initSongs={recycledSongs} addSong={addSongToRecycle} />
-        </div>
+        {
+            !snakeOpen &&
+            <div className='fixed bottom-0 right-0 w-full z-50'>
+                <RecyclingBin initSongs={recycledSongs} addSong={addSongToRecycle} />
+            </div>
+        }
+
         <div className='flex gap-4'>
             <Checkbox label="Original" checked={!random} onChange={() => setOriginalOrder()} />
             <Checkbox label="Random" checked={random} onChange={() => setRandomOrder()} />
