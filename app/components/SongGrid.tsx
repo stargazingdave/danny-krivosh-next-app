@@ -1,13 +1,9 @@
 'use client';
 
-import { FC, useEffect, useRef, useState } from 'react';
-import { IoIosPlay } from 'react-icons/io';
-import { AudioPlayer } from './AudioPlayer';
+import { FC, useState } from 'react';
 import Image from 'next/image';
-import { FaRandom } from 'react-icons/fa';
 import Checkbox from './Checkbox';
-import Dropdown from './Dropdown';
-import { NativeSong, YouTubeSong, Song as SongType } from '../types/Song';
+import { NativeSong, Song as SongType } from '../types/Song';
 import { Song } from './Song';
 import { RecyclingBin } from './RecyclingBin';
 
@@ -23,8 +19,8 @@ export const SongGrid: FC<SongGridProps> = ({ nativeSongs }) => {
     ]);
     const [activeSong, setActiveSong] = useState<string | null>(null);
     const [random, setRandom] = useState(false);
-
     const [recycledSongs, setRecycledSongs] = useState<SongType[]>([]);
+    const [longClickedSongId, setLongClickedSongId] = useState<string | null>(null);
 
     const addSongToRecycle = (song: SongType) => {
         setRecycledSongs([...recycledSongs, song]);
@@ -55,12 +51,25 @@ export const SongGrid: FC<SongGridProps> = ({ nativeSongs }) => {
                 if (song.type === 'native') {
                     return <div
                         key={song.id}
-                        className="relative min-h-32 sm:min-h-44 md:min-h-50 w-full bg-white/10 backdrop-blur-lg rounded-lg overflow-hidden hover:bg-neutral-500 transition-all duration-300"
-                        style={{
-                            boxShadow: "-1px -1px 4px 1px #77777777",
-                        }}
+                        className={`relative min-h-32 sm:min-h-44 md:min-h-50 w-full rounded-lg overflow-hidden transition-all duration-300
+                            ${longClickedSongId === song.id ? "bg-blue-800/50 border-2 border-blue-400 scale-105" : "bg-white/10 hover:bg-neutral-500"}
+                            backdrop-blur-lg`}
+                        style={{ boxShadow: "-1px -1px 4px 1px #77777777" }}
                         draggable="true"
-                        onDragStart={(e) => e.dataTransfer.setData("song", JSON.stringify(song))}
+                        onMouseDown={(e) => {
+                            const timer = setTimeout(() => setLongClickedSongId(song.id), 300);
+                            (e.currentTarget as HTMLElement).dataset.timer = String(timer);
+                        }}
+                        onMouseUp={(e) => {
+                            clearTimeout(Number((e.currentTarget as HTMLElement).dataset.timer));
+                            setLongClickedSongId(null);
+                        }}
+                        onDragEnd={() => {
+                            setLongClickedSongId(null);
+                        }}
+                        onDragStart={(e) => {
+                            e.dataTransfer.setData("song", JSON.stringify(song));
+                        }}
                     >
                         {/* Background Image */}
                         {
@@ -81,10 +90,10 @@ export const SongGrid: FC<SongGridProps> = ({ nativeSongs }) => {
                             <h2 className="text-lg font-semibold text-white">{song.title}</h2>
                             {
                                 song.url
-                                ? <Song song={song} activeSong={activeSong} setActiveSong={setActiveSong} />
-                                : <p className="text-sm text-gray-300">Coming Soon</p>
+                                    ? <Song song={song} activeSong={activeSong} setActiveSong={setActiveSong} />
+                                    : <p className="text-sm text-gray-300">Coming Soon</p>
                             }
-                            
+
                         </div>
                     </div>
                 } else if (song.type === 'youtube') {

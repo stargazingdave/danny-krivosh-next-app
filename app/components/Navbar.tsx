@@ -1,13 +1,15 @@
 'use client';
 
 import { useRouter } from "next/navigation";
-import { FC, useEffect, useState } from "react";
+import { FC, ReactNode, useEffect, useState } from "react";
 import SnakeGame from "./Snake/SnakeGame";
+import Image from "next/image";
+import { GiSnakeTongue } from "react-icons/gi";
 
 type Tab = {
     name: string;
-    label: string;
-    href: string;
+    label: ReactNode;
+    onClick: () => void;
 };
 
 export const Navbar: FC = () => {
@@ -15,19 +17,20 @@ export const Navbar: FC = () => {
     const [activeTab, setActiveTab] = useState<Tab>({
         name: "home",
         label: "Home",
-        href: "/",
+        onClick: () => router.push('/'),
     });
 
     const [snakeActive, setSnakeActive] = useState(false);
 
     const tabs: Tab[] = [
-        { name: "home", label: "Home", href: "/" },
-        { name: "about", label: "About", href: "/about" },
+        { name: "snake", label: <GiSnakeTongue size={25}/>, onClick: () => setSnakeActive(true) },
+        { name: "home", label: "Home", onClick: () => router.push('/') },
+        { name: "about", label: "About", onClick: () => router.push('/about') },
     ];
 
     const onTabClick = (tab: Tab) => {
         setActiveTab(tab);
-        router.push(tab.href);
+        tab.onClick();
     };
 
     // Disable scrolling when snake is active
@@ -64,9 +67,6 @@ export const Navbar: FC = () => {
                     Danny Krivosh
                 </div>
                 <div className="flex gap-4">
-                    <button onClick={() => setSnakeActive(true)} className="text-green text-lg">
-                        S
-                    </button>
                     {tabs.map((tab) => (
                         <button
                             key={tab.name}
