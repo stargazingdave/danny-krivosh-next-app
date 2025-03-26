@@ -82,12 +82,11 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ initSongs, addSong }) => {
     };
 
     return (
-        <Modal open={isOpen}>
-            <div
-                className="flex flex-col p-1 gap-8 bg-black"
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-            >
+        <div className='fixed bottom-4 left-4 w-1/3 z-50'
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+        >
+            <div className="flex flex-col p-1 gap-8 bg-black">
                 <div className="flex gap-2 items-center">
                     <FaWindowMinimize className="w-8 h-8 text-white p-2 border cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
                     <FaShuffle className="w-8 h-8 text-white p-2 border cursor-pointer" onClick={onShuffleClick} />
@@ -118,7 +117,7 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ initSongs, addSong }) => {
                     </div>
                 ))}
             </div>
-        </Modal>
+        </div>
     );
 };
 
