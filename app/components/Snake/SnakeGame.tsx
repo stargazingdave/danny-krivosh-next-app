@@ -281,6 +281,16 @@ export const SnakeGame: React.FC = () => {
             <audio autoPlay loop>
                 <source src="http://amp.cesnet.cz:8000/cro-radio-wave.flac" type="audio/mpeg" />
             </audio>
+
+            {
+                gameStatus === 'ready' &&
+                <div className="absolute inset-0 flex items-center justify-center z-50 animate-pulse-fade">
+                    <h1 className="text-4xl text-white italic tracking-widest text-center">
+                        PRESS ANY KEY TO PLAY
+                    </h1>
+                </div>
+            }
+
             <div className="relative bg-gray-900 rounded-2xl overflow-hidden" onClick={(e) => e.stopPropagation()} style={{ boxShadow: "0 0 16px 1px #77777777" }}>
                 <div className="relative w-full h-fit flex items-center justify-between">
                     <div className="flex text-center text-2xl font-bold p-2 tracking-widest">
