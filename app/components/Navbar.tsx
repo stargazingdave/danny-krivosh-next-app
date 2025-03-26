@@ -1,11 +1,10 @@
 'use client';
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { FC, ReactNode, useEffect, useState } from "react";
 import { SnakeGame } from "./Snake/SnakeGame";
 import { GiSnakeTongue } from "react-icons/gi";
 import { useAppContext } from "../AppContext";
-import { RevisedSnakeGame } from "./Snake/RevisedSnakeGame";
 
 type Tab = {
     name: string;
@@ -19,11 +18,7 @@ export const Navbar: FC = () => {
         setSnakeOpen
     } = useAppContext()
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<Tab>({
-        name: "home",
-        label: "Home",
-        onClick: () => router.push('/'),
-    });
+    const pathname = usePathname();
 
 
     const tabs: Tab[] = [
@@ -33,7 +28,6 @@ export const Navbar: FC = () => {
     ];
 
     const onTabClick = (tab: Tab) => {
-        setActiveTab(tab);
         tab.onClick();
     };
 
@@ -61,11 +55,16 @@ export const Navbar: FC = () => {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, []);
 
+    console.log(pathname);
+
     return (
         <div className="w-full h-16">
             <nav className="flex justify-end items-center p-4">
                 <div
-                    className="fixed left-4 top-4 text-4xl sm:text-6xl font-light font-aguafina p-2 cursor-pointer shadow-md"
+                    className="fixed left-4 top-4 text-4xl sm:text-6xl font-light font-aguafina p-2 cursor-pointer z-50"
+                    style={{
+                        textShadow: "2px 2px 0px #000, 4px 4px 0px #000",
+                    }}
                     onClick={() => router.push("/")}
                 >
                     Danny Krivosh
@@ -74,11 +73,13 @@ export const Navbar: FC = () => {
                     {tabs.map((tab) => (
                         <button
                             key={tab.name}
-                            className={`cursor-pointer border-transparent border-b hover:border-white transition-all duration-700 ${activeTab.name === tab.name
-                                ? tab.name === "home"
+                            className={`cursor-pointer border-transparent border-b hover:border-white transition-all duration-700 ${pathname === "/" && tab.name === "home"
                                     ? "text-white text-2xl"
-                                    : "text-white text-3xl"
-                                : "text-gray-500"
+                                    : pathname.split("/")[1] === tab.name
+                                        ? tab.name === "home"
+                                            ? "text-white text-2xl"
+                                            : "text-white text-3xl"
+                                        : "text-gray-500"
                                 }`}
                             onClick={() => onTabClick(tab)}
                         >

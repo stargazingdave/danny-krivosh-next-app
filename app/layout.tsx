@@ -59,7 +59,7 @@ export default function RootLayout({
                 <p>{`© dannykrivosh.com ${year}. All Rights Reserved.`}</p>
                 <p>All music and content on this site are either original compositions, properly licensed to Danny Krivosh, or used with permission.</p>
                 <p>Unauthorized reproduction, distribution, or use of any material is strictly prohibited.</p>
-                <p>Web app designed by David Portal.</p>
+                <p>Web app created by David Portal.</p>
               </footer>
             </div>
           </div>

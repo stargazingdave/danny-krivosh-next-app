@@ -13,7 +13,7 @@ const GRID_WIDTH = 36;
 const CELL_SIZE = 20;
 const INITIAL_SPEED = 5;
 const MAX_SPEED = 20;
-const MIN_SPEED = 1;
+const MIN_SPEED = 2;
 
 type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT";
 type Key = Direction | "Escape" | "Enter";
@@ -226,7 +226,7 @@ export const SnakeGame: React.FC = () => {
             // Check if snake eats food
             if (head.x === food.x && head.y === food.y) {
                 setFood(getRandomPosition(snake));
-                setSpeed(prev => Math.min(prev + 0.5, MAX_SPEED));
+                setSpeed(prev => Math.min(prev + 1, MAX_SPEED));
                 setLatestEvent('foodEaten');
                 if (!showBottle) setShowBottle(getRandomBottle());
                 if (!showPill) setShowPill(getRandomPill());
@@ -328,9 +328,9 @@ export const SnakeGame: React.FC = () => {
                 {gameStatus === 'gameOver' && (
                     <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/10 backdrop-blur-md rounded-md border border-white/20 text-white">
                         <h3 className="text-3xl font-bold mb-4">Game Over!</h3>
-                        <div className="flex flex-col items-center justify-center p-4 gap-2">
+                        <div className="flex flex-col items-center justify-center p-4 gap-4">
                             <h2 className="text-2xl">{`Your score:`}</h2>
-                            <h1 className="text-4xl">{score}</h1>
+                            <h1 className="text-6xl font-bold">{score}</h1>
                         </div>
                         <br />
                         <button onClick={restartGame} className="px-4 py-2 rounded bg-white/20 hover:bg-white/30 transition-all">
