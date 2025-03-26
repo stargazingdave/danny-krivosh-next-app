@@ -20,13 +20,17 @@ type Key = Direction | "Escape" | "Enter";
 
 const directionOptions: Key[] = ["UP", "DOWN", "LEFT", "RIGHT"];
 
-const getRandomPosition = () => ({
-    x: Math.floor(Math.random() * GRID_WIDTH),
-    y: Math.floor(Math.random() * GRID_HEIGHT),
-});
+const getRandomPosition = (snakePositions: { x: number, y: number }[]) => {
+    let x: number, y: number;
+    do {
+        x = Math.floor(Math.random() * GRID_WIDTH);
+        y = Math.floor(Math.random() * GRID_HEIGHT);
+    } while ((x === 0 && y === 0) || snakePositions.some(s => s.x === x && s.y === y));
+    return { x, y };
+};
 
-const getRandomBottle = () => Math.floor(Math.random() * 8) === 5;
-const getRandomPill = () => Math.floor(Math.random() * 8) === 5;
+const getRandomBottle = () => Math.floor(Math.random() * 8) < 5;
+const getRandomPill = () => Math.floor(Math.random() * 8) > 5;
 
 const getRandomColor = () => {
     const letters = '0123456789ABCDEF';
@@ -46,7 +50,7 @@ interface snakeColor {
 }
 
 const snakeColorMap = {
-    foodEaten: { head: 'white', body: '#777' },
+    foodEaten: { head: 'white', body: '#fce54e' },
     bottleEaten: { head: '#00ff22d1', body: '#f7a60d' },
     pillEaten: { head: getRandomColor(), body: getRandomColor() },
     default: { head: '#777', body: '#333' }
@@ -65,13 +69,13 @@ export const SnakeGame: React.FC = () => {
     const { setSnakeOpen } = useAppContext();
     const [gameStatus, setGameStatus] = useState<'ready' | 'running' | 'gameOver'>('ready');
     const [snake, setSnake] = useState([{ x: 10, y: 10 }]);
-    const [food, setFood] = useState(getRandomPosition);
+    const [food, setFood] = useState(getRandomPosition([{ x: 0, y: 0 }]));
     const [direction, setDirection] = useState<Direction>("RIGHT");
     const [latestEvent, setLatestEvent] = useState<EventType | null>(null);
     const [speed, setSpeed] = useState<number>(INITIAL_SPEED);
-    const [bottle, setBottle] = useState(getRandomPosition);
+    const [bottle, setBottle] = useState(getRandomPosition([{ x: 0, y: 0 }]));
     const [showBottle, setShowBottle] = useState(false);
-    const [pill, setPill] = useState(getRandomPosition);
+    const [pill, setPill] = useState(getRandomPosition([{ x: 0, y: 0 }]));
     const [showPill, setShowPill] = useState(false);
     const [score, setScore] = useState(0);
     const [newScore, setNewScore] = useState<{ score: number; color: string } | null>(null);
@@ -87,7 +91,7 @@ export const SnakeGame: React.FC = () => {
     const restartGame = () => {
         hasRestartedRef.current = true;
         setSnake([{ x: 10, y: 10 }]);
-        setFood(getRandomPosition());
+        setFood(getRandomPosition([{ x: 0, y: 0 }]));
         setDirection("RIGHT");
         setGameStatus('running');
         setSpeed(INITIAL_SPEED);
@@ -221,7 +225,7 @@ export const SnakeGame: React.FC = () => {
 
             // Check if snake eats food
             if (head.x === food.x && head.y === food.y) {
-                setFood(getRandomPosition());
+                setFood(getRandomPosition(snake));
                 setSpeed(prev => Math.min(prev + 0.5, MAX_SPEED));
                 setLatestEvent('foodEaten');
                 if (!showBottle) setShowBottle(getRandomBottle());
@@ -232,7 +236,7 @@ export const SnakeGame: React.FC = () => {
 
             // Check if snake eats bottle
             if (head.x === bottle.x && head.y === bottle.y && showBottle) {
-                setBottle(getRandomPosition());
+                setBottle(getRandomPosition(snake));
                 setLatestEvent('bottleEaten');
                 setShowBottle(false);
                 setSpeed(Math.min(Math.random() * (MAX_SPEED - MIN_SPEED - Math.random() * 6) + MIN_SPEED, MAX_SPEED));
@@ -240,7 +244,7 @@ export const SnakeGame: React.FC = () => {
 
             // Check if snake eats pill
             if (head.x === pill.x && head.y === pill.y && showPill) {
-                setPill(getRandomPosition());
+                setPill(getRandomPosition(snake));
                 setLatestEvent('pillEaten');
                 setShowPill(false);
                 setSpeed(prev => Math.max(prev - 2, MIN_SPEED));
@@ -274,6 +278,9 @@ export const SnakeGame: React.FC = () => {
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-sm z-50" onClick={() => setSnakeOpen(false)}>
+            <audio autoPlay loop>
+                <source src="http://amp.cesnet.cz:8000/cro-radio-wave.flac" type="audio/mpeg" />
+            </audio>
             <div className="relative bg-gray-900 rounded-2xl overflow-hidden" onClick={(e) => e.stopPropagation()} style={{ boxShadow: "0 0 16px 1px #77777777" }}>
                 <div className="relative w-full h-fit flex items-center justify-between">
                     <div className="flex text-center text-2xl font-bold p-2 tracking-widest">
@@ -321,6 +328,11 @@ export const SnakeGame: React.FC = () => {
                 {gameStatus === 'gameOver' && (
                     <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/10 backdrop-blur-md rounded-md border border-white/20 text-white">
                         <h3 className="text-3xl font-bold mb-4">Game Over!</h3>
+                        <div className="flex flex-col items-center justify-center p-4 gap-2">
+                            <h2 className="text-2xl">{`Your score:`}</h2>
+                            <h1 className="text-4xl">{score}</h1>
+                        </div>
+                        <br />
                         <button onClick={restartGame} className="px-4 py-2 rounded bg-white/20 hover:bg-white/30 transition-all">
                             Restart
                         </button>
