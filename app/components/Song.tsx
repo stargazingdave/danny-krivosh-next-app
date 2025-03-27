@@ -39,7 +39,7 @@ export const Song: FC<SongProps> = ({ song }) => {
             {currentSong?.id === song.id ? (
                 <div className="h-24 flex flex-col justify-between">
                     <p className="text-gray-300 text-sm">{song.description}</p>
-                    <AudioPlayer src={song.url} />
+                    <AudioPlayer />
                 </div>
             ) : (
                 <div className="flex flex-col h-24 items-center justify-center">

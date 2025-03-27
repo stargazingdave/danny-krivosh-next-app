@@ -3,9 +3,9 @@
 import { FC, useEffect, useRef, useState } from "react";
 import { SongData } from "../types/SongData";
 import { TbTrashXFilled } from "react-icons/tb";
-import { Modal } from "./Modal";
 import { FaPause, FaPlay, FaShuffle, FaWindowMinimize } from "react-icons/fa6";
 import { useAppContext } from "../AppContext";
+import { PlayPauseButton } from "./PlayPauseButton";
 
 interface RecyclingBinProps { }
 
@@ -14,9 +14,14 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
         addSongToRecycle,
         playlists,
         setPlaylists,
+        setRandomOrder,
+        startPlaylist,
+        isPlaying,
+        currentPlaylist,
+        togglePlay,
+        currentSong,
     } = useAppContext();
     const [isOpen, setIsOpen] = useState(false);
-    const [random, setRandom] = useState(false);
     const [isDraggedOver, setIsDraggedOver] = useState(false);
     const dragTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -65,29 +70,30 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
     const onShuffleClick = () => {
         setPlaylists(playlists.map(playlist => {
             if (playlist.id === 'recycle') {
-                const shuffledSongs = [...playlist.songs].sort(() => Math.random() - 0.5);
+                const shuffledSongs = [...playlist?.songs].sort(() => Math.random() - 0.5);
                 return { ...playlist, songs: shuffledSongs };
             }
             return playlist;
         }
         ));
-        setRandom(true);
+        setRandomOrder();
     };
 
-    const playFirstSong = () => {
-        // Stop all currently playing songs
-        audioRefs.current.forEach(audio => {
-            if (audio) {
-                audio.pause();
-                audio.currentTime = 0;
-            }
-        });
-
-        // Play the first song
-        if (audioRefs.current[0]) {
-            audioRefs.current[0].play();
+    const handleListPlayPause = () => {
+        if (currentPlaylist.id === "recycle") {
+            togglePlay();
+        } else {
+            startPlaylist("recycle");
         }
     };
+
+    const handleSongPlayPause = (song: SongData) => {
+        if (currentPlaylist.id === "recycle" && currentSong?.id === song.id) {
+            togglePlay();
+        } else {
+            startPlaylist("recycle", playlists[1].songs.findIndex(s => s.id === song.id));
+        }
+    }
 
     return (
         <div className='fixed bottom-4 left-4 w-1/3 z-50'
@@ -98,7 +104,7 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
                 <div className="flex gap-2 items-center">
                     <FaWindowMinimize className="w-8 h-8 text-white p-2 border cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
                     <FaShuffle className="w-8 h-8 text-white p-2 border cursor-pointer" onClick={onShuffleClick} />
-                    <FaPlay className="w-8 h-8 text-white p-2 border cursor-pointer" onClick={playFirstSong} />
+                    <PlayPauseButton onClick={() => handleListPlayPause()} isPlaying={isPlaying && currentPlaylist.id === "recycle"} />
                 </div>
 
                 <h1 className="text-4xl px-2">YOUR RECYCLING BIN</h1>
@@ -106,54 +112,25 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
 
             <div className="flex flex-col h-64 overflow-auto bg-black">
                 {
-                    playlists[1].songs.length === 0 && (
-                        <div className="flex justify-center items-center h-full">
-                            <p className="text-white">No songs in the bin</p>
+                    playlists[1].songs.length === 0 &&
+                    <div className="flex justify-center items-center h-full">
+                        <p className="text-white">No songs in the bin</p>
+                    </div>
+                }
+                {
+                    playlists[1].songs.map((song, index) =>
+                        <div key={index} className="font-light flex gap-1 p-2 shadow-md">
+                            <div className="flex justify-between w-full">
+                                <div className="flex gap-3">
+                                    <p>{`${index + 1}.`}</p>
+                                    <p>{song.title}</p>
+                                </div>
+                                <PlayPauseButton onClick={() => handleSongPlayPause(song)} isPlaying={isPlaying && currentPlaylist.id === "recycle" && currentSong?.id === song.id} />
+                            </div>
                         </div>
                     )
                 }
-                {playlists[1].songs.map((song, index) => (
-                    <div key={index} className="font-light flex gap-1 p-2 shadow-md">
-                        {<SongContent song={song} index={index} audioRefs={audioRefs} />
-                            }
-                    </div>
-                ))}
             </div>
-        </div>
-    );
-};
-
-const SongContent: FC<{ song: SongData; index: number; audioRefs: React.MutableRefObject<(HTMLAudioElement | null)[]> }> = ({ song, index, audioRefs }) => {
-    const audioRef = useRef<HTMLAudioElement>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-
-    useEffect(() => {
-        if (audioRef.current) {
-            audioRefs.current[index] = audioRef.current;
-        }
-    }, [index]);
-
-    const togglePlayPause = () => {
-        if (!audioRef.current) return;
-
-        if (isPlaying) {
-            audioRef.current.pause();
-        } else {
-            audioRef.current.play();
-        }
-        setIsPlaying(!isPlaying);
-    };
-
-    return (
-        <div className="flex justify-between w-full">
-            <div className="flex gap-3">
-                <p>{`${index + 1}.`}</p>
-                <p>{song.title}</p>
-                <audio src={song.url} ref={audioRef} onPause={() => setIsPlaying(false)} onPlay={() => setIsPlaying(true)} />
-            </div>
-            <button onClick={togglePlayPause} className="w-8 h-8 text-white p-2 border">
-                {isPlaying ? <FaPause /> : <FaPlay />}
-            </button>
         </div>
     );
 };
