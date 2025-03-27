@@ -1,20 +1,22 @@
 'use client';
 
 import { FC, useEffect, useRef, useState } from "react";
-import { NativeSong, Song as SongType } from "../types/Song";
+import { SongData } from "../types/SongData";
 import { TbTrashXFilled } from "react-icons/tb";
 import { Modal } from "./Modal";
 import { FaPause, FaPlay, FaShuffle, FaWindowMinimize } from "react-icons/fa6";
+import { useAppContext } from "../AppContext";
 
-interface RecyclingBinProps {
-    initSongs: SongType[];
-    addSong: (song: SongType) => void;
-}
+interface RecyclingBinProps { }
 
-export const RecyclingBin: FC<RecyclingBinProps> = ({ initSongs, addSong }) => {
+export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
+    const {
+        addSongToRecycle,
+        playlists,
+        setPlaylists,
+    } = useAppContext();
     const [isOpen, setIsOpen] = useState(false);
     const [random, setRandom] = useState(false);
-    const [songs, setSongs] = useState<SongType[]>([]);
     const [isDraggedOver, setIsDraggedOver] = useState(false);
     const dragTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -40,9 +42,8 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ initSongs, addSong }) => {
         const songData = e.dataTransfer.getData("song");
         if (!songData) return;
 
-        const droppedSong: SongType = JSON.parse(songData);
-        addSong(droppedSong); // Add song to parent component
-        setSongs((prevSongs) => [...prevSongs, droppedSong]); // Add song to bin
+        const droppedSong: SongData = JSON.parse(songData);
+        addSongToRecycle(droppedSong); // Add song to parent component
         setIsDraggedOver(false);
     };
 
@@ -62,7 +63,14 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ initSongs, addSong }) => {
     }
 
     const onShuffleClick = () => {
-        setSongs([...songs].sort(() => Math.random() - 0.5));
+        setPlaylists(playlists.map(playlist => {
+            if (playlist.id === 'recycle') {
+                const shuffledSongs = [...playlist.songs].sort(() => Math.random() - 0.5);
+                return { ...playlist, songs: shuffledSongs };
+            }
+            return playlist;
+        }
+        ));
         setRandom(true);
     };
 
@@ -98,22 +106,16 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ initSongs, addSong }) => {
 
             <div className="flex flex-col h-64 overflow-auto bg-black">
                 {
-                    songs.length === 0 && (
+                    playlists[1].songs.length === 0 && (
                         <div className="flex justify-center items-center h-full">
                             <p className="text-white">No songs in the bin</p>
                         </div>
                     )
                 }
-                {songs.map((song, index) => (
+                {playlists[1].songs.map((song, index) => (
                     <div key={index} className="font-light flex gap-1 p-2 shadow-md">
-                        {song.type === 'native'
-                            ? <SongContent song={song as NativeSong} index={index} audioRefs={audioRefs} />
-                            : (
-                                <div
-                                    dangerouslySetInnerHTML={{ __html: song.embbed }}
-                                    className="w-32 h-32"
-                                />
-                            )}
+                        {<SongContent song={song} index={index} audioRefs={audioRefs} />
+                            }
                     </div>
                 ))}
             </div>
@@ -121,7 +123,7 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ initSongs, addSong }) => {
     );
 };
 
-const SongContent: FC<{ song: NativeSong; index: number; audioRefs: React.MutableRefObject<(HTMLAudioElement | null)[]> }> = ({ song, index, audioRefs }) => {
+const SongContent: FC<{ song: SongData; index: number; audioRefs: React.MutableRefObject<(HTMLAudioElement | null)[]> }> = ({ song, index, audioRefs }) => {
     const audioRef = useRef<HTMLAudioElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
 

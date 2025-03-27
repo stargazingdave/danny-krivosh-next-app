@@ -1,15 +1,18 @@
 import { FC, useRef, useState, useEffect } from "react";
 import { IoIosPlay } from "react-icons/io";
-import { NativeSong } from "../types/Song";
+import { SongData } from "../types/SongData";
 import { AudioPlayer } from "./AudioPlayer";
+import { useAppContext } from "../AppContext";
 
 interface SongProps {
-    song: NativeSong;
-    activeSong: string | null;
-    setActiveSong: (id: string) => void;
+    song: SongData;
 }
 
-export const Song: FC<SongProps> = ({ song, activeSong, setActiveSong }) => {
+export const Song: FC<SongProps> = ({ song }) => {
+    const {
+        currentSong,
+        setCurrentSong,
+    } = useAppContext();
     const audioRef = useRef<HTMLAudioElement>(null);
     const [duration, setDuration] = useState<number | null>(null);
 
@@ -19,7 +22,6 @@ export const Song: FC<SongProps> = ({ song, activeSong, setActiveSong }) => {
         if (audioElement) {
             const updateDuration = () => {
                 setDuration(audioElement.duration);
-                console.log("Duration Loaded:", audioElement.duration);
             };
 
             // Ensure the audio loads metadata
@@ -34,7 +36,7 @@ export const Song: FC<SongProps> = ({ song, activeSong, setActiveSong }) => {
 
     return (
         <div>
-            {activeSong === song.id ? (
+            {currentSong?.id === song.id ? (
                 <div className="h-24 flex flex-col justify-between">
                     <p className="text-gray-300 text-sm">{song.description}</p>
                     <AudioPlayer src={song.url} />
@@ -49,7 +51,7 @@ export const Song: FC<SongProps> = ({ song, activeSong, setActiveSong }) => {
                     </p>
                     <IoIosPlay
                         className="w-14 h-14 text-white opacity-80 hover:opacity-100 transition-all duration-300 cursor-pointer"
-                        onClick={() => setActiveSong(song.id)}
+                        onClick={() => setCurrentSong(song)}
                     />
                 </div>
             )}

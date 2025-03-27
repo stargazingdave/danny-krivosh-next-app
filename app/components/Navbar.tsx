@@ -55,8 +55,6 @@ export const Navbar: FC = () => {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, []);
 
-    console.log(pathname);
-
     return (
         <div className="w-full h-16">
             <nav className="flex justify-end items-center p-4">

@@ -3,6 +3,8 @@ import { Aguafina_Script, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "./components/Navbar";
 import { AppProvider } from "./AppContext";
+import { getAllSongs } from "@/server/functions/getAllSongs";
+import { getPlaylists } from "@/server/functions/getPlaylists";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,18 +27,21 @@ export const metadata: Metadata = {
   description: "2025 (C) Danny Krivosh",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const year = new Date().getFullYear();
+
+  const allSongs = await getAllSongs();
+  const initialPlaylists = await getPlaylists(allSongs);
+
   return (
     <html lang="en">
-      <AppProvider>
+      <AppProvider allSongs={allSongs} initialPlaylists={initialPlaylists}>
         <body
           className={`relative h-screen ${geistSans.variable} ${geistMono.variable} ${aguafina.variable} antialiased z-0 overflow-hidden`}
-
         >
           <div className="z-50">
             <Navbar />

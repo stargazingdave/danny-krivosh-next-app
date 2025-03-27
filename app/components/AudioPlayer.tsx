@@ -1,19 +1,33 @@
 import { useEffect, useRef, useState } from "react";
 import { IoPlay, IoPause } from "react-icons/io5";
+import { useAppContext } from "../AppContext";
 
 export const AudioPlayer = ({ src }: { src: string }) => {
+    const { 
+        currentSong, 
+        playNextSong
+    } = useAppContext();
     const audioRef = useRef<HTMLAudioElement>(null);
     const [isPlaying, setIsPlaying] = useState(true);
     const [progress, setProgress] = useState(0);
     const [duration, setDuration] = useState(0);
 
+    // Set the audio source when the current song changes
     useEffect(() => {
         if (audioRef.current) {
             audioRef.current.play().catch(() => {
                 console.warn("Autoplay failed, user interaction required.");
             });
         }
-    }, [src]);
+    }, [currentSong]);
+
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        audio.addEventListener('ended', playNextSong);
+        return () => audio.removeEventListener('ended', playNextSong);
+    }, [playNextSong]);
 
     const togglePlay = () => {
         if (audioRef.current) {
@@ -71,7 +85,7 @@ export const AudioPlayer = ({ src }: { src: string }) => {
             {/* Audio Element */}
             <audio
                 ref={audioRef}
-                src={src}
+                src={currentSong?.url}
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
             />
