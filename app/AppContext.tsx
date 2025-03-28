@@ -5,21 +5,20 @@ import { SongData } from './types/SongData';
 import { Playlist } from './types/Playlist';
 
 interface AppContextProps {
-    allSongs: SongData[];
-
     snakeOpen: boolean;
     setSnakeOpen: React.Dispatch<React.SetStateAction<boolean>>;
 
     currentSong: SongData | null;
     setCurrentSong: React.Dispatch<React.SetStateAction<SongData | null>>;
     currentPlaylist: Playlist;
-    setCurrentPlaylist: React.Dispatch<React.SetStateAction<Playlist>>;
+    setCurrentPlaylistId: React.Dispatch<React.SetStateAction<string>>;
     isPlaying: boolean;
-    // setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
     progress: number;
     setProgress: React.Dispatch<React.SetStateAction<number>>;
     duration: number;
     setDuration: React.Dispatch<React.SetStateAction<number>>;
+    isRandom: Record<string, boolean>;
+
     audioRef: React.RefObject<HTMLAudioElement | null>;
     canvasRef: React.RefObject<HTMLCanvasElement | null>;
     analyserRef: React.RefObject<AnalyserNode | null>;
@@ -32,8 +31,9 @@ interface AppContextProps {
     playlists: Playlist[];
     setPlaylists: React.Dispatch<React.SetStateAction<Playlist[]>>;
 
-    setOriginalOrder: () => void;
-    setRandomOrder: () => void;
+    setOriginalOrder: (playlistId: string) => void;
+    setRandomOrder: (playlistId: string) => void;
+    getPlaylistSongs: (playlistId: string) => SongData[];
     playNextSong: () => void;
     playPrevSong: () => void;
     addSongToRecycle: (song: SongData) => void;
@@ -44,23 +44,27 @@ const AppContext = React.createContext<AppContextProps | undefined>(undefined);
 
 interface AppProviderProps {
     children: React.ReactNode;
-    allSongs: SongData[];
     initialPlaylists: Playlist[];
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({
     children,
-    allSongs,
     initialPlaylists,
 }) => {
     const [snakeOpen, setSnakeOpen] = React.useState<boolean>(false);
 
     const [currentSong, setCurrentSong] = React.useState<SongData | null>(null);
-    const [currentPlaylist, setCurrentPlaylist] = React.useState<Playlist>(initialPlaylists[0]);
+    const [currentPlaylistId, setCurrentPlaylistId] = React.useState<string>('all-songs');
     const [isPlaying, setIsPlaying] = React.useState(true);
     const [progress, setProgress] = React.useState(0);
     const [duration, setDuration] = React.useState(0);
+    const [isRandom, setIsRandom] = React.useState<Record<string, boolean>>({
+        home: false,
+        recycle: false,
+    });
 
+    const [originalOrders, setOriginalOrders] = React.useState<Record<string, SongData[]>>({});
+    const [shuffledOrders, setShuffledOrders] = React.useState<Record<string, SongData[]>>({});
     const [playlists, setPlaylists] = React.useState<Playlist[]>(initialPlaylists);
 
     const audioRef = React.useRef<HTMLAudioElement>(null);
@@ -94,7 +98,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({
         return () => window.removeEventListener("click", resumeAudio);
     }, []);
 
-    // Set the audio source when the current song changes
     React.useEffect(() => {
         if (audioRef.current) {
             audioRef.current.play().catch(() => {
@@ -103,15 +106,31 @@ export const AppProvider: React.FC<AppProviderProps> = ({
         }
     }, [currentSong]);
 
-    const playNextSong = () => {
-        if (!currentSong) return;
-        const currentIndex = currentPlaylist.songs.findIndex((s) => s.id === currentSong.id);
-        const nextSong = currentPlaylist.songs[currentIndex + 1];
-        if (nextSong) {
-            setCurrentSong(nextSong);
-        } else {
-            setCurrentSong(null); // or loop to start?
+    const currentPlaylist = playlists.find((p) => p.id === currentPlaylistId) || playlists[0];
+
+    const getPlaylistSongs = (playlistId: string) => {
+        const playlist = playlists.find(p => p.id === playlistId);
+        if (!playlist) return [];
+        if (isRandom[playlistId] && shuffledOrders[playlistId]) {
+            return shuffledOrders[playlistId];
         }
+        return playlist.songs;
+    };
+
+
+    const getCurrentPlaylistSongs = () => {
+        if (isRandom[currentPlaylist.id] && shuffledOrders[currentPlaylist.id]) {
+            return shuffledOrders[currentPlaylist.id];
+        }
+        return currentPlaylist.songs;
+    };
+
+    const playNextSong = () => {
+        const songs = getCurrentPlaylistSongs();
+        if (!currentSong) return;
+        const currentIndex = songs.findIndex((s) => s.id === currentSong.id);
+        const nextSong = songs[currentIndex + 1];
+        setCurrentSong(nextSong ?? null);
     };
 
     React.useEffect(() => {
@@ -154,26 +173,46 @@ export const AppProvider: React.FC<AppProviderProps> = ({
         }
     };
 
-    const setOriginalOrder = () => {
-        setCurrentPlaylist(playlists.find((p) => p.id === currentPlaylist.id)!);
-    }
+    const setOriginalOrder = (playlistId: string) => {
+        setIsRandom(prev => ({ ...prev, [playlistId]: false }));
+        if (currentSong && originalOrders[playlistId]) {
+            setCurrentSong(originalOrders[playlistId].find(s => s.id === currentSong.id) ?? originalOrders[playlistId][0]);
+        }
+    };
 
-    const setRandomOrder = () => {
-        setCurrentPlaylist((prev) => {
-            const shuffledSongs = [...prev.songs].sort(() => Math.random() - 0.5);
-            return { ...prev, songs: shuffledSongs };
-        });
+    const setRandomOrder = (playlistId: string) => {
+        const playlist = playlists.find(p => p.id === playlistId);
+        if (!playlist) return;
+
+        setOriginalOrders(prevOriginal => ({
+            ...prevOriginal,
+            [playlistId]: playlist.songs
+        }));
+
+        const shuffled = [...playlist.songs];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+
+        setShuffledOrders(prevShuffled => ({
+            ...prevShuffled,
+            [playlistId]: shuffled
+        }));
+
+        if (currentSong) {
+            setCurrentSong(shuffled.find(s => s.id === currentSong.id) ?? shuffled[0]);
+        }
+
+        setIsRandom(prev => ({ ...prev, [playlistId]: true }));
     };
 
     const playPrevSong = () => {
+        const songs = getCurrentPlaylistSongs();
         if (!currentSong) return;
-        const currentIndex = currentPlaylist.songs.findIndex((s) => s.id === currentSong.id);
-        const prevSong = currentPlaylist.songs[currentIndex - 1];
-        if (prevSong) {
-            setCurrentSong(prevSong);
-        } else {
-            setCurrentSong(null); // or loop to end?
-        }
+        const currentIndex = songs.findIndex((s) => s.id === currentSong.id);
+        const prevSong = songs[currentIndex - 1];
+        setCurrentSong(prevSong ?? null);
     };
 
     const addSongToRecycle = (song: SongData) => {
@@ -191,27 +230,27 @@ export const AppProvider: React.FC<AppProviderProps> = ({
     const startPlaylist = (playlistId: string, startIndex?: number) => {
         const playlist = playlists.find((p) => p.id === playlistId);
         if (playlist) {
-            setCurrentPlaylist(playlist);
-            setCurrentSong(playlist.songs[startIndex || 0]);
+            setCurrentPlaylistId(playlist.id);
+            const songs = isRandom[playlist.id] && shuffledOrders[playlist.id] ? shuffledOrders[playlist.id] : playlist.songs;
+            setCurrentSong(songs[startIndex || 0]);
         }
     };
 
-
     return (
         <AppContext.Provider value={{
-            allSongs,
             snakeOpen,
             setSnakeOpen,
             currentSong,
             setCurrentSong,
             currentPlaylist,
-            setCurrentPlaylist,
+            setCurrentPlaylistId,
             isPlaying,
-            // setIsPlaying,
             progress,
             setProgress,
             duration,
             setDuration,
+            isRandom,
+
             audioRef,
             canvasRef,
             analyserRef,
@@ -226,6 +265,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({
 
             setOriginalOrder,
             setRandomOrder,
+            getPlaylistSongs,
             playNextSong,
             playPrevSong,
             addSongToRecycle,

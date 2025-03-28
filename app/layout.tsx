@@ -40,7 +40,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <AppProvider allSongs={allSongs} initialPlaylists={initialPlaylists}>
+      <AppProvider initialPlaylists={initialPlaylists}>
         <body
           className={`relative h-screen ${geistSans.variable} ${geistMono.variable} ${aguafina.variable} antialiased z-0 overflow-hidden`}
         >
