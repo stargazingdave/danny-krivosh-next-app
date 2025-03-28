@@ -3,6 +3,7 @@ import { IoIosPlay } from "react-icons/io";
 import { SongData } from "../types/SongData";
 import { AudioPlayer } from "./AudioPlayer";
 import { useAppContext } from "../AppContext";
+import { Visualization } from "./Visualization";
 
 interface SongProps {
     song: SongData;
@@ -35,24 +36,26 @@ export const Song: FC<SongProps> = ({ song }) => {
     }, [song.url]);
 
     return (
-        <div>
+        <div className="relative w-full h-full">
             {currentSong?.id === song.id ? (
-                <div className="h-24 flex flex-col justify-between">
-                    <p className="text-gray-300 text-sm">{song.description}</p>
-                    <AudioPlayer />
+                <div className="h-full flex flex-col justify-between">
+                    <p className="text-gray-300 text-sm px-2">{song.description}</p>
+                    <Visualization type="waveform" />
                 </div>
             ) : (
-                <div className="flex flex-col h-24 items-center justify-center">
+                <div className="flex flex-col h-full items-center divide-y divide-gray-700">
                     <audio ref={audioRef} src={song.url} />
 
                     {/* Display Song Duration */}
-                    <p className='absolute top-8 left-2'>
+                    <p className='w-full text-gray-300 text-sm p-2 pt-0'>
                         {duration ? `${Math.floor(duration / 60)}:${Math.floor(duration % 60).toString().padStart(2, "0")}` : "Loading..."}
                     </p>
-                    <IoIosPlay
-                        className="w-14 h-14 text-white opacity-80 hover:opacity-100 transition-all duration-300 cursor-pointer"
-                        onClick={() => setCurrentSong(song)}
-                    />
+                    <div className="flex items-center justify-center w-full h-full relative">
+                        <IoIosPlay
+                            className="w-14 h-14 text-white opacity-80 hover:opacity-100 transition-all duration-300 cursor-pointer"
+                            onClick={() => setCurrentSong(song)}
+                        />
+                    </div>
                 </div>
             )}
         </div>

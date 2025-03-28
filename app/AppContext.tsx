@@ -21,6 +21,9 @@ interface AppContextProps {
     duration: number;
     setDuration: React.Dispatch<React.SetStateAction<number>>;
     audioRef: React.RefObject<HTMLAudioElement | null>;
+    canvasRef: React.RefObject<HTMLCanvasElement | null>;
+    analyserRef: React.RefObject<AnalyserNode | null>;
+
     togglePlay: () => void;
     handleTimeUpdate: () => void;
     handleLoadedMetadata: () => void;
@@ -61,7 +64,35 @@ export const AppProvider: React.FC<AppProviderProps> = ({
     const [playlists, setPlaylists] = React.useState<Playlist[]>(initialPlaylists);
 
     const audioRef = React.useRef<HTMLAudioElement>(null);
-    
+    const canvasRef = React.useRef<HTMLCanvasElement>(null);
+    const audioCtxRef = React.useRef<AudioContext | null>(null);
+    const sourceRef = React.useRef<MediaElementAudioSourceNode | null>(null);
+    const analyserRef = React.useRef<AnalyserNode | null>(null);
+
+    React.useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio || sourceRef.current) return;
+
+        const audioCtx = new AudioContext();
+        const analyser = audioCtx.createAnalyser();
+
+        const source = audioCtx.createMediaElementSource(audio);
+        source.connect(analyser);
+        analyser.connect(audioCtx.destination);
+
+        audioCtxRef.current = audioCtx;
+        analyserRef.current = analyser;
+        sourceRef.current = source;
+
+        const resumeAudio = () => {
+            if (audioCtx.state === "suspended") {
+                audioCtx.resume();
+            }
+        };
+
+        window.addEventListener("click", resumeAudio);
+        return () => window.removeEventListener("click", resumeAudio);
+    }, []);
 
     // Set the audio source when the current song changes
     React.useEffect(() => {
@@ -103,8 +134,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({
     };
 
     const handleTimeUpdate = () => {
-        if (audioRef.current) {
-            setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
+        const audio = audioRef.current;
+        if (audio && audio.duration && !isNaN(audio.duration)) {
+            setProgress((audio.currentTime / audio.duration) * 100);
         }
     };
 
@@ -164,7 +196,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({
         }
     };
 
-    console.log(JSON.stringify(playlists, null, 2));
 
     return (
         <AppContext.Provider value={{
@@ -182,6 +213,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({
             duration,
             setDuration,
             audioRef,
+            canvasRef,
+            analyserRef,
+
             togglePlay,
             handleTimeUpdate,
             handleLoadedMetadata,

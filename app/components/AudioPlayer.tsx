@@ -1,3 +1,5 @@
+'use client';
+
 import { FC } from "react";
 import { useAppContext } from "../AppContext";
 import { PlayPauseButton } from "./PlayPauseButton";
@@ -23,13 +25,13 @@ export const AudioPlayer: FC = () => {
 
             {/* Current Time */}
             <p className="text-white text-sm">
-                {audioRef.current ? `${Math.floor(audioRef.current.currentTime / 60)}:${Math.floor(audioRef.current.currentTime % 60).toString().padStart(2, "0")}` : "Loading..."}
+                {audioRef?.current ? `${Math.floor(audioRef.current.currentTime / 60)}:${Math.floor(audioRef.current.currentTime % 60).toString().padStart(2, "0")}` : "00:00"}
             </p>
 
             {/* Progress Bar */}
             <input
                 type="range"
-                className="w-full h-1 rounded-lg cursor-pointer accent-black"
+                className="w-full h-1 rounded-lg cursor-pointer accent-gray-900"
                 min={0}
                 max={100}
                 value={progress}
@@ -45,8 +47,8 @@ export const AudioPlayer: FC = () => {
             />
 
             {/* Total Duration */}
-            <p className="text-white text-sm">
-                {duration ? `${Math.floor(duration / 60)}:${Math.floor(duration % 60).toString().padStart(2, "0")}` : "Loading..."}
+            <p className="text-white text-sm text-nowrap">
+                {duration ? `${Math.floor(duration / 60)}:${Math.floor(duration % 60).toString().padStart(2, "0")}` : "--:--"}
             </p>
         </div>
     );

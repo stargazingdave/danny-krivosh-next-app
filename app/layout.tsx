@@ -5,6 +5,7 @@ import { Navbar } from "./components/Navbar";
 import { AppProvider } from "./AppContext";
 import { getAllSongs } from "@/server/functions/getAllSongs";
 import { getPlaylists } from "@/server/functions/getPlaylists";
+import { AudioPlayer } from "./components/AudioPlayer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,7 +51,7 @@ export default async function RootLayout({
           <div style={{
             position: "fixed",
             top: "4rem",
-            height: "calc(100vh - 4rem)",
+            height: "calc(100vh - 8rem)",
             width: "100%",
             overflowY: "auto",
           }}>
@@ -60,12 +61,34 @@ export default async function RootLayout({
               >
                 {children}
               </div>
+
               <footer className="h-fit flex flex-col flex-wrap items-center justify-center text-sm text-center p-2">
                 <p>{`© dannykrivosh.com ${year}. All Rights Reserved.`}</p>
                 <p>All music and content on this site are either original compositions, properly licensed to Danny Krivosh, or used with permission.</p>
                 <p>Unauthorized reproduction, distribution, or use of any material is strictly prohibited.</p>
                 <p>Web app created by David Portal.</p>
               </footer>
+            </div>
+          </div>
+
+          <div style={{
+            position: "fixed",
+            bottom: "0",
+            left: "0",
+            width: "100%",
+            height: "4rem",
+            backgroundColor: "#00000080",
+            backdropFilter: "blur(10px)",
+            zIndex: 50,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
+            <div style={{
+              width: "100%",
+              maxWidth: "800px",
+            }}>
+              <AudioPlayer />
             </div>
           </div>
         </body>

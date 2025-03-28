@@ -5,6 +5,7 @@ import { FC, ReactNode, useEffect, useState } from "react";
 import { SnakeGame } from "./Snake/SnakeGame";
 import { GiSnakeTongue } from "react-icons/gi";
 import { useAppContext } from "../AppContext";
+import { AudioPlayer } from "./AudioPlayer";
 
 type Tab = {
     name: string;

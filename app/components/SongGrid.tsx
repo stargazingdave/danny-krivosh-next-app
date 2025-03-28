@@ -28,7 +28,7 @@ export const SongGrid: FC<SongGridProps> = ({ }) => {
     return <div className='flex flex-col items-center justify-center'>
         {
             !snakeOpen &&
-            <div className='fixed bottom-0 right-0 w-full z-50'>
+            <div className='fixed bottom-16 right-0 w-full z-50'>
                 <RecyclingBin />
             </div>
         }
@@ -76,12 +76,12 @@ export const SongGrid: FC<SongGridProps> = ({ }) => {
                     }
 
                     {/* Content */}
-                    <div className="relative z-10 flex flex-col h-full p-2">
-                        <h2 className="text-lg font-semibold text-white">{song.title}</h2>
+                    <div className="relative z-10 flex flex-col h-full">
+                        <h2 className="text-lg font-semibold text-white p-2 pb-0">{song.title}</h2>
                         {
                             song.url
                                 ? <Song song={song} />
-                                : <p className="text-sm text-gray-300">Coming Soon</p>
+                                : <p className="text-sm text-gray-300 px-2">Coming Soon</p>
                         }
 
                     </div>
