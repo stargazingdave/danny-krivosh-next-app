@@ -76,7 +76,7 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
             return playlist;
         }
         ));
-        setRandomOrder();
+        setRandomOrder('recycle');
     };
 
     const handleListPlayPause = () => {
