@@ -61,7 +61,7 @@ export const Navbar: FC = () => {
         <div className="w-full h-16">
             <nav className="flex justify-end items-center p-4">
                 <div
-                    className="fixed left-4 top-4 text-4xl sm:text-6xl font-light font-aguafina p-2 cursor-pointer z-50 w-32 h-8 sm:w-64 sm:h-16"
+                    className="fixed left-4 top-4 text-4xl sm:text-6xl font-light font-aguafina p-2 cursor-pointer z-50 w-50 h-10 sm:w-80 sm:h-16"
                     style={{
                         textShadow: "2px 2px 0px #000, 4px 4px 0px #000",
                     }}
