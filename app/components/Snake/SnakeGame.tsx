@@ -3,10 +3,13 @@
 'use client';
 
 import { useAppContext } from "@/app/AppContext";
+import { createRainSound } from "@/app/functions/createRainSound";
+import { playThunder } from "@/app/functions/playThunder";
 import React, { useEffect, useRef, useState } from "react";
 import { FaWineBottle } from "react-icons/fa6";
 import { HiX } from "react-icons/hi";
 import { TbPillFilled } from "react-icons/tb";
+import Checkbox from "../Checkbox";
 
 const GRID_HEIGHT = 20;
 const GRID_WIDTH = 36;
@@ -81,6 +84,7 @@ export const SnakeGame: React.FC = () => {
     const [newScore, setNewScore] = useState<{ score: number; color: string } | null>(null);
     const [snakeColor, setSnakeColor] = useState<snakeColor>(snakeColorMap.default);
     const [snakeColors, setSnakeColors] = useState<string[]>([]);
+    const [soundOn, setSoundOn] = useState(false);
 
     const pillColorIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const directionQueueRef = useRef<Direction[]>([]);
@@ -276,74 +280,173 @@ export const SnakeGame: React.FC = () => {
         }, 1000);
     }, [latestEvent]);
 
+    const audioCtxRef = useRef<AudioContext | null>(null)
+
+    const startSound = () => {
+        const ctx = new AudioContext()
+        audioCtxRef.current = ctx
+        createRainSound(ctx)
+
+        // random thunder every 5-15 seconds
+        const interval = setInterval(() => {
+            playThunder(ctx)
+        }, Math.random() * 10000 + 5000)
+
+        return () => clearInterval(interval)
+    }
+
+    const stopSound = () => {
+        if (audioCtxRef.current) {
+            audioCtxRef.current.close()
+            audioCtxRef.current = null
+        }
+    }
+
+    const toggleSound = () => {
+        setSoundOn(prev => !prev)
+        if (soundOn) {
+            stopSound()
+        } else {
+            startSound()
+        }
+    }
+
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-sm z-50" onClick={() => setSnakeOpen(false)}>
-            <audio autoPlay loop>
-                <source src="http://amp.cesnet.cz:8000/cro-radio-wave.flac" type="audio/mpeg" />
-            </audio>
+        <div
+            className="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-sm z-50"
+            onClick={(e) => {
+                if (e.target === e.currentTarget) setSnakeOpen(false)
+            }}
+        >
+            {/* MAIN GAME BOX */}
+            <div
+                className="bg-gray-900 rounded-2xl overflow-hidden relative"
+                style={{ boxShadow: "0 0 16px 1px #77777777" }}
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* READY SCREEN */}
+                {gameStatus === 'ready' && (
+                    <div className="absolute inset-0 flex items-center justify-center z-40 animate-pulse-fade pointer-events-none">
+                        <h1 className="text-4xl text-white italic tracking-widest text-center">
+                            PRESS ANY KEY TO PLAY
+                        </h1>
+                    </div>
+                )}
 
-            {
-                gameStatus === 'ready' &&
-                <div className="absolute inset-0 flex items-center justify-center z-50 animate-pulse-fade">
-                    <h1 className="text-4xl text-white italic tracking-widest text-center">
-                        PRESS ANY KEY TO PLAY
-                    </h1>
-                </div>
-            }
-
-            <div className="relative bg-gray-900 rounded-2xl overflow-hidden" onClick={(e) => e.stopPropagation()} style={{ boxShadow: "0 0 16px 1px #77777777" }}>
-                <div className="relative w-full h-fit flex items-center justify-between">
-                    <div className="flex text-center text-2xl font-bold p-2 tracking-widest">
+                {/* HEADER */}
+                <div className="relative z-10 w-full h-fit flex items-center justify-between p-2">
+                    <div className="flex text-center text-2xl font-bold tracking-widest">
                         <h2>S: {score}</h2>
                         {newScore && <h2 style={{ color: newScore.color }}>+{newScore.score}</h2>}
                     </div>
-                    <h2 className="w-48 text-center text-2xl font-bold p-2 tracking-widest" style={{ position: "fixed", left: "calc(50% - 6rem)" }}>- SNAKE -</h2>
-                    <button onClick={() => setSnakeOpen(false)} className="w-fit h-fit flex items-center justify-center m-2 rounded-full bg-black text-white text-lg font-bold p-1 hover:bg-red-500 cursor-pointer">
-                        <HiX size={26} />
-                    </button>
+                    <div className="flex w-64 items-center justify-center gap-2">
+                        <h2 className="text-center text-2xl font-bold tracking-widest">SNAKE</h2>
+                        <h2 className="text-center font-extrabold text-4xl italic text-orange-300 tracking-widest">
+                            XL
+                        </h2>
+                    </div>
+                    <div className="flex items-center justify-center gap-5">
+                        {/* <div className="flex flex-col items-center justify-center gap-1">
+                            <div className="text-sm w-40 text-start flex gap-2">
+                                <Checkbox checked={soundOn} onChange={() => toggleSound()} />
+                                <p className="w-full">ADD RAIN</p>
+                            </div>
+                            <div className="text-sm w-40 text-start flex gap-2">
+                                <Checkbox />
+                                <p className="w-full">ADD THUNDER</p>
+                            </div>
+                        </div> */}
+                        <button
+                            onClick={() => setSnakeOpen(false)}
+                            className="w-fit h-fit flex items-center justify-center m-2 rounded-full bg-black text-white text-lg font-bold p-1 hover:bg-red-500 cursor-pointer"
+                        >
+                            <HiX size={26} />
+                        </button>
+                    </div>
                 </div>
 
-                <div className={`grid ${latestEvent === 'bottleEaten' ? 'bg-[#590b02]' : 'bg-black'} transition-colors ease-out`} style={{ width: GRID_WIDTH * CELL_SIZE, height: GRID_HEIGHT * CELL_SIZE, position: "relative", border: "2px solid black" }}>
+                {/* GAME GRID */}
+                <div
+                    className={`grid ${latestEvent === 'bottleEaten' ? 'bg-[#590b02]' : 'bg-black'
+                        } transition-colors ease-out`}
+                    style={{
+                        width: GRID_WIDTH * CELL_SIZE,
+                        height: GRID_HEIGHT * CELL_SIZE,
+                        position: 'relative',
+                        border: '2px solid black',
+                    }}
+                >
                     {snake.map((s, i) => (
-                        <div key={i} style={{
-                            position: "absolute",
-                            left: s.x * CELL_SIZE,
-                            top: s.y * CELL_SIZE,
-                            width: CELL_SIZE,
-                            height: CELL_SIZE,
-                            backgroundColor: snakeColors.length > 0 ? snakeColors[i % snakeColors.length] : (i === 0 ? snakeColor.head : snakeColor.body),
-                            boxShadow: latestEvent === 'foodEaten' ? '0 0 8px 1px white' : 'none',
-                        }} />
+                        <div
+                            key={i}
+                            style={{
+                                position: 'absolute',
+                                left: s.x * CELL_SIZE,
+                                top: s.y * CELL_SIZE,
+                                width: CELL_SIZE,
+                                height: CELL_SIZE,
+                                backgroundColor:
+                                    snakeColors.length > 0
+                                        ? snakeColors[i % snakeColors.length]
+                                        : i === 0
+                                            ? snakeColor.head
+                                            : snakeColor.body,
+                                boxShadow: latestEvent === 'foodEaten' ? '0 0 8px 1px white' : 'none',
+                            }}
+                        />
                     ))}
 
-                    <div style={{
-                        position: "absolute",
-                        left: food.x * CELL_SIZE,
-                        top: food.y * CELL_SIZE,
-                        width: CELL_SIZE,
-                        height: CELL_SIZE,
-                        backgroundColor: "white",
-                        borderRadius: "50%",
-                    }} />
+                    <div
+                        style={{
+                            position: 'absolute',
+                            left: food.x * CELL_SIZE,
+                            top: food.y * CELL_SIZE,
+                            width: CELL_SIZE,
+                            height: CELL_SIZE,
+                            backgroundColor: 'white',
+                            borderRadius: '50%',
+                        }}
+                    />
 
                     {showBottle && (
-                        <FaWineBottle style={{ position: "absolute", left: bottle.x * CELL_SIZE, top: bottle.y * CELL_SIZE, color: "#00ff22d1", fontSize: "20px" }} />
+                        <FaWineBottle
+                            style={{
+                                position: 'absolute',
+                                left: bottle.x * CELL_SIZE,
+                                top: bottle.y * CELL_SIZE,
+                                color: '#00ff22d1',
+                                fontSize: '20px',
+                            }}
+                        />
                     )}
 
                     {showPill && (
-                        <TbPillFilled className="text-red-500" style={{ position: "absolute", left: pill.x * CELL_SIZE, top: pill.y * CELL_SIZE, width: CELL_SIZE, height: CELL_SIZE }} />
+                        <TbPillFilled
+                            className="text-red-500"
+                            style={{
+                                position: 'absolute',
+                                left: pill.x * CELL_SIZE,
+                                top: pill.y * CELL_SIZE,
+                                width: CELL_SIZE,
+                                height: CELL_SIZE,
+                            }}
+                        />
                     )}
                 </div>
 
+                {/* GAME OVER SCREEN */}
                 {gameStatus === 'gameOver' && (
-                    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/10 backdrop-blur-md rounded-md border border-white/20 text-white">
+                    <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-white/10 backdrop-blur-md rounded-md border border-white/20 text-white">
                         <h3 className="text-3xl font-bold mb-4">Game Over!</h3>
                         <div className="flex flex-col items-center justify-center p-4 gap-4">
-                            <h2 className="text-2xl">{`Your score:`}</h2>
+                            <h2 className="text-2xl">Your score:</h2>
                             <h1 className="text-6xl font-bold">{score}</h1>
                         </div>
                         <br />
-                        <button onClick={restartGame} className="px-4 py-2 rounded bg-white/20 hover:bg-white/30 transition-all">
+                        <button
+                            onClick={restartGame}
+                            className="px-4 py-2 rounded bg-white/20 hover:bg-white/30 transition-all"
+                        >
                             Restart
                         </button>
                     </div>

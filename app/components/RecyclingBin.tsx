@@ -25,8 +25,6 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
     const [isDraggedOver, setIsDraggedOver] = useState(false);
     const dragTimeout = useRef<NodeJS.Timeout | null>(null);
 
-    const audioRefs = useRef<(HTMLAudioElement | null)[]>([]);
-
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         setIsDraggedOver(true);

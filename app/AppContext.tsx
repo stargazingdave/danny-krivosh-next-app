@@ -38,6 +38,7 @@ interface AppContextProps {
     playPrevSong: () => void;
     addSongToRecycle: (song: SongData) => void;
     startPlaylist: (playlistId: string, startIndex?: number) => void;
+    handlePlaySong: (song: SongData) => void;
 }
 
 const AppContext = React.createContext<AppContextProps | undefined>(undefined);
@@ -236,6 +237,22 @@ export const AppProvider: React.FC<AppProviderProps> = ({
         }
     };
 
+    const handlePlaySong = (song: SongData) => {
+        const playlist = playlists.find((p) => p.id === currentPlaylistId);
+        if (playlist) {
+            const songs = isRandom[playlist.id] && shuffledOrders[playlist.id] ? shuffledOrders[playlist.id] : playlist.songs;
+            const songIndex = songs.findIndex((s) => s.id === song.id);
+            setCurrentSong(songs[songIndex]);
+            setCurrentPlaylistId(playlist.id);
+            setIsPlaying(true);
+            if (audioRef.current) {
+                audioRef.current.play().catch(() => {
+                    console.warn("Autoplay failed, user interaction required.");
+                });
+            }
+        }
+    };
+
     return (
         <AppContext.Provider value={{
             snakeOpen,
@@ -270,6 +287,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({
             playPrevSong,
             addSongToRecycle,
             startPlaylist,
+            handlePlaySong,
         }}>
             {children}
         </AppContext.Provider>

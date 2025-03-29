@@ -5,8 +5,11 @@ import { FC, ReactNode, useEffect, useState } from "react";
 import { SnakeGame } from "./Snake/SnakeGame";
 import { GiSnakeTongue } from "react-icons/gi";
 import { useAppContext } from "../AppContext";
-import { AudioPlayer } from "./AudioPlayer";
 import Image from "next/image";
+import { IoHomeSharp, IoMenuOutline } from "react-icons/io5";
+import { HiXMark } from "react-icons/hi2";
+import { MdHelpOutline } from "react-icons/md";
+import { BsQuestionLg } from "react-icons/bs";
 
 type Tab = {
     name: string;
@@ -24,9 +27,9 @@ export const Navbar: FC = () => {
 
 
     const tabs: Tab[] = [
-        { name: "snake", label: <GiSnakeTongue size={25} />, onClick: () => setSnakeOpen(true) },
-        { name: "home", label: "Home", onClick: () => router.push('/') },
-        { name: "about", label: "About", onClick: () => router.push('/about') },
+        { name: "snake", label: <GiSnakeTongue />, onClick: () => setSnakeOpen(true) },
+        { name: "home", label: <IoHomeSharp />, onClick: () => router.push('/') },
+        { name: "about", label: <BsQuestionLg />, onClick: () => router.push('/about') },
     ];
 
     const onTabClick = (tab: Tab) => {
@@ -61,10 +64,7 @@ export const Navbar: FC = () => {
         <div className="w-full h-16">
             <nav className="flex justify-end items-center p-4">
                 <div
-                    className="fixed left-4 top-4 text-4xl sm:text-6xl font-light font-aguafina p-2 cursor-pointer z-50 w-50 h-10 sm:w-80 sm:h-16"
-                    style={{
-                        textShadow: "2px 2px 0px #000, 4px 4px 0px #000",
-                    }}
+                    className="fixed left-4 top-3 p-2 cursor-pointer z-50 w-56 h-12 sm:w-96 sm:h-20"
                     onClick={() => router.push("/")}
                 >
                     <Image
@@ -75,24 +75,12 @@ export const Navbar: FC = () => {
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                 </div>
-                <div className="flex gap-4">
-                    {tabs.map((tab) => (
-                        <button
-                            key={tab.name}
-                            className={`cursor-pointer border-transparent border-b hover:border-white transition-all duration-700 ${pathname === "/" && tab.name === "home"
-                                ? "text-white text-2xl"
-                                : pathname.split("/")[1] === tab.name
-                                    ? tab.name === "home"
-                                        ? "text-white text-2xl"
-                                        : "text-white text-3xl"
-                                    : "text-gray-500"
-                                }`}
-                            onClick={() => onTabClick(tab)}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
+
+                <Tabs
+                    tabs={tabs}
+                    onTabClick={onTabClick}
+                    pathname={pathname}
+                />
 
                 {/* Overlay for Snake Game */}
                 {/* {snakeOpen ? <RevisedSnakeGame /> : ""} */}
@@ -103,3 +91,29 @@ export const Navbar: FC = () => {
         </div>
     );
 };
+
+interface TabProps {
+    tabs: Tab[];
+    onTabClick: (tab: Tab) => void;
+    pathname: string;
+}
+
+const Tabs: FC<TabProps> = ({ tabs, onTabClick, pathname }) => {
+    return <div className="flex gap-4">
+        {tabs.map((tab) => (
+            <button
+                key={tab.name}
+                className={`cursor-pointer border-transparent border-b hover:border-white transition-all duration-700 ${pathname === "/" && tab.name === "home"
+                    ? "text-white text-2xl"
+                    : pathname.split("/")[1] === tab.name
+                        ? "text-white text-2xl"
+                        : "text-white"
+                    }`}
+                onClick={() => onTabClick(tab)}
+            >
+                {tab.label}
+            </button>
+        ))}
+    </div>
+}
+

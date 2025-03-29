@@ -27,8 +27,10 @@ export const SongGrid: FC<SongGridProps> = () => {
     return (
         <div className='flex flex-col items-center justify-center'>
             {!snakeOpen && (
-                <div className='fixed bottom-16 right-0 w-full z-50'>
-                    <RecyclingBin />
+                <div className='fixed bottom-16 right-0 w-full z-50 pointer-events-none'>
+                    <div className='pointer-events-auto w-fit'>
+                        <RecyclingBin />
+                    </div>
                 </div>
             )}
 

@@ -12,7 +12,7 @@ interface SongProps {
 export const Song: FC<SongProps> = ({ song }) => {
     const {
         currentSong,
-        setCurrentSong,
+        handlePlaySong,
     } = useAppContext();
     const audioRef = useRef<HTMLAudioElement>(null);
     const [duration, setDuration] = useState<number | null>(null);
@@ -53,7 +53,7 @@ export const Song: FC<SongProps> = ({ song }) => {
                     <div className="flex items-center justify-center w-full h-full relative">
                         <IoIosPlay
                             className="w-14 h-14 text-white opacity-80 hover:opacity-100 transition-all duration-300 cursor-pointer"
-                            onClick={() => setCurrentSong(song)}
+                            onClick={() => handlePlaySong(song)}
                         />
                     </div>
                 </div>

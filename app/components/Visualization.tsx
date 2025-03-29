@@ -57,8 +57,8 @@ export const Visualization: FC<VisualizationProps> = ({ type = "waveform" }) => 
 
                 for (let i = 0; i < bufferLength; i++) {
                     const barHeight = (dataArray[i] / 255) * canvas.height;
-                    // ctx.fillStyle = `rgb(${dataArray[i]}, ${255 - dataArray[i]}, 150)`;
-                    ctx.fillStyle = 'gray';
+                    ctx.fillStyle = `rgb(${dataArray[i]}, ${255 - dataArray[i]}, 150)`;
+                    // ctx.fillStyle = '#e7ddb0';
                     ctx.fillRect(i * barWidth, canvas.height - barHeight, barWidth, barHeight);
                 }
             } else {
@@ -66,7 +66,7 @@ export const Visualization: FC<VisualizationProps> = ({ type = "waveform" }) => 
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.lineWidth = 2;
-                ctx.strokeStyle = "gray";
+                ctx.strokeStyle = "#e7ddb0";
                 ctx.beginPath();
 
                 const sliceWidth = canvas.width / bufferLength;
