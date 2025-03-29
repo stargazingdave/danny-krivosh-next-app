@@ -6,6 +6,7 @@ import { SnakeGame } from "./Snake/SnakeGame";
 import { GiSnakeTongue } from "react-icons/gi";
 import { useAppContext } from "../AppContext";
 import { AudioPlayer } from "./AudioPlayer";
+import Image from "next/image";
 
 type Tab = {
     name: string;
@@ -60,25 +61,31 @@ export const Navbar: FC = () => {
         <div className="w-full h-16">
             <nav className="flex justify-end items-center p-4">
                 <div
-                    className="fixed left-4 top-4 text-4xl sm:text-6xl font-light font-aguafina p-2 cursor-pointer z-50"
+                    className="fixed left-4 top-4 text-4xl sm:text-6xl font-light font-aguafina p-2 cursor-pointer z-50 w-32 h-8 sm:w-64 sm:h-16"
                     style={{
                         textShadow: "2px 2px 0px #000, 4px 4px 0px #000",
                     }}
                     onClick={() => router.push("/")}
                 >
-                    Danny Krivosh
+                    <Image
+                        src={"/images/logo/logo.png"}
+                        alt="Logo"
+                        fill
+                        className="object-contain"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
                 </div>
                 <div className="flex gap-4">
                     {tabs.map((tab) => (
                         <button
                             key={tab.name}
                             className={`cursor-pointer border-transparent border-b hover:border-white transition-all duration-700 ${pathname === "/" && tab.name === "home"
-                                    ? "text-white text-2xl"
-                                    : pathname.split("/")[1] === tab.name
-                                        ? tab.name === "home"
-                                            ? "text-white text-2xl"
-                                            : "text-white text-3xl"
-                                        : "text-gray-500"
+                                ? "text-white text-2xl"
+                                : pathname.split("/")[1] === tab.name
+                                    ? tab.name === "home"
+                                        ? "text-white text-2xl"
+                                        : "text-white text-3xl"
+                                    : "text-gray-500"
                                 }`}
                             onClick={() => onTabClick(tab)}
                         >
