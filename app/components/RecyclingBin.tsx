@@ -6,6 +6,7 @@ import { TbTrashXFilled } from "react-icons/tb";
 import { FaPause, FaPlay, FaShuffle, FaWindowMinimize } from "react-icons/fa6";
 import { useAppContext } from "../AppContext";
 import { PlayPauseButton } from "./PlayPauseButton";
+import Image from "next/image";
 
 interface RecyclingBinProps { }
 
@@ -56,9 +57,20 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
             >
-                <TbTrashXFilled
+                {/* <TbTrashXFilled
                     className="w-16 h-16 text-white shadow-md rounded-full m-8 p-2 bg-black cursor-pointer transition-all duration-300 ease-in-out"
                     style={{ boxShadow: isDraggedOver ? "rgb(255 0 0) 0px 0px 24px 1px" : "" }}
+                    onClick={() => setIsOpen(true)}
+                /> */}
+                <Image
+                    src="/images/recycle-bin-icon.png"
+                    alt="Recycle Bin"
+                    width={isDraggedOver ? 96 : 72}
+                    height={isDraggedOver ? 96 : 72}
+                    className="m-8 p-2 cursor-pointer transition-all duration-300 ease-in-out"
+                    style={isDraggedOver ? {
+                        filter: "drop-shadow(0 0 24px rgb(255 0 0))"
+                    } : {}}
                     onClick={() => setIsOpen(true)}
                 />
             </div>
