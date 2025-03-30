@@ -47,6 +47,19 @@ const isOpposite = (dir1: Direction, dir2: Direction) => (
     (dir1 === "RIGHT" && dir2 === "LEFT")
 );
 
+const canMakeTurn = (currentDir: Direction, nextDir: Direction, snake: { x: number, y: number }[]) => {
+    const head = snake[0];
+    const nextHead = { ...head };
+    if (nextDir === currentDir || isOpposite(currentDir, nextDir)) return false;
+    if (nextDir === "UP") nextHead.y--;
+    else if (nextDir === "DOWN") nextHead.y++;
+    else if (nextDir === "LEFT") nextHead.x--;
+    else if (nextDir === "RIGHT") nextHead.x++;
+
+    return !snake.some(s => s.x === nextHead.x && s.y === nextHead.y) &&
+        !(nextHead.x < 0 || nextHead.y < 0 || nextHead.x >= GRID_WIDTH || nextHead.y >= GRID_HEIGHT);
+}
+
 interface snakeColor {
     head: string;
     body: string;
@@ -65,7 +78,7 @@ type ScoreType = 'food' | 'bottle' | 'pill';
 const scoreMap: Record<ScoreType, { score: number; color: string }> = {
     food: { score: 1, color: '#d7b964' },
     bottle: { score: 50, color: '#00ff22d1' },
-    pill: { score: 15, color: '#590b02' },
+    pill: { score: 15, color: '#FCEB12' },
 };
 
 export const SnakeGame: React.FC = () => {
@@ -188,8 +201,6 @@ export const SnakeGame: React.FC = () => {
             else if (currentDirection === "RIGHT") head.x++;
 
             const isOutOfBounds = head.x < 0 || head.y < 0 || head.x >= GRID_WIDTH || head.y >= GRID_HEIGHT;
-            const isSelfCollision = currentSnake.some((s, i) => i > 0 && s.x === head.x && s.y === head.y);
-
             if (isOutOfBounds) {
                 if (!wallTimeoutRef.current) {
                     wallTimeoutRef.current = setTimeout(() => {
@@ -209,6 +220,7 @@ export const SnakeGame: React.FC = () => {
                 wallTimeoutRef.current = null;
             }
 
+            const isSelfCollision = currentSnake.some((s, i) => i > 0 && s.x === head.x && s.y === head.y);
             if (isSelfCollision) {
                 if (!selfTimeoutRef.current) {
                     selfTimeoutRef.current = setTimeout(() => {
@@ -217,12 +229,17 @@ export const SnakeGame: React.FC = () => {
                         else if (currentDirection === "DOWN") retryHead.y++;
                         else if (currentDirection === "LEFT") retryHead.x--;
                         else if (currentDirection === "RIGHT") retryHead.x++;
-                        const stillSelfCollision = currentSnake.some((s, i) => i > 0 && s.x === retryHead.x && s.y === retryHead.y);
+
+                        const stillSelfCollision = snake.some((s, i) => i > 0 && s.x === retryHead.x && s.y === retryHead.y);
                         if (stillSelfCollision) setGameStatus('gameOver');
+
                         selfTimeoutRef.current = null;
                     }, 150);
                 }
                 return;
+            } else if (selfTimeoutRef.current) {
+                clearTimeout(selfTimeoutRef.current);
+                selfTimeoutRef.current = null;
             }
 
             const newSnake = [head, ...currentSnake];
@@ -313,14 +330,14 @@ export const SnakeGame: React.FC = () => {
 
     return (
         <div
-            className="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-sm z-50"
+            className="fixed inset-0 flex items-center justify-center bg-black/85 backdrop-blur-sm z-50"
             onClick={(e) => {
                 if (e.target === e.currentTarget) setSnakeOpen(false)
             }}
         >
             {/* MAIN GAME BOX */}
             <div
-                className="bg-gray-900 rounded-2xl overflow-hidden relative"
+                className="bg-gray-956 rounded-2xl overflow-hidden relative"
                 style={{ boxShadow: "0 0 16px 1px #77777777" }}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -328,20 +345,20 @@ export const SnakeGame: React.FC = () => {
                 {gameStatus === 'ready' && (
                     <div className="absolute inset-0 flex items-center justify-center z-40 animate-pulse-fade pointer-events-none">
                         <h1 className="text-4xl text-white italic tracking-widest text-center">
-                            PRESS ANY KEY TO PLAY
+                            PRESS ANY KEY TO START
                         </h1>
                     </div>
                 )}
 
                 {/* HEADER */}
-                <div className="relative z-10 w-full h-fit flex items-center justify-between p-2">
+                <div className="relative z-10 w-full h-11 flex items-center justify-between p-2">
                     <div className="flex text-center text-2xl font-bold tracking-widest">
                         <h2>S: {score}</h2>
                         {newScore && <h2 style={{ color: newScore.color }}>+{newScore.score}</h2>}
                     </div>
-                    <div className="flex w-64 items-center justify-center gap-2">
-                        <h2 className="text-center text-2xl font-bold tracking-widest">SNAKE</h2>
-                        <h2 className="text-center font-extrabold text-4xl italic text-orange-300 tracking-widest">
+                    <div className="fixed left-[calc(50% - 8rem)] flex w-64 items-center justify-center gap-2" style={{ left: "calc(50% - 8rem)" }}>
+                        <h2 className="text-2xl font-bold tracking-widest">SNAKE</h2>
+                        <h2 className="font-extrabold text-4xl italic text-orange-300 tracking-widest">
                             XL
                         </h2>
                     </div>
@@ -373,7 +390,7 @@ export const SnakeGame: React.FC = () => {
                         width: GRID_WIDTH * CELL_SIZE,
                         height: GRID_HEIGHT * CELL_SIZE,
                         position: 'relative',
-                        border: '2px solid black',
+                        overflow: 'hidden',
                     }}
                 >
                     {snake.map((s, i) => (

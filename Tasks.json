@@ -1,0 +1,25 @@
+{
+    "MOBILE": [
+        "drag drop",
+        "snake"
+    ],
+
+    "SITE": {
+        "currently playing bar": [
+            "L for lyric shining or gray",
+            "song name",
+            "HD",
+            "forward/backwords + enlarge play",
+            "vizualizer"
+        ],
+        "recycle bin": [
+            "fix pause button and separate from global button",
+            "delete buttons for a song and for all",
+        ],
+        "snake": [
+            "New food cannot be generated on snake's tail.",
+            "When eating a pill while tripping balls, you get 2X points per pill eaten while trippin.",
+            "thunder and rain sounds"
+        ],
+    },
+}

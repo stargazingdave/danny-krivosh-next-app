@@ -94,25 +94,25 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
     }
 
     return (
-        <div className='fixed bottom-4 left-4 w-1/3 z-50'
+        <div className='fixed bottom-4 left-4 w-fit min-w-64 z-50'
             onDragOver={handleDragOver}
             onDrop={handleDrop}
         >
-            <div className="flex flex-col p-1 gap-8 bg-black">
+            <div className="flex p-1 gap-8 justify-between bg-black">
                 <div className="flex gap-2 items-center">
                     <FaWindowMinimize className="w-8 h-8 text-white p-2 border cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
                     <FaShuffle className="w-8 h-8 text-white p-2 border cursor-pointer" onClick={onShuffleClick} />
                     <PlayPauseButton onClick={() => handleListPlayPause()} isPlaying={isPlaying && currentPlaylist.id === "recycle"} />
                 </div>
 
-                <h1 className="text-4xl px-2">YOUR RECYCLING BIN</h1>
+                <h1 className="w-fit text-2xl">DUMPSTER 3000</h1>
             </div>
 
             <div className="flex flex-col h-64 overflow-auto bg-black">
                 {
                     playlists[1].songs.length === 0 &&
                     <div className="flex justify-center items-center h-full">
-                        <p className="text-white">No songs in the bin</p>
+                        <p className="text-white">Dump Here</p>
                     </div>
                 }
                 {
