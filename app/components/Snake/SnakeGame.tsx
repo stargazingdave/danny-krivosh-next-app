@@ -320,7 +320,7 @@ export const SnakeGame: React.FC = () => {
             setFood(getRandomPositionMobile(snake));
             setBottle(getRandomPositionMobile(snake));
             setPill(getRandomPositionMobile(snake));
-            
+
         } else {
             setIsMobile(false);
         }
@@ -511,25 +511,30 @@ export const SnakeGame: React.FC = () => {
                     </div>
                 )}
             </div>
-            <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50 w-full h-96 grid grid-cols-3 p-2 gap-2 sm:hidden">
-                <div />
-                <button onClick={() => handleTouchDirection("UP")} className="h-24 w-24 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
-                    ↑
-                </button>
-                <div />
-                <button onClick={() => handleTouchDirection("LEFT")} className="h-24 w-24 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
-                    ←
-                </button>
-                <div />
-                <button onClick={() => handleTouchDirection("RIGHT")} className="h-24 w-24 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
-                    →
-                </button>
-                <div />
-                <button onClick={() => handleTouchDirection("DOWN")} className="h-24 w-24 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
-                    ↓
-                </button>
-                <div />
-            </div>
+            {/* MOBILE CONTROLS */}
+
+            {isMobile && gameStatus !== 'gameOver' &&
+                <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 grid grid-cols-3 p-2 gap-2">
+                    <div />
+                    <button onClick={() => handleTouchDirection("UP")} className="h-16 w-16 flex items-center justify-center bg-white/40 rounded-full text-white text-xl">
+                        ↑
+                    </button>
+                    <div />
+                    <button onClick={() => handleTouchDirection("LEFT")} className="h-16 w-16 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
+                        ←
+                    </button>
+                    <div />
+                    <button onClick={() => handleTouchDirection("RIGHT")} className="h-16 w-16 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
+                        →
+                    </button>
+                    <div />
+                    <button onClick={() => handleTouchDirection("DOWN")} className="h-16 w-16 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
+                        ↓
+                    </button>
+                    <div />
+                </div>
+            }
+
         </div>
     );
 };
