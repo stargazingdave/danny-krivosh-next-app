@@ -107,7 +107,7 @@ export const SnakeGame: React.FC = () => {
     const restartGame = () => {
         hasRestartedRef.current = true;
         setSnake([{ x: 10, y: 10 }]);
-        setFood(getRandomPosition([{ x: 0, y: 0 }]));
+        setFood(isMobile ? getRandomPositionMobile([{ x: 0, y: 0 }]) : getRandomPosition([{ x: 0, y: 0 }]));
         setDirection("RIGHT");
         setGameStatus('running');
         setSpeed(INITIAL_SPEED);
@@ -256,7 +256,7 @@ export const SnakeGame: React.FC = () => {
 
             // Check if snake eats food
             if (head.x === food.x && head.y === food.y) {
-                setFood(getRandomPosition(snake));
+                setFood(isMobile ? getRandomPositionMobile(snake) : getRandomPosition(snake));
                 setSpeed(prev => Math.min(prev + 1, MAX_SPEED));
                 setLatestEvent('foodEaten');
                 if (!showBottle) setShowBottle(getRandomBottle());
@@ -267,7 +267,7 @@ export const SnakeGame: React.FC = () => {
 
             // Check if snake eats bottle
             if (head.x === bottle.x && head.y === bottle.y && showBottle) {
-                setBottle(getRandomPosition(snake));
+                setBottle(isMobile ? getRandomPositionMobile(snake) : getRandomPosition(snake));
                 setLatestEvent('bottleEaten');
                 setShowBottle(false);
                 setSpeed(Math.min(Math.random() * (MAX_SPEED - MIN_SPEED - Math.random() * 6) + MIN_SPEED, MAX_SPEED));
@@ -275,7 +275,7 @@ export const SnakeGame: React.FC = () => {
 
             // Check if snake eats pill
             if (head.x === pill.x && head.y === pill.y && showPill) {
-                setPill(getRandomPosition(snake));
+                setPill(isMobile ? getRandomPositionMobile(snake) : getRandomPosition(snake));
                 setLatestEvent('pillEaten');
                 setShowPill(false);
                 setSpeed(prev => Math.max(prev - 2, MIN_SPEED));
@@ -317,6 +317,10 @@ export const SnakeGame: React.FC = () => {
     const handleResize = () => {
         if (window.innerWidth < 768) {
             setIsMobile(true);
+            setFood(getRandomPositionMobile(snake));
+            setBottle(getRandomPositionMobile(snake));
+            setPill(getRandomPositionMobile(snake));
+            
         } else {
             setIsMobile(false);
         }
