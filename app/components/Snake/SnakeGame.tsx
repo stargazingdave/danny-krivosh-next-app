@@ -13,6 +13,8 @@ import Checkbox from "../Checkbox";
 
 const GRID_HEIGHT = 20;
 const GRID_WIDTH = 36;
+const MOBILE_GRID_WIDTH = 16;
+const MOBILE_GRID_HEIGHT = 24;
 const CELL_SIZE = 20;
 const INITIAL_SPEED = 5;
 const MAX_SPEED = 20;
@@ -32,6 +34,15 @@ const getRandomPosition = (snakePositions: { x: number, y: number }[]) => {
     return { x, y };
 };
 
+const getRandomPositionMobile = (snakePositions: { x: number, y: number }[]) => {
+    let x: number, y: number;
+    do {
+        x = Math.floor(Math.random() * MOBILE_GRID_WIDTH);
+        y = Math.floor(Math.random() * MOBILE_GRID_HEIGHT);
+    } while ((x === 0 && y === 0) || snakePositions.some(s => s.x === x && s.y === y));
+    return { x, y };
+}
+
 const getRandomBottle = () => Math.floor(Math.random() * 8) < 5;
 const getRandomPill = () => Math.floor(Math.random() * 8) > 5;
 
@@ -46,19 +57,6 @@ const isOpposite = (dir1: Direction, dir2: Direction) => (
     (dir1 === "LEFT" && dir2 === "RIGHT") ||
     (dir1 === "RIGHT" && dir2 === "LEFT")
 );
-
-const canMakeTurn = (currentDir: Direction, nextDir: Direction, snake: { x: number, y: number }[]) => {
-    const head = snake[0];
-    const nextHead = { ...head };
-    if (nextDir === currentDir || isOpposite(currentDir, nextDir)) return false;
-    if (nextDir === "UP") nextHead.y--;
-    else if (nextDir === "DOWN") nextHead.y++;
-    else if (nextDir === "LEFT") nextHead.x--;
-    else if (nextDir === "RIGHT") nextHead.x++;
-
-    return !snake.some(s => s.x === nextHead.x && s.y === nextHead.y) &&
-        !(nextHead.x < 0 || nextHead.y < 0 || nextHead.x >= GRID_WIDTH || nextHead.y >= GRID_HEIGHT);
-}
 
 interface snakeColor {
     head: string;
@@ -98,6 +96,7 @@ export const SnakeGame: React.FC = () => {
     const [snakeColor, setSnakeColor] = useState<snakeColor>(snakeColorMap.default);
     const [snakeColors, setSnakeColors] = useState<string[]>([]);
     const [soundOn, setSoundOn] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
 
     const pillColorIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const directionQueueRef = useRef<Direction[]>([]);
@@ -151,6 +150,15 @@ export const SnakeGame: React.FC = () => {
         }, 1000);
     };
 
+    const handleTouchDirection = (newDir: Direction) => {
+        const last = directionQueueRef.current.at(-1) || direction;
+        if (newDir !== last && directionQueueRef.current.length < 3) {
+            directionQueueRef.current.push(newDir);
+        }
+
+        if (gameStatus === 'ready') setGameStatus('running');
+    };
+
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             const keyMap: Record<string, Key> = {
@@ -201,7 +209,8 @@ export const SnakeGame: React.FC = () => {
             else if (currentDirection === "RIGHT") head.x++;
 
             const isOutOfBounds = head.x < 0 || head.y < 0 || head.x >= GRID_WIDTH || head.y >= GRID_HEIGHT;
-            if (isOutOfBounds) {
+            const isOutOfBoundsMobile = head.x < 0 || head.y < 0 || head.x >= MOBILE_GRID_WIDTH || head.y >= MOBILE_GRID_HEIGHT;
+            if (isMobile ? isOutOfBoundsMobile : isOutOfBounds) {
                 if (!wallTimeoutRef.current) {
                     wallTimeoutRef.current = setTimeout(() => {
                         const retryHead = { ...snake[0] };
@@ -210,7 +219,8 @@ export const SnakeGame: React.FC = () => {
                         else if (currentDirection === "LEFT") retryHead.x--;
                         else if (currentDirection === "RIGHT") retryHead.x++;
                         const stillOutOfBounds = retryHead.x < 0 || retryHead.y < 0 || retryHead.x >= GRID_WIDTH || retryHead.y >= GRID_HEIGHT;
-                        if (stillOutOfBounds) setGameStatus('gameOver');
+                        const stillOutOfBoundsMobile = retryHead.x < 0 || retryHead.y < 0 || retryHead.x >= MOBILE_GRID_WIDTH || retryHead.y >= MOBILE_GRID_HEIGHT;
+                        if (isMobile ? stillOutOfBoundsMobile : stillOutOfBounds) setGameStatus('gameOver');
                         wallTimeoutRef.current = null;
                     }, 150);
                 }
@@ -297,6 +307,27 @@ export const SnakeGame: React.FC = () => {
         }, 1000);
     }, [latestEvent]);
 
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, []);
+
+    const handleResize = () => {
+        if (window.innerWidth < 768) {
+            setIsMobile(true);
+        } else {
+            setIsMobile(false);
+        }
+    }
+
+    useEffect(() => {
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const audioCtxRef = useRef<AudioContext | null>(null)
 
     const startSound = () => {
@@ -330,14 +361,17 @@ export const SnakeGame: React.FC = () => {
 
     return (
         <div
-            className="fixed inset-0 flex items-center justify-center bg-black/85 backdrop-blur-sm z-50"
+            className="fixed inset-0 flex items-center justify-center backdrop-blur-sm z-50"
+            style={{
+                backgroundColor: "color-mix(in oklab, var(--color-black) /* #000 = #000000 */ 88%, transparent)"
+            }}
             onClick={(e) => {
                 if (e.target === e.currentTarget) setSnakeOpen(false)
             }}
         >
             {/* MAIN GAME BOX */}
             <div
-                className="bg-gray-956 rounded-2xl overflow-hidden relative"
+                className="bg-transparent rounded-2xl overflow-hidden relative"
                 style={{ boxShadow: "0 0 16px 1px #77777777" }}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -358,7 +392,11 @@ export const SnakeGame: React.FC = () => {
                     </div>
                     <div className="fixed left-[calc(50% - 8rem)] flex w-64 items-center justify-center gap-2" style={{ left: "calc(50% - 8rem)" }}>
                         <h2 className="text-2xl font-bold tracking-widest">SNAKE</h2>
-                        <h2 className="font-extrabold text-4xl italic text-orange-300 tracking-widest">
+                        <h2 className="font-extrabold italic text-yellow-300 tracking-widest"
+                            style={{
+                                WebkitTextStroke: '2px gray',
+                                fontSize: '2.75rem',
+                            }}>
                             XL
                         </h2>
                     </div>
@@ -387,8 +425,8 @@ export const SnakeGame: React.FC = () => {
                     className={`grid ${latestEvent === 'bottleEaten' ? 'bg-[#590b02]' : 'bg-black'
                         } transition-colors ease-out`}
                     style={{
-                        width: GRID_WIDTH * CELL_SIZE,
-                        height: GRID_HEIGHT * CELL_SIZE,
+                        width: isMobile ? MOBILE_GRID_WIDTH * CELL_SIZE : GRID_WIDTH * CELL_SIZE,
+                        height: isMobile ? MOBILE_GRID_HEIGHT * CELL_SIZE : GRID_HEIGHT * CELL_SIZE,
                         position: 'relative',
                         overflow: 'hidden',
                     }}
@@ -468,6 +506,25 @@ export const SnakeGame: React.FC = () => {
                         </button>
                     </div>
                 )}
+            </div>
+            <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50 w-40 h-32 grid grid-cols-3 gap-2 sm:hidden">
+                <div />
+                <button onClick={() => handleTouchDirection("UP")} className="h-12 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
+                    ↑
+                </button>
+                <div />
+                <button onClick={() => handleTouchDirection("LEFT")} className="h-12 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
+                    ←
+                </button>
+                <div />
+                <button onClick={() => handleTouchDirection("RIGHT")} className="h-12 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
+                    →
+                </button>
+                <div />
+                <button onClick={() => handleTouchDirection("DOWN")} className="h-12 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
+                    ↓
+                </button>
+                <div />
             </div>
         </div>
     );
