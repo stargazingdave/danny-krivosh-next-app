@@ -511,21 +511,21 @@ export const SnakeGame: React.FC = () => {
                     </div>
                 )}
             </div>
-            <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50 w-40 h-32 grid grid-cols-3 gap-2 sm:hidden">
+            <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50 w-full h-96 grid grid-cols-3 p-2 gap-2 sm:hidden">
                 <div />
-                <button onClick={() => handleTouchDirection("UP")} className="h-12 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
+                <button onClick={() => handleTouchDirection("UP")} className="h-24 w-24 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
                     ↑
                 </button>
                 <div />
-                <button onClick={() => handleTouchDirection("LEFT")} className="h-12 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
+                <button onClick={() => handleTouchDirection("LEFT")} className="h-24 w-24 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
                     ←
                 </button>
                 <div />
-                <button onClick={() => handleTouchDirection("RIGHT")} className="h-12 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
+                <button onClick={() => handleTouchDirection("RIGHT")} className="h-24 w-24 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
                     →
                 </button>
                 <div />
-                <button onClick={() => handleTouchDirection("DOWN")} className="h-12 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
+                <button onClick={() => handleTouchDirection("DOWN")} className="h-24 w-24 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
                     ↓
                 </button>
                 <div />
