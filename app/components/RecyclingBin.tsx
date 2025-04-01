@@ -8,6 +8,9 @@ import { useAppContext } from "../AppContext";
 import { PlayPauseButton } from "./PlayPauseButton";
 import Image from "next/image";
 
+const widthUnit = 15;
+const heightUnit = 13;
+
 interface RecyclingBinProps { }
 
 export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
@@ -24,6 +27,23 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
     } = useAppContext();
     const [isOpen, setIsOpen] = useState(false);
     const [isDraggedOver, setIsDraggedOver] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+
+    const handleResize = () => {
+        if (window.innerWidth <= 768) {
+            setIsMobile(true);
+        } else {
+            setIsMobile(false);
+        }
+    }
+    
+    useEffect(() => {
+        handleResize(); // Set initial state
+        window.addEventListener("resize", handleResize); // Add event listener
+        return () => {
+            window.removeEventListener("resize", handleResize); // Cleanup event listener
+        };
+    }, []);
     const dragTimeout = useRef<NodeJS.Timeout | null>(null);
 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -57,20 +77,19 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
             >
-                {/* <TbTrashXFilled
-                    className="w-16 h-16 text-white shadow-md rounded-full m-8 p-2 bg-black cursor-pointer transition-all duration-300 ease-in-out"
-                    style={{ boxShadow: isDraggedOver ? "rgb(255 0 0) 0px 0px 24px 1px" : "" }}
-                    onClick={() => setIsOpen(true)}
-                /> */}
                 <Image
                     src="/images/recycle-bin-icon.png"
                     alt="Recycle Bin"
-                    width={isDraggedOver ? 96 : 72}
-                    height={isDraggedOver ? 96 : 72}
-                    className="m-8 p-2 cursor-pointer transition-all duration-300 ease-in-out"
-                    style={isDraggedOver ? {
-                        filter: "drop-shadow(0 0 24px rgb(255 0 0))"
-                    } : {}}
+                    width={isDraggedOver ? 210 : 200}
+                    height={isDraggedOver ? 150 : 135}
+                    className="p-2 cursor-pointer transition-all duration-300 ease-in-out"
+                    style={{
+                        filter: isDraggedOver ? "drop-shadow(0 0 24px rgb(255 0 0))" : undefined,
+                        // objectFit: "fill", // <-- this allows distorting the aspect ratio
+                        width: widthUnit * (isDraggedOver ? 12 : 10),
+                        height: heightUnit * (isDraggedOver ? 12 : 10),
+                        margin: isMobile ? "0" : "2rem",
+                    }}
                     onClick={() => setIsOpen(true)}
                 />
             </div>

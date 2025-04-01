@@ -5,27 +5,36 @@ import { FaAmazon, FaYoutube } from "react-icons/fa6";
 
 export default async function AboutPage() {
     const youtubeLink = "https://www.youtube.com/DannyKrivosh";
-    const primaryEmail = "gofor@dannykrivosh.com";
+    const primaryEmail = "GoFor@DannyKrivosh.com";
     const secondaryEmail = "strifed@gmail.com";
 
     return (
         <div className="p-4 text-xl text-center">
             <p className="text-white">
-                I am a musician and composer from the United States.
+                <br></br>Originally from Ukraine, <br></br>
+                <br></br>I am the musician behind some songs and author of "Brown, to Brown. - An Anthology".
             </p>
             <br />
             <p className="text-white">
-                I have been writing music for over 20 years and have released several albums.
+                I have been writing music throughout my life.
             </p>
             <br />
             <p className="text-white">
-                My music is available on all major streaming platforms.
+                My music isn't available on all major streaming platforms.
+                <br></br>
+                You can find some  of it on SoundCloud, but most of it is on YouTube.
+                <br></br>
+                I also have an Amazon Author Page.
             </p>
             <br />
             <p className="text-white">
-                For business inquiries, please contact me at:
+                We've made this awesome easter-egg-filled site for your conveinience and for our joy.
+                <br>
+                </br>
+                <br>
+                </br>Be sure to try the Recycling Bin (DUMPSTER 3000) feature.<br></br>
+                <br></br>You can contact me at: 
             </p>
-            <br />
             <p>
                 <a href={`mailto:${primaryEmail}`} className="text-accent text-gray-500">
                     {primaryEmail}
