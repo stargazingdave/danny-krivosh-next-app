@@ -1,14 +1,12 @@
 'use client';
 
 import { usePathname, useRouter } from "next/navigation";
-import { FC, ReactNode, useEffect, useState } from "react";
+import { FC, ReactNode, useEffect } from "react";
 import { SnakeGame } from "./Snake/SnakeGame";
 import { GiSnakeTongue } from "react-icons/gi";
 import { useAppContext } from "../AppContext";
 import Image from "next/image";
-import { IoHomeSharp, IoMenuOutline } from "react-icons/io5";
-import { HiXMark } from "react-icons/hi2";
-import { MdHelpOutline } from "react-icons/md";
+import { IoHomeSharp } from "react-icons/io5";
 import { BsQuestionLg } from "react-icons/bs";
 
 type Tab = {
@@ -64,7 +62,7 @@ export const Navbar: FC = () => {
         <div className="w-full h-16">
             <nav className="flex justify-end items-center p-4">
                 <div
-                    className="fixed left-4 top-3 p-2 cursor-pointer z-50 w-56 h-12 sm:w-96 sm:h-20"
+                    className="fixed left-4 top-3 p-2 cursor-pointer z-50 w-56 h-12 sm:w-[25rem] sm:h-20"
                     onClick={() => router.push("/")}
                 >
                     <Image
