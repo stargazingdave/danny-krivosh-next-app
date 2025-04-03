@@ -9,6 +9,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { FaWineBottle } from "react-icons/fa6";
 import { HiX } from "react-icons/hi";
 import { TbPillFilled } from "react-icons/tb";
+import { LiaJointSolid } from "react-icons/lia";
 import Checkbox from "../Checkbox";
 
 const GRID_HEIGHT = 20;
@@ -17,7 +18,7 @@ const MOBILE_GRID_WIDTH = 16;
 const MOBILE_GRID_HEIGHT = 24;
 const CELL_SIZE = 20;
 const INITIAL_SPEED = 5;
-const MAX_SPEED = 20;
+const MAX_SPEED = 18;
 const MIN_SPEED = 2;
 
 type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT";
@@ -25,26 +26,22 @@ type Key = Direction | "Escape" | "Enter";
 
 const directionOptions: Key[] = ["UP", "DOWN", "LEFT", "RIGHT"];
 
-const getRandomPosition = (snakePositions: { x: number, y: number }[]) => {
+const getRandomPosition = (
+    snakePositions: { x: number, y: number }[],
+    isMobile: boolean
+) => {
     let x: number, y: number;
     do {
-        x = Math.floor(Math.random() * GRID_WIDTH);
-        y = Math.floor(Math.random() * GRID_HEIGHT);
+        x = Math.floor(Math.random() * (isMobile ? MOBILE_GRID_WIDTH : GRID_WIDTH));
+        y = Math.floor(Math.random() * (isMobile ? MOBILE_GRID_HEIGHT : GRID_HEIGHT));
     } while ((x === 0 && y === 0) || snakePositions.some(s => s.x === x && s.y === y));
     return { x, y };
 };
 
-const getRandomPositionMobile = (snakePositions: { x: number, y: number }[]) => {
-    let x: number, y: number;
-    do {
-        x = Math.floor(Math.random() * MOBILE_GRID_WIDTH);
-        y = Math.floor(Math.random() * MOBILE_GRID_HEIGHT);
-    } while ((x === 0 && y === 0) || snakePositions.some(s => s.x === x && s.y === y));
-    return { x, y };
-}
 
 const getRandomBottle = () => Math.floor(Math.random() * 8) < 5;
 const getRandomPill = () => Math.floor(Math.random() * 8) > 5;
+const getRandomJoint = () => Math.floor(Math.random() * 8) < 5;
 
 const getRandomColor = () => {
     const letters = '0123456789ABCDEF';
@@ -67,53 +64,67 @@ const snakeColorMap = {
     foodEaten: { head: 'white', body: '#fce54e' },
     bottleEaten: { head: '#00ff22d1', body: '#f7a60d' },
     pillEaten: { head: getRandomColor(), body: getRandomColor() },
+    jointEaten: { head: 'yellow', body: 'yellow' },
     default: { head: '#777', body: '#333' }
 };
 
-type EventType = 'foodEaten' | 'bottleEaten' | 'pillEaten';
-type ScoreType = 'food' | 'bottle' | 'pill';
+type EventType = 'foodEaten' | 'bottleEaten' | 'pillEaten' | 'jointEaten' | null;
+type ScoreType = 'food' | 'bottle' | 'pill' | 'joint';
 
 const scoreMap: Record<ScoreType, { score: number; color: string }> = {
     food: { score: 1, color: '#d7b964' },
     bottle: { score: 50, color: '#00ff22d1' },
-    pill: { score: 15, color: '#FCEB12' },
+    pill: { score: 30, color: '#FCEB12' },
+    joint: { score: 7, color: 'yellow' },
 };
 
 export const SnakeGame: React.FC = () => {
     const { setSnakeOpen } = useAppContext();
-    const [gameStatus, setGameStatus] = useState<'ready' | 'running' | 'gameOver'>('ready');
-    const [snake, setSnake] = useState([{ x: 10, y: 10 }]);
-    const [food, setFood] = useState(getRandomPosition([{ x: 0, y: 0 }]));
-    const [direction, setDirection] = useState<Direction>("RIGHT");
-    const [latestEvent, setLatestEvent] = useState<EventType | null>(null);
-    const [speed, setSpeed] = useState<number>(INITIAL_SPEED);
-    const [bottle, setBottle] = useState(getRandomPosition([{ x: 0, y: 0 }]));
-    const [showBottle, setShowBottle] = useState(false);
-    const [pill, setPill] = useState(getRandomPosition([{ x: 0, y: 0 }]));
-    const [showPill, setShowPill] = useState(false);
-    const [score, setScore] = useState(0);
-    const [newScore, setNewScore] = useState<{ score: number; color: string } | null>(null);
-    const [snakeColor, setSnakeColor] = useState<snakeColor>(snakeColorMap.default);
-    const [snakeColors, setSnakeColors] = useState<string[]>([]);
-    const [soundOn, setSoundOn] = useState(false);
+
     const [isMobile, setIsMobile] = useState(false);
 
-    const pillColorIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const [soundOn, setSoundOn] = useState(false);
+    const [gameStatus, setGameStatus] = useState<'ready' | 'running' | 'gameOver'>('ready');
+    
+    const [score, setScore] = useState(0);
+    const [snake, setSnake] = useState([{ x: 10, y: 10 }]);
+    const [speed, setSpeed] = useState<number>(INITIAL_SPEED);
+    const [direction, setDirection] = useState<Direction>("RIGHT");
+
     const directionQueueRef = useRef<Direction[]>([]);
     const wallTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const selfTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const hasRestartedRef = useRef(false); // <-- fix stuck game
 
+    const [newScore, setNewScore] = useState<{ score: number; color: string } | null>(null);
+    const [latestEvent, setLatestEvent] = useState<EventType | null>(null);
+    const [snakeColor, setSnakeColor] = useState<snakeColor>(snakeColorMap.default);
+    const [snakeColors, setSnakeColors] = useState<string[]>([]);
+
+    const [food, setFood] = useState(getRandomPosition([{ x: 0, y: 0 }], isMobile),);
+    
+    const [bottle, setBottle] = useState(getRandomPosition([{ x: 0, y: 0 }], isMobile));
+    const [showBottle, setShowBottle] = useState(false);
+
+    const [pill, setPill] = useState(getRandomPosition([{ x: 0, y: 0 }], isMobile));
+    const [showPill, setShowPill] = useState(false);
+    const pillColorIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    const [joint, setJoint] = useState(getRandomPosition([{ x: 0, y: 0 }], isMobile));
+    const [showJoint, setShowJoint] = useState(false);
+    
+
     const restartGame = () => {
         hasRestartedRef.current = true;
         setSnake([{ x: 10, y: 10 }]);
-        setFood(isMobile ? getRandomPositionMobile([{ x: 0, y: 0 }]) : getRandomPosition([{ x: 0, y: 0 }]));
+        setFood(getRandomPosition([{ x: 0, y: 0 }], isMobile));
         setDirection("RIGHT");
         setGameStatus('running');
         setSpeed(INITIAL_SPEED);
         setScore(0);
         setShowBottle(false);
         setShowPill(false);
+        setShowJoint(false);
         setSnakeColor(snakeColorMap.default);
         setSnakeColors([]);
         directionQueueRef.current = [];
@@ -143,7 +154,9 @@ export const SnakeGame: React.FC = () => {
             setSnakeColor(snakeColorMap.foodEaten);
         } else if (event === 'bottleEaten') {
             setSnakeColor(snakeColorMap.bottleEaten);
-        }
+        } else if (event === 'jointEaten') {
+            setSnakeColor(snakeColorMap.jointEaten);
+        }            
 
         setTimeout(() => {
             setSnakeColor(snakeColorMap.default);
@@ -256,18 +269,19 @@ export const SnakeGame: React.FC = () => {
 
             // Check if snake eats food
             if (head.x === food.x && head.y === food.y) {
-                setFood(isMobile ? getRandomPositionMobile(snake) : getRandomPosition(snake));
+                setFood(getRandomPosition(snake, isMobile));
                 setSpeed(prev => Math.min(prev + 1, MAX_SPEED));
                 setLatestEvent('foodEaten');
                 if (!showBottle) setShowBottle(getRandomBottle());
                 if (!showPill) setShowPill(getRandomPill());
+                if (!showJoint) setShowJoint(getRandomJoint());
             } else {
                 newSnake.pop();
             }
 
             // Check if snake eats bottle
             if (head.x === bottle.x && head.y === bottle.y && showBottle) {
-                setBottle(isMobile ? getRandomPositionMobile(snake) : getRandomPosition(snake));
+                setBottle(getRandomPosition(snake, isMobile));
                 setLatestEvent('bottleEaten');
                 setShowBottle(false);
                 setSpeed(Math.min(Math.random() * (MAX_SPEED - MIN_SPEED - Math.random() * 6) + MIN_SPEED, MAX_SPEED));
@@ -275,10 +289,18 @@ export const SnakeGame: React.FC = () => {
 
             // Check if snake eats pill
             if (head.x === pill.x && head.y === pill.y && showPill) {
-                setPill(isMobile ? getRandomPositionMobile(snake) : getRandomPosition(snake));
+                setPill(getRandomPosition(snake, isMobile));
                 setLatestEvent('pillEaten');
                 setShowPill(false);
                 setSpeed(prev => Math.max(prev - 2, MIN_SPEED));
+            }
+
+            // Check if snake eats joint
+            if (head.x === joint.x && head.y === joint.y && showJoint) {
+                setJoint(getRandomPosition(snake, isMobile));
+                setLatestEvent('jointEaten');
+                setShowJoint(false);
+                setSpeed(8);
             }
 
             setSnake(newSnake);
@@ -286,7 +308,7 @@ export const SnakeGame: React.FC = () => {
 
         const interval = setInterval(moveSnake, (MAX_SPEED - speed + 1) * 10);
         return () => clearInterval(interval);
-    }, [snake, direction, speed, food, showBottle, showPill, gameStatus]);
+    }, [snake, direction, speed, food, showBottle, showPill, showJoint, gameStatus]);
 
     useEffect(() => {
         if (!latestEvent) return;
@@ -300,6 +322,9 @@ export const SnakeGame: React.FC = () => {
         } else if (latestEvent === 'pillEaten') {
             setScore(prev => prev + scoreMap.pill.score);
             setNewScore(scoreMap.pill);
+        } else if (latestEvent === 'jointEaten') {
+            setScore(prev => prev + scoreMap.joint.score);
+            setNewScore(scoreMap.joint);
         }
         setTimeout(() => {
             setNewScore(null);
@@ -317,10 +342,10 @@ export const SnakeGame: React.FC = () => {
     const handleResize = () => {
         if (window.innerWidth < 768) {
             setIsMobile(true);
-            setFood(getRandomPositionMobile(snake));
-            setBottle(getRandomPositionMobile(snake));
-            setPill(getRandomPositionMobile(snake));
-
+            setFood(getRandomPosition(snake, isMobile));
+            setBottle(getRandomPosition(snake, isMobile));
+            setPill(getRandomPosition(snake, isMobile));
+            setJoint(getRandomPosition(snake, isMobile));
         } else {
             setIsMobile(false);
         }
@@ -486,6 +511,19 @@ export const SnakeGame: React.FC = () => {
                                 position: 'absolute',
                                 left: pill.x * CELL_SIZE,
                                 top: pill.y * CELL_SIZE,
+                                width: CELL_SIZE,
+                                height: CELL_SIZE,
+                            }}
+                        />
+                    )}
+
+                    {showJoint && (
+                        <LiaJointSolid
+                            className="text-yellow-500"
+                            style={{
+                                position: 'absolute',
+                                left: joint.x * CELL_SIZE,
+                                top: joint.y * CELL_SIZE,
                                 width: CELL_SIZE,
                                 height: CELL_SIZE,
                             }}
