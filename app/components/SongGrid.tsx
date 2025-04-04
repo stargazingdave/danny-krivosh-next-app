@@ -7,6 +7,7 @@ import { Song } from './Song';
 import { RecyclingBin } from './RecyclingBin';
 import { useAppContext } from '../AppContext';
 import { motion, AnimatePresence } from 'motion/react';
+import { SongData } from '../types/SongData';
 
 export const SongGrid: FC = () => {
     const {
@@ -15,6 +16,7 @@ export const SongGrid: FC = () => {
         setRandomOrder,
         isRandom,
         getPlaylistSongs,
+        addSongToRecycle,
     } = useAppContext();
 
     const playlistId = 'all-songs';
@@ -41,6 +43,31 @@ export const SongGrid: FC = () => {
         setShuffleKey(prev => prev + 1);
         setRandomOrder(playlistId);
         setTimeout(() => setShuffling(false), 500);
+    };
+
+    const touchPosition = useRef<{ x: number; y: number } | null>(null);
+
+    const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>, song: SongData) => {
+        touchPosition.current = {
+            x: e.touches[0].clientX,
+            y: e.touches[0].clientY,
+        };
+
+        // Optionally highlight the item
+        setLongClickedSongId(song.id);
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>, song: SongData) => {
+        if (!touchPosition.current) return;
+        const touch = e.changedTouches[0];
+        const dropZone = document.elementFromPoint(touch.clientX, touch.clientY);
+
+        if (dropZone?.id === 'recycle-bin-dropzone') {
+            // Simulate drop
+            addSongToRecycle(song);
+        }
+
+        setLongClickedSongId(null);
     };
 
     return (
@@ -71,9 +98,12 @@ export const SongGrid: FC = () => {
                     {songs.map((song, index) => {
                         const offset = shuffleOffsetsRef.current[song.id] ?? { rotate: 0, x: 0, y: 0 };
 
+
+
                         return (
                             <div
                                 key={`${song.id}-${shuffleKey}`}
+
                                 draggable
                                 onDragStart={(e: React.DragEvent<HTMLDivElement>) => {
                                     e.dataTransfer.setData("song", JSON.stringify(song));
@@ -83,6 +113,10 @@ export const SongGrid: FC = () => {
                                     e.currentTarget.classList.remove("opacity-50", "scale-105");
                                     setLongClickedSongId(null);
                                 }}
+
+                                onTouchStart={(e) => handleTouchStart(e, song)}
+                                onTouchEnd={(e) => handleTouchEnd(e, song)}
+                                
                                 onMouseDown={(e) => {
                                     const timer = setTimeout(() => setLongClickedSongId(song.id), 300);
                                     (e.currentTarget as HTMLElement).dataset.timer = String(timer);
@@ -107,8 +141,8 @@ export const SongGrid: FC = () => {
                                         easing: 'ease-in-out',
                                     }}
                                     className={`relative h-36 w-full rounded-lg overflow-hidden backdrop-blur-lg shadow-md transition-all duration-200 ${longClickedSongId === song.id
-                                            ? "bg-blue-800/50 border-2 border-blue-400 scale-105"
-                                            : "bg-white/10 hover:bg-neutral-500"
+                                        ? "bg-blue-800/50 border-2 border-blue-400 scale-105"
+                                        : "bg-white/10 hover:bg-neutral-500"
                                         }`}
                                     style={{ boxShadow: "-1px -1px 4px 1px #77777777" }}
                                 >

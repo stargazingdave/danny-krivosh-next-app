@@ -36,7 +36,7 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
             setIsMobile(false);
         }
     }
-    
+
     useEffect(() => {
         handleResize(); // Set initial state
         window.addEventListener("resize", handleResize); // Add event listener
@@ -74,6 +74,7 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
     if (!isOpen) {
         return (
             <div
+                id="recycle-bin-dropzone"
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
             >
@@ -125,7 +126,8 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
     }
 
     return (
-        <div className='fixed bottom-4 left-4 w-fit min-w-64 z-50'
+        <div id="recycle-bin-dropzone"
+            className='fixed bottom-4 left-4 w-fit min-w-64 z-50'
             onDragOver={handleDragOver}
             onDrop={handleDrop}
         >
