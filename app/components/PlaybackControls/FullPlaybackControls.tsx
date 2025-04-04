@@ -8,6 +8,7 @@ import {
 import { PlayPauseButton } from "./PlayPauseButton";
 
 interface FullPlaybackControlsProps {
+    songActive: boolean;
     isPlaying: boolean;
     onPlayPause: () => void;
     onNext: () => void;
@@ -15,6 +16,7 @@ interface FullPlaybackControlsProps {
 }
 
 export const FullPlaybackControls: FC<FullPlaybackControlsProps> = ({
+    songActive,
     isPlaying,
     onPlayPause,
     onNext,
@@ -22,11 +24,19 @@ export const FullPlaybackControls: FC<FullPlaybackControlsProps> = ({
 }) => {
     return (
         <div className="flex items-center gap-2 p-2">
-            <button onClick={onPrevious} className="text-white text-2xl cursor-pointer">
+            <button
+                onClick={onPrevious}
+                className="text-white text-2xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!songActive}
+            >
                 <IoPlaySkipBack />
             </button>
             <PlayPauseButton isPlaying={isPlaying} onClick={onPlayPause} />
-            <button onClick={onNext} className="text-white text-2xl cursor-pointer">
+            <button
+                onClick={onNext}
+                className="text-white text-2xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!songActive}
+            >
                 <IoPlaySkipForward />
             </button>
         </div>

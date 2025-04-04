@@ -24,26 +24,24 @@ export const AudioPlayer: FC = () => {
     return (
         <div className="relative flex items-center gap-2 p-4 w-full">
             {/* Song Details */}
-            <div className="flex flex-col p-2 text-white text-sm text-nowrap">
+            <div className="hidden sm:flex flex-col p-2 text-white text-sm text-nowrap">
                 <p className="font-semibold">{currentSong?.title}</p>
             </div>
-            
+
             {/* Playback Controls */}
             <FullPlaybackControls
+                songActive={!!currentSong}
                 isPlaying={isPlaying}
                 onPlayPause={togglePlay}
                 onNext={playNextSong}
                 onPrevious={playPrevSong}
             />
 
-            {/* Visualization Component */}
-            <div className="fixed left-0 top-0 w-full h-16 -z-10 opacity-10">
-                <Visualization type="spectrum" barCount={64} />
-            </div>
-
             {/* Current Time */}
-            <p className="text-white text-sm">
-                {audioRef?.current ? `${Math.floor(audioRef.current.currentTime / 60)}:${Math.floor(audioRef.current.currentTime % 60).toString().padStart(2, "0")}` : "00:00"}
+            <p className="text-white text-sm text-nowrap">
+                {audioRef?.current && duration
+                    ? `${Math.floor(audioRef.current.currentTime / 60)}:${Math.floor(audioRef.current.currentTime % 60).toString().padStart(2, "0")}`
+                    : "--:--"}
             </p>
 
             {/* Progress Bar */}
@@ -69,7 +67,10 @@ export const AudioPlayer: FC = () => {
                 {duration ? `${Math.floor(duration / 60)}:${Math.floor(duration % 60).toString().padStart(2, "0")}` : "--:--"}
             </p>
 
-            
+            {/* Visualization Component */}
+            <div className="fixed left-0 top-0 w-full h-16 -z-10 opacity-10">
+                <Visualization type="spectrum" barCount={64} />
+            </div>
         </div>
     );
 };
