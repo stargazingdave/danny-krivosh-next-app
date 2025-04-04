@@ -2,11 +2,12 @@
 
 import { FC } from "react";
 import { useAppContext } from "../AppContext";
-import { PlayPauseButton } from "./PlayPauseButton";
+import { FullPlaybackControls } from "./PlaybackControls/FullPlaybackControls";
+import { Visualization } from "./Visualization";
 
 export const AudioPlayer: FC = () => {
-    const { 
-        currentSong, 
+    const {
+        currentSong,
         isPlaying,
         progress,
         duration,
@@ -15,13 +16,30 @@ export const AudioPlayer: FC = () => {
         handleSeek,
         handleTimeUpdate,
         handleLoadedMetadata,
+        playNextSong,
+        playPrevSong,
     } = useAppContext();
-    
+
 
     return (
-        <div className="flex items-center gap-2 p-4 w-full">
-            {/* Play/Pause Button */}
-            <PlayPauseButton isPlaying={isPlaying} onClick={togglePlay} />
+        <div className="relative flex items-center gap-2 p-4 w-full">
+            {/* Song Details */}
+            <div className="flex flex-col p-2 text-white text-sm text-nowrap">
+                <p className="font-semibold">{currentSong?.title}</p>
+            </div>
+            
+            {/* Playback Controls */}
+            <FullPlaybackControls
+                isPlaying={isPlaying}
+                onPlayPause={togglePlay}
+                onNext={playNextSong}
+                onPrevious={playPrevSong}
+            />
+
+            {/* Visualization Component */}
+            <div className="fixed left-0 top-0 w-full h-16 -z-10 opacity-10">
+                <Visualization type="spectrum" barCount={64} />
+            </div>
 
             {/* Current Time */}
             <p className="text-white text-sm">
@@ -50,6 +68,8 @@ export const AudioPlayer: FC = () => {
             <p className="text-white text-sm text-nowrap">
                 {duration ? `${Math.floor(duration / 60)}:${Math.floor(duration % 60).toString().padStart(2, "0")}` : "--:--"}
             </p>
+
+            
         </div>
     );
 };

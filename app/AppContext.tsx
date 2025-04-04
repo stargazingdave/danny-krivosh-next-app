@@ -56,7 +56,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({
 
     const [currentSong, setCurrentSong] = React.useState<SongData | null>(null);
     const [currentPlaylistId, setCurrentPlaylistId] = React.useState<string>('all-songs');
-    const [isPlaying, setIsPlaying] = React.useState(true);
+    const [isPlaying, setIsPlaying] = React.useState(false);
     const [progress, setProgress] = React.useState(0);
     const [duration, setDuration] = React.useState(0);
     const [isRandom, setIsRandom] = React.useState<Record<string, boolean>>({
@@ -71,43 +71,41 @@ export const AppProvider: React.FC<AppProviderProps> = ({
     const audioRef = React.useRef<HTMLAudioElement>(null);
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
     const audioCtxRef = React.useRef<AudioContext | null>(null);
-    const sourceRef = React.useRef<MediaElementAudioSourceNode | null>(null);
     const analyserRef = React.useRef<AnalyserNode | null>(null);
 
     React.useEffect(() => {
         const audio = audioRef.current;
-        if (!audio || sourceRef.current) return;
+        if (!audio || audioCtxRef.current) return;
 
         const audioCtx = new AudioContext();
         const analyser = audioCtx.createAnalyser();
-
         const source = audioCtx.createMediaElementSource(audio);
+
         source.connect(analyser);
         analyser.connect(audioCtx.destination);
 
         audioCtxRef.current = audioCtx;
         analyserRef.current = analyser;
-        sourceRef.current = source;
 
         const resumeAudio = () => {
-            if (audioCtx.state === "suspended") {
+            if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
         };
 
-        window.addEventListener("click", resumeAudio);
-        return () => window.removeEventListener("click", resumeAudio);
+        window.addEventListener('click', resumeAudio);
+        return () => window.removeEventListener('click', resumeAudio);
     }, []);
 
     React.useEffect(() => {
         if (audioRef.current) {
             audioRef.current.play().catch(() => {
-                console.warn("Autoplay failed, user interaction required.");
+                console.warn('Autoplay failed, user interaction required.');
             });
         }
     }, [currentSong]);
 
-    const currentPlaylist = playlists.find((p) => p.id === currentPlaylistId) || playlists[0];
+    const currentPlaylist = playlists.find(p => p.id === currentPlaylistId) || playlists[0];
 
     const getPlaylistSongs = (playlistId: string) => {
         const playlist = playlists.find(p => p.id === playlistId);
@@ -117,7 +115,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({
         }
         return playlist.songs;
     };
-
 
     const getCurrentPlaylistSongs = () => {
         if (isRandom[currentPlaylist.id] && shuffledOrders[currentPlaylist.id]) {
@@ -134,6 +131,23 @@ export const AppProvider: React.FC<AppProviderProps> = ({
         setCurrentSong(nextSong ?? null);
     };
 
+    const playPrevSong = () => {
+        const songs = getCurrentPlaylistSongs();
+        const audio = audioRef.current;
+
+        if (!currentSong || !audio) return;
+
+        const currentIndex = songs.findIndex((s) => s.id === currentSong.id);
+        const currentTime = audio.currentTime;
+
+        if (currentTime > 3 || currentIndex <= 0) {
+            audio.currentTime = 0;
+        } else {
+            const prevSong = songs[currentIndex - 1];
+            setCurrentSong(prevSong ?? null);
+        }
+    };
+
     React.useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
@@ -143,13 +157,39 @@ export const AppProvider: React.FC<AppProviderProps> = ({
     }, [playNextSong]);
 
     const togglePlay = () => {
-        if (audioRef.current) {
-            if (isPlaying) {
-                audioRef.current.pause();
-            } else {
-                audioRef.current.play();
+        const audio = audioRef.current;
+
+        if (!currentSong) {
+            const playlist = playlists.find(p => p.id === 'all-songs');
+            if (playlist && playlist.songs.length > 0) {
+                setCurrentPlaylistId('all-songs');
+                const firstSong = isRandom['all-songs'] && shuffledOrders['all-songs']
+                    ? shuffledOrders['all-songs'][0]
+                    : playlist.songs[0];
+
+                setCurrentSong(firstSong);
+                setIsPlaying(true);
+                setTimeout(() => {
+                    audio?.play().catch(() => {
+                        console.warn("Autoplay failed, user interaction required.");
+                        setIsPlaying(false);
+                    });
+                }, 0);
             }
-            setIsPlaying(!isPlaying);
+            return;
+        }
+
+        if (audio) {
+            if (isPlaying) {
+                audio.pause();
+                setIsPlaying(false);
+            } else {
+                audio.play().catch(() => {
+                    console.warn("Autoplay failed, user interaction required.");
+                    setIsPlaying(false);
+                });
+                setIsPlaying(true);
+            }
         }
     };
 
@@ -206,14 +246,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({
         }
 
         setIsRandom(prev => ({ ...prev, [playlistId]: true }));
-    };
-
-    const playPrevSong = () => {
-        const songs = getCurrentPlaylistSongs();
-        if (!currentSong) return;
-        const currentIndex = songs.findIndex((s) => s.id === currentSong.id);
-        const prevSong = songs[currentIndex - 1];
-        setCurrentSong(prevSong ?? null);
     };
 
     const addSongToRecycle = (song: SongData) => {

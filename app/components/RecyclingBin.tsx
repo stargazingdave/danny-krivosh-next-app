@@ -5,7 +5,7 @@ import { SongData } from "../types/SongData";
 import { TbTrashXFilled } from "react-icons/tb";
 import { FaPause, FaPlay, FaShuffle, FaWindowMinimize } from "react-icons/fa6";
 import { useAppContext } from "../AppContext";
-import { PlayPauseButton } from "./PlayPauseButton";
+import { PlayPauseButton } from "./PlaybackControls/PlayPauseButton";
 import Image from "next/image";
 
 const widthUnit = 13;

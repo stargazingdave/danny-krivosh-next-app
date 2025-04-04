@@ -8,7 +8,7 @@ export const PlayPauseButton = ({
     onClick: () => void;
 }) => {
     return (
-        <button onClick={onClick} className="text-white text-2xl cursor-pointer">
+        <button onClick={onClick} className="text-white text-4xl cursor-pointer">
             {isPlaying ? <IoPause /> : <IoPlay />}
         </button>
     );

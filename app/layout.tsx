@@ -51,13 +51,12 @@ export default async function RootLayout({
           <div style={{
             position: "fixed",
             top: "3.5rem",
-            height: "calc(100vh - 7.5rem)",
+            height: "calc(100vh - 6rem)",
             width: "100%",
             overflowY: "auto",
           }}>
             <div className="flex flex-col z-0 justify-between min-h-fit overflow-auto">
               <div className="flex flex-col h-fit"
-              // style={{ height: "calc(100vh - 4rem)" }}
               >
                 {children}
               </div>
@@ -76,7 +75,7 @@ export default async function RootLayout({
             bottom: "0",
             left: "0",
             width: "100%",
-            height: "4rem",
+            height: "3.5rem",
             backgroundColor: "#00000080",
             backdropFilter: "blur(10px)",
             zIndex: 50,
