@@ -1,16 +1,11 @@
 {
     "MOBILE": [
         "drag drop",
-        "snake"
     ],
 
     "SITE": {
         "currently playing bar": [
             "L for lyric shining or gray",
-            "song name",
-            "HD",
-            "forward/backwords + enlarge play",
-            "vizualizer"
         ],
         "recycle bin": [
             "fix pause button and separate from global button",

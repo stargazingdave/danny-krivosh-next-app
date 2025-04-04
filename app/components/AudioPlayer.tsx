@@ -4,6 +4,7 @@ import { FC } from "react";
 import { useAppContext } from "../AppContext";
 import { FullPlaybackControls } from "./PlaybackControls/FullPlaybackControls";
 import { Visualization } from "./Visualization";
+import { RiHdFill, RiHdLine } from "react-icons/ri";
 
 export const AudioPlayer: FC = () => {
     const {
@@ -66,6 +67,9 @@ export const AudioPlayer: FC = () => {
             <p className="text-white text-sm text-nowrap">
                 {duration ? `${Math.floor(duration / 60)}:${Math.floor(duration % 60).toString().padStart(2, "0")}` : "--:--"}
             </p>
+
+            {/* HD Icon */}
+            <RiHdLine size={50} />
 
             {/* Visualization Component */}
             <div className="fixed left-0 top-0 w-full h-16 -z-10 opacity-10">
