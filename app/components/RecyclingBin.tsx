@@ -8,8 +8,8 @@ import { useAppContext } from "../AppContext";
 import { PlayPauseButton } from "./PlayPauseButton";
 import Image from "next/image";
 
-const widthUnit = 15;
-const heightUnit = 13;
+const widthUnit = 13;
+const heightUnit = 12;
 
 interface RecyclingBinProps { }
 

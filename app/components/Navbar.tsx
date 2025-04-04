@@ -1,13 +1,14 @@
 'use client';
 
 import { usePathname, useRouter } from "next/navigation";
-import { FC, ReactNode, useEffect } from "react";
+import { FC, ReactNode, useEffect, useRef, useState } from "react";
 import { SnakeGame } from "./Snake/SnakeGame";
 import { GiSnakeTongue } from "react-icons/gi";
 import { useAppContext } from "../AppContext";
 import Image from "next/image";
 import { IoHomeSharp } from "react-icons/io5";
 import { BsQuestionLg } from "react-icons/bs";
+import Checkbox from "./Checkbox";
 
 type Tab = {
     name: string;
@@ -18,7 +19,10 @@ type Tab = {
 export const Navbar: FC = () => {
     const {
         snakeOpen,
-        setSnakeOpen
+        setSnakeOpen,
+        isRandom,
+        setOriginalOrder,
+        setRandomOrder,
     } = useAppContext()
     const router = useRouter();
     const pathname = usePathname();
@@ -58,11 +62,13 @@ export const Navbar: FC = () => {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, []);
 
+    const playlistId = 'all-songs';
+
     return (
-        <div className="w-full h-16">
-            <nav className="flex justify-end items-center p-4">
+        <div className="w-full h-full">
+            <nav className="relative flex justify-end items-center h-[3.5rem]">
                 <div
-                    className="fixed left-4 top-3 p-2 cursor-pointer z-50 w-56 h-12 sm:w-[25rem] sm:h-20"
+                    className="absolute left-2 top-2 cursor-pointer w-64 z-55 h-13"
                     onClick={() => router.push("/")}
                 >
                     <Image
@@ -71,6 +77,18 @@ export const Navbar: FC = () => {
                         fill
                         className="object-contain"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                </div>
+                <div className='absolute top-4 w-64 justify-center gap-4 hidden sm:flex' style={{ left: 'calc(50% - 8rem)' }}>
+                    <Checkbox
+                        label="Original"
+                        checked={!isRandom[playlistId]}
+                        onChange={() => setOriginalOrder(playlistId)}
+                    />
+                    <Checkbox
+                        label="Random"
+                        checked={!!isRandom[playlistId]}
+                        onChange={() => setRandomOrder(playlistId)}
                     />
                 </div>
 

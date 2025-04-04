@@ -58,14 +58,15 @@ const isOpposite = (dir1: Direction, dir2: Direction) => (
 interface snakeColor {
     head: string;
     body: string;
+    glow: string;
 }
 
-const snakeColorMap = {
-    foodEaten: { head: 'white', body: '#fce54e' },
-    bottleEaten: { head: '#00ff22d1', body: '#f7a60d' },
-    pillEaten: { head: getRandomColor(), body: getRandomColor() },
-    jointEaten: { head: 'yellow', body: 'yellow' },
-    default: { head: '#777', body: '#333' }
+const snakeColorMap: Record<string, snakeColor> = {
+    foodEaten: { head: 'white', body: '#fce54e', glow: '0 0 8px 1px white' },
+    bottleEaten: { head: '#00ff22d1', body: '#f7a60d', glow: 'none' },
+    pillEaten: { head: getRandomColor(), body: getRandomColor(), glow: 'none' },
+    jointEaten: { head: 'pink', body: 'pink', glow: '0 0 8px 1px cyan' },
+    default: { head: '#777', body: '#333', glow: 'none' },
 };
 
 type EventType = 'foodEaten' | 'bottleEaten' | 'pillEaten' | 'jointEaten' | null;
@@ -75,7 +76,7 @@ const scoreMap: Record<ScoreType, { score: number; color: string }> = {
     food: { score: 1, color: '#d7b964' },
     bottle: { score: 50, color: '#00ff22d1' },
     pill: { score: 30, color: '#FCEB12' },
-    joint: { score: 7, color: 'yellow' },
+    joint: { score: 7, color: 'cyan' },
 };
 
 export const SnakeGame: React.FC = () => {
@@ -475,7 +476,7 @@ export const SnakeGame: React.FC = () => {
                                         : i === 0
                                             ? snakeColor.head
                                             : snakeColor.body,
-                                boxShadow: latestEvent === 'foodEaten' ? '0 0 8px 1px white' : 'none',
+                                boxShadow: snakeColorMap[latestEvent || 'default'].glow,
                             }}
                         />
                     ))}
@@ -519,7 +520,7 @@ export const SnakeGame: React.FC = () => {
 
                     {showJoint && (
                         <LiaJointSolid
-                            className="text-yellow-500"
+                            className="text-[pink]"
                             style={{
                                 position: 'absolute',
                                 left: joint.x * CELL_SIZE,

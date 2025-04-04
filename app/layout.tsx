@@ -50,8 +50,8 @@ export default async function RootLayout({
 
           <div style={{
             position: "fixed",
-            top: "4rem",
-            height: "calc(100vh - 8rem)",
+            top: "3.5rem",
+            height: "calc(100vh - 7.5rem)",
             width: "100%",
             overflowY: "auto",
           }}>
