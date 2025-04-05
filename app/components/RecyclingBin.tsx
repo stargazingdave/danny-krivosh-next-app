@@ -7,6 +7,7 @@ import { FaPause, FaPlay, FaShuffle, FaWindowMinimize } from "react-icons/fa6";
 import { useAppContext } from "../AppContext";
 import { PlayPauseButton } from "./PlaybackControls/PlayPauseButton";
 import Image from "next/image";
+import { HiOutlineTrash } from "react-icons/hi2";
 
 const widthUnit = 13;
 const heightUnit = 12;
@@ -16,6 +17,7 @@ interface RecyclingBinProps { }
 export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
     const {
         addSongToRecycle,
+        removeSongsFromRecycle,
         playlists,
         setPlaylists,
         setRandomOrder,
@@ -85,7 +87,7 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
                     height={isDraggedOver ? 150 : 135}
                     className="p-2 cursor-pointer transition-all duration-300 ease-in-out"
                     style={{
-                        filter: isDraggedOver ? "drop-shadow(0 0 24px rgb(255 0 0))" : undefined,
+                        filter: isDraggedOver ? "drop-shadow(0 0 24px rgb(255 0 0))" : "drop-shadow(0 0.5rem 0.5rem rgb(0 0 0))",
                         // objectFit: "fill", // <-- this allows distorting the aspect ratio
                         width: widthUnit * (isDraggedOver ? 12 : 10),
                         height: heightUnit * (isDraggedOver ? 12 : 10),
@@ -125,23 +127,51 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
         }
     }
 
+    const recyclePlaylist = playlists.find(playlist => playlist.id === "recycle");
+    if (!recyclePlaylist) return null; // Ensure recycle playlist exists
+
+    const handleDeleteAllSongs = () => {
+        if (playlists[1].songs.length > 0) {
+            removeSongsFromRecycle(recyclePlaylist.songs); // Remove all songs from recycle bin
+        }
+        setPlaylists(playlists.map(playlist => {
+            if (playlist.id === 'recycle') {
+                return { ...playlist, songs: [] };
+            }
+            return playlist;
+        }));
+    };
+
     return (
         <div id="recycle-bin-dropzone"
             className='fixed bottom-4 left-4 w-fit min-w-64 z-50'
             onDragOver={handleDragOver}
             onDrop={handleDrop}
         >
-            <div className="flex p-1 gap-8 justify-between bg-black">
+            <div
+                className="flex p-1 gap-8 justify-between bg-black"
+                style={{
+                    backgroundColor: "#000000b0",
+                    backdropFilter: "blur(10px)",
+                }}
+            >
                 <div className="flex gap-2 items-center">
                     <FaWindowMinimize className="w-8 h-8 text-white p-2 border cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
                     <FaShuffle className="w-8 h-8 text-white p-2 border cursor-pointer" onClick={onShuffleClick} />
                     <PlayPauseButton onClick={() => handleListPlayPause()} isPlaying={isPlaying && currentPlaylist.id === "recycle"} />
+                    <HiOutlineTrash className="w-8 h-8 text-white cursor-pointer" onClick={handleDeleteAllSongs} />
                 </div>
 
                 <h1 className="w-fit text-2xl">DUMPSTER 3000</h1>
             </div>
 
-            <div className="flex flex-col h-64 overflow-auto bg-black">
+            <div
+                className="flex flex-col h-64 overflow-auto bg-black"
+                style={{
+                    backgroundColor: "#000000b0",
+                    backdropFilter: "blur(10px)",
+                }}
+            >
                 {
                     playlists[1].songs.length === 0 &&
                     <div className="flex justify-center items-center h-full">

@@ -37,6 +37,7 @@ interface AppContextProps {
     playNextSong: () => void;
     playPrevSong: () => void;
     addSongToRecycle: (song: SongData) => void;
+    removeSongsFromRecycle: (songs: SongData[]) => void;
     startPlaylist: (playlistId: string, startIndex?: number) => void;
     handlePlaySong: (song: SongData) => void;
 }
@@ -260,6 +261,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({
         });
     };
 
+    const removeSongsFromRecycle = (songs: SongData[]) => {
+        setPlaylists((prev) => {
+            const recyclePlaylist = prev.find((p) => p.id === 'recycle');
+            if (recyclePlaylist) {
+                return prev.map((p) =>
+                    p.id === 'recycle' ? { ...p, songs: p.songs.filter((s) => !songs.some((song) => song.id === s.id)) } : p
+                );
+            }
+            return prev;
+        });
+    };
+
     const startPlaylist = (playlistId: string, startIndex?: number) => {
         const playlist = playlists.find((p) => p.id === playlistId);
         if (playlist) {
@@ -318,6 +331,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({
             playNextSong,
             playPrevSong,
             addSongToRecycle,
+            removeSongsFromRecycle,
             startPlaylist,
             handlePlaySong,
         }}>

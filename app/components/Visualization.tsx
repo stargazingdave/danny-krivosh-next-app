@@ -103,8 +103,8 @@ export const Visualization: FC<VisualizationProps> = ({ type = "waveform", barCo
                     const barHeight = previousHeights[i];
 
                     // 🔮 Dynamic color using HSL:
-                    const hue = 250 + (i / clampedBarCount) * 50; // range: 200–300 (blue to purple)
-                    const saturation = 50;
+                    const hue = 0 + (i / clampedBarCount) * 50; // range: 0 to 50 (colors: red to yellow)
+                    const saturation = 100;
                     const lightness = 50 + (val / 255) * 50; // 30% to 80% based on intensity
                     ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 
