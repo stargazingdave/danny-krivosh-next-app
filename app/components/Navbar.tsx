@@ -66,7 +66,7 @@ export const Navbar: FC = () => {
 
     return (
         <div className="w-full h-full">
-            <nav className="relative flex justify-end items-center h-[3.5rem]">
+            <nav className="relative flex justify-end items-center h-full">
                 <div
                     className="absolute left-2 top-2 cursor-pointer w-64 z-55 h-13"
                     onClick={() => router.push("/")}

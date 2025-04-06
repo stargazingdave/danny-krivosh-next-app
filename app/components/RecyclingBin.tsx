@@ -12,9 +12,13 @@ import { HiOutlineTrash } from "react-icons/hi2";
 const widthUnit = 13;
 const heightUnit = 12;
 
-interface RecyclingBinProps { }
+interface RecyclingBinProps {
+    isTouchDraggedOver?: boolean;
+}
 
-export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
+export const RecyclingBin: FC<RecyclingBinProps> = ({
+    isTouchDraggedOver = false,
+}) => {
     const {
         addSongToRecycle,
         removeSongsFromRecycle,
@@ -83,14 +87,14 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
                 <Image
                     src="/images/recycle-bin-icon.png"
                     alt="Recycle Bin"
-                    width={isDraggedOver ? 210 : 200}
-                    height={isDraggedOver ? 150 : 135}
+                    width={(isDraggedOver || isTouchDraggedOver) ? 210 : 200}
+                    height={(isDraggedOver || isTouchDraggedOver) ? 150 : 135}
                     className="p-2 cursor-pointer transition-all duration-300 ease-in-out"
                     style={{
-                        filter: isDraggedOver ? "drop-shadow(0 0 24px rgb(255 0 0))" : "drop-shadow(0 0.5rem 0.5rem rgb(0 0 0))",
+                        filter: (isDraggedOver || isTouchDraggedOver) ? "drop-shadow(0 0 24px rgb(255 0 0))" : "drop-shadow(0 0.5rem 0.5rem rgb(0 0 0))",
                         // objectFit: "fill", // <-- this allows distorting the aspect ratio
-                        width: widthUnit * (isDraggedOver ? 12 : 10),
-                        height: heightUnit * (isDraggedOver ? 12 : 10),
+                        width: widthUnit * ((isDraggedOver || isTouchDraggedOver) ? 12 : 10),
+                        height: heightUnit * ((isDraggedOver || isTouchDraggedOver) ? 12 : 10),
                         margin: isMobile ? "0" : "2rem",
                     }}
                     onClick={() => setIsOpen(true)}
@@ -144,7 +148,7 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
 
     return (
         <div id="recycle-bin-dropzone"
-            className='fixed bottom-16 left-4 w-fit min-w-64 z-50'
+            className='fixed bottom-14 left-0 w-fit min-w-64 z-50'
             onDragOver={handleDragOver}
             onDrop={handleDrop}
         >

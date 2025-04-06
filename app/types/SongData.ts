@@ -3,7 +3,7 @@ export interface SongData {
     title: string;
     description: string;
     length: number;
-    url: string;
+    url?: string;
     generes: string[];
     image?: string;
 }

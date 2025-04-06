@@ -44,14 +44,16 @@ export default async function RootLayout({
         <body
           className={`relative h-screen ${geistSans.variable} ${geistMono.variable} ${aguafina.variable} antialiased z-0 overflow-hidden`}
         >
-          <div className="z-50">
+          <div style={{
+            height: "3.5rem",
+          }}>
             <Navbar />
           </div>
 
           <div style={{
             position: "fixed",
             top: "3.5rem",
-            height: "calc(100vh - 6rem)",
+            height: "calc(100vh - 7rem)",
             width: "100%",
             overflowY: "auto",
           }}>

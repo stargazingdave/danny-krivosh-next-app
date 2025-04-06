@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Checkbox from './Checkbox';
 import { Song } from './Song';
@@ -8,6 +8,8 @@ import { RecyclingBin } from './RecyclingBin';
 import { useAppContext } from '../AppContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { SongData } from '../types/SongData';
+
+const isTouchDevice = () => typeof window !== 'undefined' && 'ontouchstart' in window;
 
 export const SongGrid: FC = () => {
     const {
@@ -19,6 +21,34 @@ export const SongGrid: FC = () => {
         addSongToRecycle,
     } = useAppContext();
 
+    const gridRef = useRef<HTMLDivElement | null>(null);
+    const [isDraggingOverRecycleBin, setIsDraggingOverRecycleBin] = useState(false);
+    const [touchGhost, setTouchGhost] = useState<{ x: number; y: number; song: SongData } | null>(null);
+    const touchGhostRef = useRef<HTMLDivElement | null>(null);
+
+
+    useEffect(() => {
+        const el = gridRef.current;
+        if (!el) return;
+
+        const handleTouchMove = (e: TouchEvent) => {
+            e.preventDefault();
+
+            const touch = e.touches[0];
+            setTouchGhost(prev => prev ? { ...prev, x: touch.clientX, y: touch.clientY } : null);
+            const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+            const isOverRecycle = dropTarget?.id === 'recycle-bin-dropzone' || dropTarget?.closest('#recycle-bin-dropzone');
+
+            setIsDraggingOverRecycleBin(!!isOverRecycle);
+        };
+
+        el.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+        return () => {
+            el.removeEventListener('touchmove', handleTouchMove);
+        };
+    }, []);
+
     const playlistId = 'all-songs';
     const songs = getPlaylistSongs(playlistId);
 
@@ -28,7 +58,6 @@ export const SongGrid: FC = () => {
     const shuffleOffsetsRef = useRef<Record<string, { rotate: number; x: number; y: number }>>({});
 
     const handleShuffle = () => {
-        // Only generate offsets here, not in render
         const newOffsets: typeof shuffleOffsetsRef.current = {};
         songs.forEach(song => {
             newOffsets[song.id] = {
@@ -48,26 +77,27 @@ export const SongGrid: FC = () => {
     const touchPosition = useRef<{ x: number; y: number } | null>(null);
 
     const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>, song: SongData) => {
-        touchPosition.current = {
-            x: e.touches[0].clientX,
-            y: e.touches[0].clientY,
-        };
+        const x = e.touches[0].clientX;
+        const y = e.touches[0].clientY;
 
-        // Optionally highlight the item
+        setTouchGhost({ x, y, song });
         setLongClickedSongId(song.id);
     };
 
     const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>, song: SongData) => {
-        if (!touchPosition.current) return;
         const touch = e.changedTouches[0];
-        const dropZone = document.elementFromPoint(touch.clientX, touch.clientY);
+        const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+        const isOverRecycleBin =
+            dropTarget?.id === 'recycle-bin-dropzone' || dropTarget?.closest('#recycle-bin-dropzone');
 
-        if (dropZone?.id === 'recycle-bin-dropzone' && song.url) {
-            // Simulate drop
+        if (isOverRecycleBin && song.url) {
             addSongToRecycle(song);
         }
 
+        touchPosition.current = null;
         setLongClickedSongId(null);
+        setIsDraggingOverRecycleBin(false);
+        setTouchGhost(null);
     };
 
     return (
@@ -75,7 +105,7 @@ export const SongGrid: FC = () => {
             {!snakeOpen && (
                 <div className="fixed bottom-16 right-0 w-full z-50 pointer-events-none">
                     <div className="pointer-events-auto w-fit">
-                        <RecyclingBin />
+                        <RecyclingBin isTouchDraggedOver={isDraggingOverRecycleBin} />
                     </div>
                 </div>
             )}
@@ -93,37 +123,48 @@ export const SongGrid: FC = () => {
                 />
             </div>
 
-            <div className="w-full box-border relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 z-10">
+            <div
+                className="w-full box-border relative grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 z-10"
+                ref={gridRef}
+            >
                 <AnimatePresence mode="popLayout">
                     {songs.map((song, index) => {
-                        const offset = shuffleOffsetsRef.current[song.id] ?? { rotate: 0, x: 0, y: 0 };
-
-
+                        const offset = shuffleOffsetsRef.current[song.id] ?? {
+                            rotate: 0,
+                            x: 0,
+                            y: 0,
+                        };
 
                         return (
                             <div
                                 key={`${song.id}-${shuffleKey}`}
-
                                 draggable
-                                onDragStart={(e: React.DragEvent<HTMLDivElement>) => {
-                                    song.url && e.dataTransfer.setData("song", JSON.stringify(song));
-                                    e.currentTarget.classList.add("opacity-50", "scale-105");
+                                onDragStart={e => {
+                                    if (!isTouchDevice()) {
+                                        song.url && e.dataTransfer.setData('song', JSON.stringify(song));
+                                        e.currentTarget.classList.add('opacity-50', 'scale-105');
+                                    }
                                 }}
-                                onDragEnd={(e) => {
-                                    e.currentTarget.classList.remove("opacity-50", "scale-105");
-                                    setLongClickedSongId(null);
+                                onDragEnd={e => {
+                                    if (!isTouchDevice()) {
+                                        e.currentTarget.classList.remove('opacity-50', 'scale-105');
+                                        setLongClickedSongId(null);
+                                        touchPosition.current = null;
+                                    }
                                 }}
-
-                                onTouchStart={(e) => handleTouchStart(e, song)}
-                                onTouchEnd={(e) => handleTouchEnd(e, song)}
-                                
-                                onMouseDown={(e) => {
-                                    const timer = setTimeout(() => setLongClickedSongId(song.id), 300);
-                                    (e.currentTarget as HTMLElement).dataset.timer = String(timer);
+                                onTouchStart={e => handleTouchStart(e, song)}
+                                onTouchEnd={e => handleTouchEnd(e, song)}
+                                onMouseDown={e => {
+                                    if (!isTouchDevice()) {
+                                        const timer = setTimeout(() => setLongClickedSongId(song.id), 300);
+                                        (e.currentTarget as HTMLElement).dataset.timer = String(timer);
+                                    }
                                 }}
-                                onMouseUp={(e) => {
-                                    clearTimeout(Number((e.currentTarget as HTMLElement).dataset.timer));
-                                    setLongClickedSongId(null);
+                                onMouseUp={e => {
+                                    if (!isTouchDevice()) {
+                                        clearTimeout(Number((e.currentTarget as HTMLElement).dataset.timer));
+                                        setLongClickedSongId(null);
+                                    }
                                 }}
                             >
                                 <motion.div
@@ -141,10 +182,10 @@ export const SongGrid: FC = () => {
                                         easing: 'ease-in-out',
                                     }}
                                     className={`relative h-36 w-full rounded-lg overflow-hidden backdrop-blur-lg shadow-md transition-all duration-200 ${longClickedSongId === song.id
-                                        ? "bg-blue-800/50 border-2 border-blue-400 scale-105"
-                                        : "bg-white/10 hover:bg-neutral-500"
+                                        ? 'bg-blue-800/50 border-2 border-blue-400 scale-105'
+                                        : 'bg-white/10 hover:bg-neutral-500'
                                         }`}
-                                    style={{ boxShadow: "-1px -1px 4px 1px #77777777" }}
+                                    style={{ boxShadow: '-1px -1px 4px 1px #77777777' }}
                                 >
                                     {song.image && (
                                         <div className="absolute inset-0">
@@ -173,6 +214,36 @@ export const SongGrid: FC = () => {
                         );
                     })}
                 </AnimatePresence>
+                {touchGhost && (
+                    <div
+                        ref={touchGhostRef}
+                        className="fixed pointer-events-none z-50"
+                        style={{
+                            top: touchGhost.y - 40,
+                            left: touchGhost.x - 80,
+                            width: 160,
+                            opacity: 0.7,
+                            transform: 'scale(0.9)',
+                            transition: 'transform 0.1s ease',
+                        }}
+                    >
+                        <div className="rounded-lg overflow-hidden bg-white/20 backdrop-blur-md shadow-md border border-white/30">
+                            <div className="relative h-20 w-full">
+                                {touchGhost.song.image && (
+                                    <Image
+                                        src={touchGhost.song.image}
+                                        alt={touchGhost.song.title}
+                                        fill
+                                        className="object-cover opacity-40"
+                                    />
+                                )}
+                                <div className="absolute inset-0 flex items-center justify-center px-2 text-white text-sm text-center z-10">
+                                    {touchGhost.song.title}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
