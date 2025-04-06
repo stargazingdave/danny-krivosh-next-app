@@ -25,7 +25,8 @@ export const SongGrid: FC = () => {
     const [isDraggingOverRecycleBin, setIsDraggingOverRecycleBin] = useState(false);
     const [touchGhost, setTouchGhost] = useState<{ x: number; y: number; song: SongData } | null>(null);
     const touchGhostRef = useRef<HTMLDivElement | null>(null);
-
+    const [dragReady, setDragReady] = useState(false);
+    const dragTimer = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const el = gridRef.current;
@@ -80,24 +81,35 @@ export const SongGrid: FC = () => {
         const x = e.touches[0].clientX;
         const y = e.touches[0].clientY;
 
-        setTouchGhost({ x, y, song });
-        setLongClickedSongId(song.id);
+        // Wait a moment before setting drag state
+        dragTimer.current = setTimeout(() => {
+            setDragReady(true);
+            setTouchGhost({ x, y, song });
+            setLongClickedSongId(song.id);
+        }, 200); // long press threshold
     };
 
     const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>, song: SongData) => {
-        const touch = e.changedTouches[0];
-        const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
-        const isOverRecycleBin =
-            dropTarget?.id === 'recycle-bin-dropzone' || dropTarget?.closest('#recycle-bin-dropzone');
-
-        if (isOverRecycleBin && song.url) {
-            addSongToRecycle(song);
+        if (dragTimer.current) {
+            clearTimeout(dragTimer.current);
+            dragTimer.current = null;
         }
 
-        touchPosition.current = null;
-        setLongClickedSongId(null);
-        setIsDraggingOverRecycleBin(false);
+        if (dragReady) {
+            const touch = e.changedTouches[0];
+            const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+            const isOverRecycleBin =
+                dropTarget?.id === 'recycle-bin-dropzone' || dropTarget?.closest('#recycle-bin-dropzone');
+
+            if (isOverRecycleBin && song.url) {
+                addSongToRecycle(song);
+            }
+        }
+
+        setDragReady(false);
         setTouchGhost(null);
+        setIsDraggingOverRecycleBin(false);
+        setLongClickedSongId(null);
     };
 
     return (
