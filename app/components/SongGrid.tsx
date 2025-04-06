@@ -62,7 +62,7 @@ export const SongGrid: FC = () => {
         const touch = e.changedTouches[0];
         const dropZone = document.elementFromPoint(touch.clientX, touch.clientY);
 
-        if (dropZone?.id === 'recycle-bin-dropzone') {
+        if (dropZone?.id === 'recycle-bin-dropzone' && song.url) {
             // Simulate drop
             addSongToRecycle(song);
         }
@@ -106,7 +106,7 @@ export const SongGrid: FC = () => {
 
                                 draggable
                                 onDragStart={(e: React.DragEvent<HTMLDivElement>) => {
-                                    e.dataTransfer.setData("song", JSON.stringify(song));
+                                    song.url && e.dataTransfer.setData("song", JSON.stringify(song));
                                     e.currentTarget.classList.add("opacity-50", "scale-105");
                                 }}
                                 onDragEnd={(e) => {
@@ -151,7 +151,7 @@ export const SongGrid: FC = () => {
                                             <Image
                                                 src={song.image}
                                                 alt={song.title}
-                                                layout="fill"
+                                                fill
                                                 objectFit="cover"
                                                 className="opacity-40"
                                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

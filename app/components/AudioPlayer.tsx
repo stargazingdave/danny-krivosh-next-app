@@ -5,6 +5,7 @@ import { useAppContext } from "../AppContext";
 import { FullPlaybackControls } from "./PlaybackControls/FullPlaybackControls";
 import { Visualization } from "./Visualization";
 import { RiHdFill, RiHdLine } from "react-icons/ri";
+import { FastLyricsFinder } from "./FastLyricsFinder";
 
 export const AudioPlayer: FC = () => {
     const {
@@ -24,10 +25,8 @@ export const AudioPlayer: FC = () => {
 
     return (
         <div className="relative flex items-center gap-2 p-4 w-full">
-            {/* Song Details */}
-            <div className="hidden sm:flex flex-col p-2 text-white text-sm text-nowrap">
-                <p className="font-semibold">{currentSong?.title}</p>
-            </div>
+            {/* Fast Lyrics Finder */}
+            <FastLyricsFinder />
 
             {/* Playback Controls */}
             <FullPlaybackControls
@@ -74,6 +73,11 @@ export const AudioPlayer: FC = () => {
             {/* Visualization Component */}
             <div className="fixed left-0 top-0 w-full h-16 -z-10 opacity-10">
                 <Visualization type="spectrum" barCount={64} />
+            </div>
+
+            {/* Song Details */}
+            <div className="hidden sm:flex flex-col p-2 text-white text-sm text-nowrap">
+                <p className="font-semibold">{currentSong?.title}</p>
             </div>
         </div>
     );

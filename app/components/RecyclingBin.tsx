@@ -144,7 +144,7 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ }) => {
 
     return (
         <div id="recycle-bin-dropzone"
-            className='fixed bottom-4 left-4 w-fit min-w-64 z-50'
+            className='fixed bottom-16 left-4 w-fit min-w-64 z-50'
             onDragOver={handleDragOver}
             onDrop={handleDrop}
         >
