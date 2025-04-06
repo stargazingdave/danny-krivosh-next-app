@@ -45,6 +45,8 @@ const HoverColorIcon = ({
             rel="noopener noreferrer"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            onTouchStart={() => setIsHovered(true)}
+            onTouchEnd={() => setIsHovered(false)}
         >
             <Icon
                 className="text-6xl cursor-pointer transition-colors duration-300"

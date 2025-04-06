@@ -11,6 +11,7 @@ const allSongs: SongData[] = [
         url: "/song_files/answers_none.mp3",
         generes: ["rock", "pop"],
         image: "/song_images/answers-none.webp",
+        definition: "hd",
     },
     {
         id: "2",
@@ -20,6 +21,7 @@ const allSongs: SongData[] = [
         url: "/song_files/8.mp3",
         generes: ["rock"],
         image: "/song_images/8.webp",
+        definition: "hd",
     },
     {
         id: "3",
@@ -29,6 +31,7 @@ const allSongs: SongData[] = [
         url: "/song_files/a_reflection_of_you.mp3",
         generes: ["rock"],
         image: "/song_images/a-reflection-of-you.jpg",
+        definition: "hd",
     },
     {
         id: "4",
@@ -47,6 +50,7 @@ const allSongs: SongData[] = [
         url: "/song_files/under.mp3",
         generes: ["pop"],
         image: "/song_images/under.webp",
+        definition: "hd",
     },
     {
         id: "6",
@@ -56,6 +60,7 @@ const allSongs: SongData[] = [
         url: "/song_files/halomot_sheniganti.mp3",
         generes: ["rock"],
         image: "/song_images/poor-mans-vision.webp",
+        definition: "hd",
     },
     {
         id: "7",
@@ -65,6 +70,7 @@ const allSongs: SongData[] = [
         url: "/song_files/serenade.mp3",
         generes: ["rock", "pop"],
         image: "/song_images/serenade.webp",
+        definition: "hd",
     },
     {
         id: "8",
@@ -82,6 +88,7 @@ const allSongs: SongData[] = [
         url: "/song_files/laundromat.mp3",
         generes: ["rock"],
         image: "/song_images/remain-unfold.jpg",
+        definition: "hd",
     },
     {
         id: "10",
@@ -100,6 +107,7 @@ const allSongs: SongData[] = [
         url: "/song_files/taste.mp3",
         generes: ["pop"],
         image: "/song_images/taste.webp",
+        definition: "hd",
     },
     {
         id: "12",
@@ -109,6 +117,7 @@ const allSongs: SongData[] = [
         url: "/song_files/the_extra_color.mp3",
         generes: ["rock"],
         image: "/song_images/the-extra-color.webp",
+        definition: "hd",
     },
     {
         id: "13",
@@ -127,6 +136,7 @@ const allSongs: SongData[] = [
         url: "/song_files/thought_of_a_kid_p-2.mp3",
         generes: ["pop"],
         image: "/song_images/thought-of-a-kid-part-2.jpg",
+        definition: "hd",
     },
     {
         id: "15",
@@ -136,6 +146,7 @@ const allSongs: SongData[] = [
         url: "/song_files/use_art.mp3",
         generes: ["rock"],
         image: "/song_images/use-art.webp",
+        definition: "hd",
     },
     {
         id: "16",
@@ -145,6 +156,7 @@ const allSongs: SongData[] = [
         url: "/song_files/vitality.mp3",
         generes: ["rock", "pop"],
         image: "/song_images/vitality.webp",
+        definition: "hd",
     },
     {
         id: "17",
@@ -162,6 +174,7 @@ const allSongs: SongData[] = [
         url: "/song_files/in_and_out.mp3",
         generes: ["rock"],
         image: "/song_images/in-and-out.webp",
+        definition: "hd",
     },
     {
         id: "19",
@@ -180,6 +193,7 @@ const allSongs: SongData[] = [
         url: "/song_files/otto_hapachad.mp3",
         generes: ["pop"],
         image: "/song_images/otto-hapachad.png",
+        definition: "hd",
     },
     {
         id: "21",
@@ -189,6 +203,7 @@ const allSongs: SongData[] = [
         url: "/song_files/diem.mp3",
         generes: ["rock"],
         image: "/song_images/diem.png",
+        definition: "hd",
     },
     {
         id: "22",
@@ -198,6 +213,7 @@ const allSongs: SongData[] = [
         url: "/song_files/erev_rav.mp3",
         generes: ["rock", "pop"],
         image: "/song_images/erev-rav.png",
+        definition: "hd",
     },
 ];
 

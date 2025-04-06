@@ -68,7 +68,10 @@ export const AudioPlayer: FC = () => {
             </p>
 
             {/* HD Icon */}
-            <RiHdLine size={50} />
+            {
+                currentSong?.definition === "hd" &&
+                <RiHdLine size={50} />
+            }
 
             {/* Visualization Component */}
             <div className="fixed left-0 top-0 w-full h-16 -z-10 opacity-10">

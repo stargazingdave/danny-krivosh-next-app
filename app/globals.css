@@ -21,9 +21,12 @@
 }
 
 @keyframes pulse-fade {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0;
   }
+
   50% {
     opacity: 1;
   }
@@ -33,6 +36,7 @@
   .animate-fade-out {
     animation: fade-out 1s ease-out forwards;
   }
+
   .animate-pulse-fade {
     animation: pulse-fade 1.5s ease-in-out infinite;
   }
@@ -42,4 +46,121 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.sparkle-letter {
+  position: relative;
+  display: inline-block;
+
+  background: linear-gradient(90deg, #05a30d, #eeff00);
+  background-size: 200% auto;
+  background-position: left center;
+  animation: sparkle 4s linear infinite;
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  overflow: visible;
+}
+
+/* .sparkle-letter::after {
+  content: '';
+  position: absolute;
+  top: 0.2em;
+  right: 0;
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 4px 2px white;
+  opacity: 0;
+  animation: twinkle 8s infinite ease-in-out;
+  pointer-events: none;
+} */
+
+.sparkle-letter::after {
+  content: '';
+  position: absolute;
+  top: 0.2em;
+  /* a bit above the top of the F */
+  left: -10%;
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 4px 2px white;
+  opacity: 0;
+  animation: sparkle-slide 4s infinite ease-in-out;
+  pointer-events: none;
+}
+
+@keyframes sparkle-slide {
+
+  0%,
+  100% {
+    left: -12%;
+    opacity: 0;
+    transform: scale(0.1);
+  }
+
+  70% {
+    left: 70%;
+    opacity: 1;
+    transform: scale(0.6);
+  }
+
+  80% {
+    left: 80%;
+    opacity: 0;
+    transform: scale(0.2);
+  }
+
+  90% {
+    left: 90%;
+    opacity: 0;
+    transform: scale(0);
+  }
+}
+
+@keyframes sparkle {
+  0% {
+    background-position: 0% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes twinkle {
+
+  0%,
+  95%,
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  96% {
+    opacity: 1;
+    transform: scale(1.4);
+  }
+
+  97% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+.find-button {
+  background-color: black;
+  padding: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.find-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }

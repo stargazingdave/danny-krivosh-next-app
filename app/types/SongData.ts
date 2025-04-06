@@ -6,4 +6,5 @@ export interface SongData {
     url?: string;
     generes: string[];
     image?: string;
+    definition?: 'hd' | 'sd';
 }

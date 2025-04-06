@@ -87,7 +87,7 @@ export default async function RootLayout({
           }}>
             <div style={{
               width: "100%",
-              maxWidth: "800px",
+              maxWidth: "70rem",
             }}>
               <AudioPlayer />
             </div>

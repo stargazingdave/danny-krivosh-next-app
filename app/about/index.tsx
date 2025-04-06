@@ -3,6 +3,7 @@
 import { FaSpotify } from "react-icons/fa";
 import { FaAmazon, FaYoutube } from "react-icons/fa6";
 import { SocialLinkIcons } from "./components/SocialLinkIcons";
+import { IoLogoSoundcloud } from "react-icons/io5";
 
 export default function AboutIndex() {
     const youtubeLink = "https://www.youtube.com/DannyKrivosh";
@@ -58,13 +59,13 @@ export default function AboutIndex() {
                     icon: FaAmazon,
                     link: "https://www.amazon.com/author/dannykrivosh",
                     color: "white",
-                    hoverColor: "yellow",
+                    hoverColor: "#ffd600",
                 },
                 {
-                    icon: FaSpotify,
-                    link: "https://open.spotify.com/artist/3Jv5y2b1j0Qd7G4b2W4aYx",
+                    icon: IoLogoSoundcloud,
+                    link: "https://soundcloud.com/danny-krivosh",
                     color: "white",
-                    hoverColor: "orange",
+                    hoverColor: "#ff5408",
                 },
             ]} />
         </div>

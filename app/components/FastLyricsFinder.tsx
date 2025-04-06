@@ -3,6 +3,7 @@
 import { FC, ReactNode, useEffect, useRef, useState } from "react";
 import { useAppContext } from "../AppContext";
 import { HiXMark } from "react-icons/hi2";
+import { FaWindowMinimize } from "react-icons/fa6";
 
 interface FastLyricsFinderProps { }
 
@@ -10,8 +11,18 @@ export const FastLyricsFinder: FC<FastLyricsFinderProps> = () => {
     const { currentSong } = useAppContext();
     const [isOpen, setIsOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
-    const [status, setStatus] = useState<'ready' | 'searching' | 'done' | 'show'>('ready');
-    const [lyrics, setLyrics] = useState<string | null>(null);
+    const [status, setStatus] = useState<'ready' | 'searching' | 'done'>('ready');
+    const [lyrics, setLyrics] = useState<string[] | null>(null);
+    const [currentSongId, setCurrentSongId] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (currentSong) {
+            if (currentSong.id === currentSongId) return;
+            setCurrentSongId(currentSong.id);
+            setStatus('ready');
+            setLyrics(null);
+        }
+    }, [currentSong]);
 
     const handleResize = () => {
         setIsMobile(window.innerWidth <= 768);
@@ -23,55 +34,60 @@ export const FastLyricsFinder: FC<FastLyricsFinderProps> = () => {
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    const handleClickFind = () => {
-        setStatus('searching');
-        const songId = currentSong?.id;
+    const isHebrew = (text: string) => {
+        const firstChar = text.trim().charAt(0);
+        return /[֐-׿]/.test(firstChar);
+    };
 
-        songId && fetch(`/lyrics/${songId}.lrc`)
-            .then(res => res.text())
-            .then(raw => {
-                const cleaned = raw
-                    .split("\n")
-                    .filter(line => !line.startsWith('#'))
-                    .map(line => line.replace(/^\[\d{2}:\d{2}(?:\.\d{2})?\]\s?/, ''))
-                    .join("\n");
-                setLyrics(cleaned);
-            })
-            .catch(() => setLyrics(null));
+    const handleClickFind = () => {
+        if (!currentSongId) return;
+        setStatus('searching');
+
+        currentSongId &&
+            fetch(`/lyrics/${currentSongId}.lrc`)
+                .then(res => {
+                    if (!res.ok) throw new Error('File not found');
+                    return res.text();
+                })
+                .then(raw => {
+                    const cleanedLines = raw
+                        .split("\n")
+                        .filter(line => !line.startsWith('#'))
+                        .map(line => line.replace(/^\[\d{2}:\d{2}(?:\.\d{2})?\]\s?/, ''));
+                    setLyrics(cleanedLines);
+                })
+                .catch(() => setLyrics(null));
     };
 
     return (
         <div>
-            <div className="hidden sm:flex flex-col p-2 text-white text-2xl text-nowrap">
+            <div className="flex flex-col p-2 text-white text-2xl text-nowrap">
                 <button
-                    className="font-semibold hover:bg-gradient-to-b hover:from-yellow-500 hover:to-green-500 hover:bg-clip-text hover:text-transparent cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                    className={`find-button ${!isOpen ? 'sparkle' : ''}`}
                     onClick={() => setIsOpen(!isOpen)}
                     disabled={!currentSong}
+                    onMouseEnter={e => e.currentTarget.classList.remove('sparkle')}
+                    onMouseLeave={e => {
+                        if (!isOpen) e.currentTarget.classList.add('sparkle');
+                    }}
                 >
-                    F
+                    <span className="sparkle-letter">F</span>
                 </button>
             </div>
 
-            {/* Main Container */}
             {isOpen && (
-                <div className='fixed bottom-14 left-[calc(50%-12rem)] w-96 max-w-5/6 z-50 border border-black text-black'>
-                    <div className="flex p-1 gap-8 justify-between" style={{ backgroundColor: "#46a758c9", backdropFilter: "blur(10px)" }}>
-                        <div>
-                            <button className="cursor-pointer" onClick={() => setIsOpen(false)}>
-                                <HiXMark className="w-8 h-8" />
-                            </button>
-                        </div>
-                        <h1 className="w-full text-2xl text-center font-bold">
-                            Fast Lyrics Finder
-                        </h1>
+                <div className='fixed bottom-14 left-[calc(50%-12rem)] w-96 max-w-5/6 z-50 border border-black bg-black text-white shadow-[4px_4px_0px_#000]'>
+                    <div className="flex p-1 gap-4 justify-between items-center bg-black border-b border-gray-700">
+                        <FaWindowMinimize className="w-8 h-8 text-white p-2 border cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
+                        <h1 className="w-full text-xl text-center font-bold text-white">Fast Lyrics Finder</h1>
                     </div>
 
-                    <div className="flex flex-col items-center h-96 overflow-auto gap-4" style={{ backgroundColor: "#46a758c9", backdropFilter: "blur(10px)" }}>
-                        <p className="text-center text-lg mt-2">There may be lyrics available for this song. Click here!</p>
+                    <div className="flex flex-col items-center h-96 overflow-auto gap-4 px-4 py-2 bg-black">
+                        <p className="text-center text-sm text-gray-300">There may be lyrics available for this song. Click here!</p>
 
                         {status === 'ready' && (
                             <button
-                                className="w-fit h-12 flex px-4 py-1 items-center justify-center bg-gray-400 font-semibold rounded-lg cursor-pointer tracking-widest hover:bg-black hover:text-white transition duration-300 ease-in-out"
+                                className="px-4 py-1 bg-gray-800 border border-gray-700 shadow-[inset_1px_1px_0px_#333] text-sm font-semibold text-white hover:bg-gray-700"
                                 onClick={handleClickFind}
                             >
                                 FIND
@@ -82,34 +98,26 @@ export const FastLyricsFinder: FC<FastLyricsFinderProps> = () => {
 
                         {status === 'done' && (
                             lyrics === null ? (
-                                <div className="flex flex-col items-center h-96 overflow-auto gap-4">
-                                    <p className="text-center text-lg mt-2">No lyrics found.</p>
-                                    <button
-                                        className="w-fit h-12 flex px-4 py-1 items-center justify-center bg-gray-400 font-semibold rounded-lg cursor-pointer tracking-widest hover:bg-black hover:text-white transition duration-300 ease-in-out"
-                                        onClick={() => setStatus('ready')}
-                                    >
-                                        Try Again
-                                    </button>
-                                </div>
+                                <p className="text-sm text-gray-400">none found... probably an instrumental :)</p>
                             ) : (
-                                <div className="flex flex-col items-center h-96 overflow-auto gap-4">
-                                    <p className="text-center text-lg mt-2">Lyrics found!</p>
-                                    <button
-                                        className="w-fit h-12 flex px-4 py-1 items-center justify-center bg-gray-400 font-semibold rounded-lg cursor-pointer tracking-widest hover:bg-black hover:text-white transition duration-300 ease-in-out"
-                                        onClick={() => setStatus('show')}
-                                    >
-                                        Show Lyrics
-                                    </button>
+                                <div className="flex flex-col items-center h-96 overflow-auto gap-2 w-full px-2 py-1 bg-black border border-gray-700 shadow-inner">
+                                    <div className="w-full h-full overflow-auto leading-relaxed font-mono text-xs"
+                                        style={{
+                                            color: "#979c61",
+                                        }}>
+                                        {lyrics.map((line, i) => (
+                                            <p
+                                                key={i}
+                                                className="whitespace-pre-wrap"
+                                                dir={isHebrew(line) ? 'rtl' : 'ltr'}
+                                                style={{ textAlign: isHebrew(line) ? 'right' : 'left' }}
+                                            >
+                                                {line}
+                                            </p>
+                                        ))}
+                                    </div>
                                 </div>
                             )
-                        )}
-
-                        {status === 'show' && (
-                            <div className="flex flex-col items-center h-96 overflow-auto gap-4 px-4">
-                                <div className="w-full h-full overflow-auto whitespace-pre-wrap leading-relaxed font-mono text-sm">
-                                    {lyrics}
-                                </div>
-                            </div>
                         )}
                     </div>
                 </div>
@@ -132,7 +140,7 @@ const LyricsSearchMock: FC<FastLyricsFinderMockProps> = ({ setStatus }) => {
         "Retrieving..."
     ].map(site => (
         <div className="flex flex-col items-center h-96 overflow-auto gap-4">
-            <p className="text-center text-lg mt-2">Searching for lyrics in {site}...</p>
+            <p className="text-sm text-white">Searching for lyrics in {site}...</p>
         </div>
     ));
 
