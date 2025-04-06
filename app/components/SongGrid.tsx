@@ -24,31 +24,10 @@ export const SongGrid: FC = () => {
     const gridRef = useRef<HTMLDivElement | null>(null);
     const [isDraggingOverRecycleBin, setIsDraggingOverRecycleBin] = useState(false);
     const [touchGhost, setTouchGhost] = useState<{ x: number; y: number; song: SongData } | null>(null);
-    const touchGhostRef = useRef<HTMLDivElement | null>(null);
     const [dragReady, setDragReady] = useState(false);
     const dragTimer = useRef<NodeJS.Timeout | null>(null);
-
-    useEffect(() => {
-        const el = gridRef.current;
-        if (!el) return;
-
-        const handleTouchMove = (e: TouchEvent) => {
-            e.preventDefault();
-
-            const touch = e.touches[0];
-            setTouchGhost(prev => prev ? { ...prev, x: touch.clientX, y: touch.clientY } : null);
-            const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
-            const isOverRecycle = dropTarget?.id === 'recycle-bin-dropzone' || dropTarget?.closest('#recycle-bin-dropzone');
-
-            setIsDraggingOverRecycleBin(!!isOverRecycle);
-        };
-
-        el.addEventListener('touchmove', handleTouchMove, { passive: false });
-
-        return () => {
-            el.removeEventListener('touchmove', handleTouchMove);
-        };
-    }, []);
+    const dragStartPoint = useRef<{ x: number; y: number } | null>(null);
+    const currentDraggedSong = useRef<SongData | null>(null);
 
     const playlistId = 'all-songs';
     const songs = getPlaylistSongs(playlistId);
@@ -57,6 +36,79 @@ export const SongGrid: FC = () => {
     const [shuffleKey, setShuffleKey] = useState(0);
     const [shuffling, setShuffling] = useState(false);
     const shuffleOffsetsRef = useRef<Record<string, { rotate: number; x: number; y: number }>>({});
+
+    const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>, song: SongData) => {
+        const touch = e.touches[0];
+        const startX = touch.clientX;
+        const startY = touch.clientY;
+        dragStartPoint.current = { x: startX, y: startY };
+        currentDraggedSong.current = song;
+
+        const handleMove = (e: TouchEvent) => {
+            const moveTouch = e.touches[0];
+            const dx = moveTouch.clientX - startX;
+            const dy = moveTouch.clientY - startY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (!dragReady && distance > 10) {
+                // User intends to scroll, cancel drag
+                clearTimeout(dragTimer.current!);
+                dragTimer.current = null;
+                cleanup();
+                return;
+            }
+
+            if (dragReady) {
+                e.preventDefault();
+                setTouchGhost(prev => prev ? { ...prev, x: moveTouch.clientX, y: moveTouch.clientY } : null);
+
+                const dropTarget = document.elementFromPoint(moveTouch.clientX, moveTouch.clientY);
+                const isOverRecycle = dropTarget?.id === 'recycle-bin-dropzone' || dropTarget?.closest('#recycle-bin-dropzone');
+                setIsDraggingOverRecycleBin(!!isOverRecycle);
+            }
+        };
+
+        const cleanup = () => {
+            window.removeEventListener('touchmove', handleMove);
+            window.removeEventListener('touchend', handleEnd);
+        };
+
+        const handleEnd = () => cleanup();
+
+        window.addEventListener('touchmove', handleMove, { passive: false });
+        window.addEventListener('touchend', handleEnd);
+
+        dragTimer.current = setTimeout(() => {
+            setDragReady(true);
+            setTouchGhost({ x: startX, y: startY, song });
+            setLongClickedSongId(song.id);
+        }, 200);
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+        if (dragTimer.current) {
+            clearTimeout(dragTimer.current);
+            dragTimer.current = null;
+        }
+
+        if (dragReady && currentDraggedSong.current) {
+            const touch = e.changedTouches[0];
+            const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+            const isOverRecycleBin =
+                dropTarget?.id === 'recycle-bin-dropzone' || dropTarget?.closest('#recycle-bin-dropzone');
+
+            if (isOverRecycleBin && currentDraggedSong.current.url) {
+                addSongToRecycle(currentDraggedSong.current);
+            }
+        }
+
+        setDragReady(false);
+        setTouchGhost(null);
+        setIsDraggingOverRecycleBin(false);
+        setLongClickedSongId(null);
+        dragStartPoint.current = null;
+        currentDraggedSong.current = null;
+    };
 
     const handleShuffle = () => {
         const newOffsets: typeof shuffleOffsetsRef.current = {};
@@ -73,43 +125,6 @@ export const SongGrid: FC = () => {
         setShuffleKey(prev => prev + 1);
         setRandomOrder(playlistId);
         setTimeout(() => setShuffling(false), 500);
-    };
-
-    const touchPosition = useRef<{ x: number; y: number } | null>(null);
-
-    const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>, song: SongData) => {
-        const x = e.touches[0].clientX;
-        const y = e.touches[0].clientY;
-
-        // Wait a moment before setting drag state
-        dragTimer.current = setTimeout(() => {
-            setDragReady(true);
-            setTouchGhost({ x, y, song });
-            setLongClickedSongId(song.id);
-        }, 200); // long press threshold
-    };
-
-    const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>, song: SongData) => {
-        if (dragTimer.current) {
-            clearTimeout(dragTimer.current);
-            dragTimer.current = null;
-        }
-
-        if (dragReady) {
-            const touch = e.changedTouches[0];
-            const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
-            const isOverRecycleBin =
-                dropTarget?.id === 'recycle-bin-dropzone' || dropTarget?.closest('#recycle-bin-dropzone');
-
-            if (isOverRecycleBin && song.url) {
-                addSongToRecycle(song);
-            }
-        }
-
-        setDragReady(false);
-        setTouchGhost(null);
-        setIsDraggingOverRecycleBin(false);
-        setLongClickedSongId(null);
     };
 
     return (
@@ -161,23 +176,10 @@ export const SongGrid: FC = () => {
                                     if (!isTouchDevice()) {
                                         e.currentTarget.classList.remove('opacity-50', 'scale-105');
                                         setLongClickedSongId(null);
-                                        touchPosition.current = null;
                                     }
                                 }}
                                 onTouchStart={e => handleTouchStart(e, song)}
-                                onTouchEnd={e => handleTouchEnd(e, song)}
-                                onMouseDown={e => {
-                                    if (!isTouchDevice()) {
-                                        const timer = setTimeout(() => setLongClickedSongId(song.id), 300);
-                                        (e.currentTarget as HTMLElement).dataset.timer = String(timer);
-                                    }
-                                }}
-                                onMouseUp={e => {
-                                    if (!isTouchDevice()) {
-                                        clearTimeout(Number((e.currentTarget as HTMLElement).dataset.timer));
-                                        setLongClickedSongId(null);
-                                    }
-                                }}
+                                onTouchEnd={handleTouchEnd}
                             >
                                 <motion.div
                                     layout
@@ -228,7 +230,6 @@ export const SongGrid: FC = () => {
                 </AnimatePresence>
                 {touchGhost && (
                     <div
-                        ref={touchGhostRef}
                         className="fixed pointer-events-none z-50"
                         style={{
                             top: touchGhost.y - 40,
