@@ -4,6 +4,7 @@ import { FC, ReactNode, useEffect, useRef, useState } from "react";
 import { useAppContext } from "../AppContext";
 import { HiXMark } from "react-icons/hi2";
 import { FaWindowMinimize } from "react-icons/fa6";
+import CustomSlider from "./Slider";
 
 interface FastLyricsFinderProps { }
 
@@ -14,6 +15,8 @@ export const FastLyricsFinder: FC<FastLyricsFinderProps> = () => {
     const [status, setStatus] = useState<'ready' | 'searching' | 'done'>('ready');
     const [lyrics, setLyrics] = useState<string[] | null>(null);
     const [currentSongId, setCurrentSongId] = useState<string | null>(null);
+    const [fontSize, setFontSize] = useState(16); // Default font size
+    const [lineHeight, setLineHeight] = useState(1.5 * 16); // Default line height
 
     useEffect(() => {
         if (currentSong) {
@@ -37,6 +40,12 @@ export const FastLyricsFinder: FC<FastLyricsFinderProps> = () => {
     const isHebrew = (text: string) => {
         const firstChar = text.trim().charAt(0);
         return /[֐-׿]/.test(firstChar);
+    };
+
+    const handleFontSizeChange = (newSize: number) => {
+        setFontSize(newSize);
+        const newLineHeight = newSize * 1.5; // Adjust line height based on font size
+        setLineHeight(newLineHeight);
     };
 
     const handleClickFind = () => {
@@ -76,10 +85,10 @@ export const FastLyricsFinder: FC<FastLyricsFinderProps> = () => {
             </div>
 
             {isOpen && (
-                <div className='fixed bottom-14 left-[calc(50%-12rem)] w-96 max-w-5/6 z-50 border border-black bg-black text-white shadow-[4px_4px_0px_#000]'>
+                <div className='fixed bottom-14 left-[calc(50%-12rem)] w-96 max-w-5/6 z-50 border border-gray-600 bg-black text-white shadow-[4px_4px_0px_#000]'>
                     <div className="flex p-1 gap-4 justify-between items-center bg-black border-b border-gray-700">
                         <FaWindowMinimize className="w-8 h-8 text-white p-2 border cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
-                        <h1 className="w-full text-xl text-center font-bold text-white">Fast Lyrics Finder</h1>
+                        <h1 className="w-full text-xl text-center text-white">FAST LYRICS FINDER</h1>
                     </div>
 
                     <div className="flex flex-col items-center h-96 overflow-auto gap-4 px-4 py-2 bg-black">
@@ -101,9 +110,28 @@ export const FastLyricsFinder: FC<FastLyricsFinderProps> = () => {
                                 <p className="text-sm text-gray-400">none found... probably an instrumental :)</p>
                             ) : (
                                 <div className="flex flex-col items-center h-96 overflow-auto gap-2 w-full px-2 py-1 bg-black border border-gray-700 shadow-inner">
-                                    <div className="w-full h-full overflow-auto leading-relaxed font-mono text-xs"
+                                    <div className="flex justify-between items-center w-full">
+                                        <p>-</p>
+                                        <p className="text-sm text-gray-400">Font Size</p>
+                                        <p>-</p>
+                                    </div>
+
+                                    <CustomSlider
+                                        min={10}
+                                        max={40}
+                                        step={1}
+                                        value={fontSize}
+                                        onChange={handleFontSizeChange}
+                                        // label="Font Size"
+                                        className="w-full"
+                                        thumbColor="#d0d0d0"
+                                        thumbShape="square"
+                                    />
+                                    <div className="w-full h-full overflow-auto leading-relaxed font-mono"
                                         style={{
                                             color: "#979c61",
+                                            fontSize: `${fontSize}px`,
+                                            lineHeight: `${lineHeight}px`,
                                         }}>
                                         {lyrics.map((line, i) => (
                                             <p
