@@ -86,7 +86,7 @@ export const SnakeGame: React.FC = () => {
 
     const [soundOn, setSoundOn] = useState(false);
     const [gameStatus, setGameStatus] = useState<'ready' | 'running' | 'gameOver'>('ready');
-    
+
     const [score, setScore] = useState(0);
     const [snake, setSnake] = useState([{ x: 10, y: 10 }]);
     const [speed, setSpeed] = useState<number>(INITIAL_SPEED);
@@ -103,7 +103,7 @@ export const SnakeGame: React.FC = () => {
     const [snakeColors, setSnakeColors] = useState<string[]>([]);
 
     const [food, setFood] = useState(getRandomPosition([{ x: 0, y: 0 }], isMobile),);
-    
+
     const [bottle, setBottle] = useState(getRandomPosition([{ x: 0, y: 0 }], isMobile));
     const [showBottle, setShowBottle] = useState(false);
 
@@ -113,7 +113,7 @@ export const SnakeGame: React.FC = () => {
 
     const [joint, setJoint] = useState(getRandomPosition([{ x: 0, y: 0 }], isMobile));
     const [showJoint, setShowJoint] = useState(false);
-    
+
 
     const restartGame = () => {
         hasRestartedRef.current = true;
@@ -157,7 +157,7 @@ export const SnakeGame: React.FC = () => {
             setSnakeColor(snakeColorMap.bottleEaten);
         } else if (event === 'jointEaten') {
             setSnakeColor(snakeColorMap.jointEaten);
-        }            
+        }
 
         setTimeout(() => {
             setSnakeColor(snakeColorMap.default);
@@ -401,7 +401,7 @@ export const SnakeGame: React.FC = () => {
         >
             {/* MAIN GAME BOX */}
             <div
-                className="bg-transparent rounded-2xl overflow-hidden relative"
+                className="fixed top-16 w-full h-[calc(100%-4rem)] bg-transparent overflow-hidden"
                 style={{ boxShadow: "0 0 16px 1px #77777777" }}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -409,7 +409,11 @@ export const SnakeGame: React.FC = () => {
                 {gameStatus === 'ready' && (
                     <div className="absolute inset-0 flex items-center justify-center z-40 animate-pulse-fade pointer-events-none">
                         <h1 className="text-4xl text-white italic tracking-widest text-center">
-                            PRESS ANY KEY TO START
+                            {
+                                isMobile
+                                    ? "INSERT COIN TO PLAY"
+                                    : "PRESS ANY KEY TO START"
+                            }
                         </h1>
                     </div>
                 )}
@@ -450,87 +454,89 @@ export const SnakeGame: React.FC = () => {
                     </div>
                 </div>
 
-                {/* GAME GRID */}
-                <div
-                    className={`grid ${latestEvent === 'bottleEaten' ? 'bg-[#590b02]' : 'bg-black'
-                        } transition-colors ease-out`}
-                    style={{
-                        width: isMobile ? MOBILE_GRID_WIDTH * CELL_SIZE : GRID_WIDTH * CELL_SIZE,
-                        height: isMobile ? MOBILE_GRID_HEIGHT * CELL_SIZE : GRID_HEIGHT * CELL_SIZE,
-                        position: 'relative',
-                        overflow: 'hidden',
-                    }}
-                >
-                    {snake.map((s, i) => (
-                        <div
-                            key={i}
-                            style={{
-                                position: 'absolute',
-                                left: s.x * CELL_SIZE,
-                                top: s.y * CELL_SIZE,
-                                width: CELL_SIZE,
-                                height: CELL_SIZE,
-                                backgroundColor:
-                                    snakeColors.length > 0
-                                        ? snakeColors[i % snakeColors.length]
-                                        : i === 0
-                                            ? snakeColor.head
-                                            : snakeColor.body,
-                                boxShadow: snakeColorMap[latestEvent || 'default'].glow,
-                            }}
-                        />
-                    ))}
-
-                    {/* FOOD */}
+                <div className="relative z-20 flex justify-center w-full h-full">
+                    {/* GAME GRID */}
                     <div
+                        className={`grid ${latestEvent === 'bottleEaten' ? 'bg-[#590b02]' : 'bg-black'
+                            } transition-colors ease-out`}
                         style={{
-                            position: 'absolute',
-                            left: food.x * CELL_SIZE,
-                            top: food.y * CELL_SIZE,
-                            width: CELL_SIZE,
-                            height: CELL_SIZE,
-                            backgroundColor: '#e9e9e9',
-                            borderRadius: '50%',
+                            width: isMobile ? MOBILE_GRID_WIDTH * CELL_SIZE : GRID_WIDTH * CELL_SIZE,
+                            height: isMobile ? MOBILE_GRID_HEIGHT * CELL_SIZE : GRID_HEIGHT * CELL_SIZE,
+                            position: 'relative',
+                            overflow: 'hidden',
                         }}
-                    />
+                    >
+                        {snake.map((s, i) => (
+                            <div
+                                key={i}
+                                style={{
+                                    position: 'absolute',
+                                    left: s.x * CELL_SIZE,
+                                    top: s.y * CELL_SIZE,
+                                    width: CELL_SIZE,
+                                    height: CELL_SIZE,
+                                    backgroundColor:
+                                        snakeColors.length > 0
+                                            ? snakeColors[i % snakeColors.length]
+                                            : i === 0
+                                                ? snakeColor.head
+                                                : snakeColor.body,
+                                    boxShadow: snakeColorMap[latestEvent || 'default'].glow,
+                                }}
+                            />
+                        ))}
 
-                    {showBottle && (
-                        <FaWineBottle
+                        {/* FOOD */}
+                        <div
                             style={{
                                 position: 'absolute',
-                                left: bottle.x * CELL_SIZE,
-                                top: bottle.y * CELL_SIZE,
-                                color: '#00ff22d1',
-                                fontSize: '20px',
-                            }}
-                        />
-                    )}
-
-                    {showPill && (
-                        <TbPillFilled
-                            className="text-red-500"
-                            style={{
-                                position: 'absolute',
-                                left: pill.x * CELL_SIZE,
-                                top: pill.y * CELL_SIZE,
+                                left: food.x * CELL_SIZE,
+                                top: food.y * CELL_SIZE,
                                 width: CELL_SIZE,
                                 height: CELL_SIZE,
+                                backgroundColor: 'white !important',
+                                borderRadius: '50%',
                             }}
                         />
-                    )}
 
-                    {showJoint && (
-                        <LiaJointSolid
-                            className="text-[pink]"
-                            style={{
-                                position: 'absolute',
-                                left: joint.x * CELL_SIZE,
-                                top: joint.y * CELL_SIZE,
-                                width: CELL_SIZE,
-                                height: CELL_SIZE,
-                            }}
-                        />
-                    )}
+                        {showBottle && (
+                            <FaWineBottle
+                                style={{
+                                    position: 'absolute',
+                                    left: bottle.x * CELL_SIZE,
+                                    top: bottle.y * CELL_SIZE,
+                                    color: '#00ff22d1',
+                                    fontSize: '20px',
+                                }}
+                            />
+                        )}
+
+                        {showPill && (
+                            <TbPillFilled
+                                className="text-red-500"
+                                style={{
+                                    position: 'absolute',
+                                    left: pill.x * CELL_SIZE,
+                                    top: pill.y * CELL_SIZE,
+                                    width: CELL_SIZE,
+                                    height: CELL_SIZE,
+                                }}
+                            />
+                        )}
+
+                        {showJoint && (
+                            <LiaJointSolid
+                                className="text-[pink]"
+                                style={{
+                                    position: 'absolute',
+                                    left: joint.x * CELL_SIZE,
+                                    top: joint.y * CELL_SIZE,
+                                    width: CELL_SIZE,
+                                    height: CELL_SIZE,
+                                }}
+                            />
+                        )}
+                    </div>
                 </div>
 
                 {/* GAME OVER SCREEN */}

@@ -113,7 +113,7 @@ export const FastLyricsFinder: FC<FastLyricsFinderProps> = () => {
                                     <div className="flex justify-between items-center w-full">
                                         <p>-</p>
                                         <p className="text-sm text-gray-400">Font Size</p>
-                                        <p>-</p>
+                                        <p>+</p>
                                     </div>
 
                                     <CustomSlider

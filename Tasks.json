@@ -4,7 +4,8 @@
             "New food cannot be generated on snake's tail.",
             "When eating a pill while tripping balls, you get 2X points per pill eaten while trippin.",
             "thunder and rain sounds",
-            "food color in dark theme"
+            "food color in dark theme",
+            "replace start with insert coin"
         ]
     }
 }
