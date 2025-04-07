@@ -1,16 +1,10 @@
 {
     "SITE": {
-        "currently playing bar": [
-            "L for lyric shining or gray",
-        ],
-        "recycle bin": [
-            "fix pause button and separate from global button",
-            "delete buttons for a song and for all"
-        ],
         "snake": [
             "New food cannot be generated on snake's tail.",
             "When eating a pill while tripping balls, you get 2X points per pill eaten while trippin.",
-            "thunder and rain sounds"
+            "thunder and rain sounds",
+            "food color in dark theme"
         ]
     }
 }

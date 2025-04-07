@@ -39,7 +39,7 @@ interface AppContextProps {
     addSongToRecycle: (song: SongData) => void;
     removeSongsFromRecycle: (songs: SongData[]) => void;
     startPlaylist: (playlistId: string, startIndex?: number) => void;
-    handlePlaySong: (song: SongData) => void;
+    handlePlaySong: (song: SongData, playlistId: string) => void;
 }
 
 const AppContext = React.createContext<AppContextProps | undefined>(undefined);
@@ -279,22 +279,22 @@ export const AppProvider: React.FC<AppProviderProps> = ({
             setCurrentPlaylistId(playlist.id);
             const songs = isRandom[playlist.id] && shuffledOrders[playlist.id] ? shuffledOrders[playlist.id] : playlist.songs;
             setCurrentSong(songs[startIndex || 0]);
+            setIsPlaying(true);
         }
     };
 
-    const handlePlaySong = (song: SongData) => {
-        const playlist = playlists.find((p) => p.id === currentPlaylistId);
+    const handlePlaySong = (song: SongData, playlistId: string) => {
+        const playlist = playlists.find((p) => p.id === playlistId);
         if (playlist) {
-            const songs = isRandom[playlist.id] && shuffledOrders[playlist.id] ? shuffledOrders[playlist.id] : playlist.songs;
-            const songIndex = songs.findIndex((s) => s.id === song.id);
-            setCurrentSong(songs[songIndex]);
             setCurrentPlaylistId(playlist.id);
+            setCurrentSong(song);
             setIsPlaying(true);
-            if (audioRef.current) {
-                audioRef.current.play().catch(() => {
+            setTimeout(() => {
+                audioRef.current?.play().catch(() => {
                     console.warn("Autoplay failed, user interaction required.");
+                    setIsPlaying(false);
                 });
-            }
+            }, 0);
         }
     };
 

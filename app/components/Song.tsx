@@ -53,7 +53,7 @@ export const Song: FC<SongProps> = ({ song }) => {
                     <div className="flex items-center justify-center w-full h-full relative">
                         <IoIosPlay
                             className="w-14 h-14 text-white opacity-80 hover:opacity-100 transition-all duration-300 cursor-pointer"
-                            onClick={() => handlePlaySong(song)}
+                            onClick={() => handlePlaySong(song, 'all-songs')}
                         />
                     </div>
                 </div>

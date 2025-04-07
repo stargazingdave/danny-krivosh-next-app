@@ -481,6 +481,7 @@ export const SnakeGame: React.FC = () => {
                         />
                     ))}
 
+                    {/* FOOD */}
                     <div
                         style={{
                             position: 'absolute',
@@ -488,7 +489,7 @@ export const SnakeGame: React.FC = () => {
                             top: food.y * CELL_SIZE,
                             width: CELL_SIZE,
                             height: CELL_SIZE,
-                            backgroundColor: 'white',
+                            backgroundColor: '#e9e9e9',
                             borderRadius: '50%',
                         }}
                     />
