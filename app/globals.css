@@ -167,6 +167,6 @@ body {
 
 .snake-food {
   position: absolute;
-  background-color: 'white !important';
-  border-radius: '50%';
+  background-color: white !important;
+  border-radius: 50%;
 }
