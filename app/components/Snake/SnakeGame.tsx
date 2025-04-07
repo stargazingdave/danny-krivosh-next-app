@@ -488,14 +488,12 @@ export const SnakeGame: React.FC = () => {
 
                         {/* FOOD */}
                         <div
+                            className="snake-food"
                             style={{
-                                position: 'absolute',
                                 left: food.x * CELL_SIZE,
                                 top: food.y * CELL_SIZE,
                                 width: CELL_SIZE,
                                 height: CELL_SIZE,
-                                backgroundColor: 'white !important',
-                                borderRadius: '50%',
                             }}
                         />
 
