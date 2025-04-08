@@ -27,14 +27,18 @@ type Key = Direction | "Escape" | "Enter";
 const directionOptions: Key[] = ["UP", "DOWN", "LEFT", "RIGHT"];
 
 const getRandomPosition = (
-    snakePositions: { x: number, y: number }[],
+    blocked: { x: number; y: number }[],
     isMobile: boolean
 ) => {
     let x: number, y: number;
+    const width = isMobile ? MOBILE_GRID_WIDTH : GRID_WIDTH;
+    const height = isMobile ? MOBILE_GRID_HEIGHT : GRID_HEIGHT;
+
     do {
-        x = Math.floor(Math.random() * (isMobile ? MOBILE_GRID_WIDTH : GRID_WIDTH));
-        y = Math.floor(Math.random() * (isMobile ? MOBILE_GRID_HEIGHT : GRID_HEIGHT));
-    } while ((x === 0 && y === 0) || snakePositions.some(s => s.x === x && s.y === y));
+        x = Math.floor(Math.random() * width);
+        y = Math.floor(Math.random() * height);
+    } while (blocked.some(p => p.x === x && p.y === y));
+
     return { x, y };
 };
 
@@ -266,23 +270,25 @@ export const SnakeGame: React.FC = () => {
                 selfTimeoutRef.current = null;
             }
 
-            const newSnake = [head, ...currentSnake];
+            let newSnake = [head, ...currentSnake];
+            let shouldGrow = false;
 
-            // Check if snake eats food
+            // On food eaten
             if (head.x === food.x && head.y === food.y) {
-                setFood(getRandomPosition(snake, isMobile));
+                shouldGrow = true;
+                const blocked = [...newSnake, bottle, pill, joint];
+                setFood(getRandomPosition(blocked, isMobile));
                 setSpeed(prev => Math.min(prev + 1, MAX_SPEED));
                 setLatestEvent('foodEaten');
                 if (!showBottle) setShowBottle(getRandomBottle());
                 if (!showPill) setShowPill(getRandomPill());
                 if (!showJoint) setShowJoint(getRandomJoint());
-            } else {
-                newSnake.pop();
             }
 
             // Check if snake eats bottle
             if (head.x === bottle.x && head.y === bottle.y && showBottle) {
-                setBottle(getRandomPosition(snake, isMobile));
+                shouldGrow = true;
+                setBottle(getRandomPosition([...newSnake, food, pill, joint], isMobile));
                 setLatestEvent('bottleEaten');
                 setShowBottle(false);
                 setSpeed(Math.min(Math.random() * (MAX_SPEED - MIN_SPEED - Math.random() * 6) + MIN_SPEED, MAX_SPEED));
@@ -290,7 +296,8 @@ export const SnakeGame: React.FC = () => {
 
             // Check if snake eats pill
             if (head.x === pill.x && head.y === pill.y && showPill) {
-                setPill(getRandomPosition(snake, isMobile));
+                shouldGrow = true;
+                setPill(getRandomPosition([...newSnake, food, bottle, joint], isMobile));
                 setLatestEvent('pillEaten');
                 setShowPill(false);
                 setSpeed(prev => Math.max(prev - 2, MIN_SPEED));
@@ -298,7 +305,8 @@ export const SnakeGame: React.FC = () => {
 
             // Check if snake eats joint
             if (head.x === joint.x && head.y === joint.y && showJoint) {
-                setJoint(getRandomPosition(snake, isMobile));
+                shouldGrow = true;
+                setJoint(getRandomPosition([...newSnake, food, bottle, pill], isMobile));
                 setLatestEvent('jointEaten');
                 setShowJoint(false);
                 setSpeed(8);
