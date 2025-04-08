@@ -207,8 +207,7 @@ export const SongGrid: FC = () => {
                                                 src={song.image}
                                                 alt={song.title}
                                                 fill
-                                                objectFit="cover"
-                                                className="opacity-40"
+                                                className="opacity-40 object-cover"
                                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                             />
                                         </div>

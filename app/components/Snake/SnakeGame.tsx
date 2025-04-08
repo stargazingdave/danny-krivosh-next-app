@@ -11,28 +11,65 @@ import { HiX } from "react-icons/hi";
 import { TbPillFilled } from "react-icons/tb";
 import { LiaJointSolid } from "react-icons/lia";
 import Checkbox from "../Checkbox";
+import { IoSettingsOutline } from "react-icons/io5";
 
-const GRID_HEIGHT = 20;
-const GRID_WIDTH = 36;
-const MOBILE_GRID_WIDTH = 16;
-const MOBILE_GRID_HEIGHT = 24;
+type GridSizeKey = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+type GridSize = { width: number; height: number };
+type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT";
+type Key = Direction | "Escape" | "Enter";
+type Position = { x: number; y: number };
+
+const GRID_SIZES: Record<GridSizeKey, {
+    width: number;
+    height: number;
+}> = {
+    xs: {
+        width: 20,
+        height: 12,
+    },
+    sm: {
+        width: 24,
+        height: 16,
+    },
+    md: {
+        width: 28,
+        height: 20,
+    },
+    lg: {
+        width: 32,
+        height: 24,
+    },
+    xl: {
+        width: 50,
+        height: 28,
+    },
+};
+
+const getGridSize = () => {
+    const width = window.innerWidth;
+    if (width < 400) return GRID_SIZES.xs;
+    if (width < 640) return GRID_SIZES.sm;
+    if (width < 1024) return GRID_SIZES.md;
+    if (width < 1440) return GRID_SIZES.lg;
+    return GRID_SIZES.xl;
+};
+
 const CELL_SIZE = 20;
 const INITIAL_SPEED = 5;
 const MAX_SPEED = 18;
 const MIN_SPEED = 2;
 
-type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT";
-type Key = Direction | "Escape" | "Enter";
+
 
 const directionOptions: Key[] = ["UP", "DOWN", "LEFT", "RIGHT"];
 
 const getRandomPosition = (
     blocked: { x: number; y: number }[],
-    isMobile: boolean
+    gridSize: GridSize
 ) => {
     let x: number, y: number;
-    const width = isMobile ? MOBILE_GRID_WIDTH : GRID_WIDTH;
-    const height = isMobile ? MOBILE_GRID_HEIGHT : GRID_HEIGHT;
+    const width = gridSize.width;
+    const height = gridSize.height;
 
     do {
         x = Math.floor(Math.random() * width);
@@ -86,10 +123,9 @@ const scoreMap: Record<ScoreType, { score: number; color: string }> = {
 export const SnakeGame: React.FC = () => {
     const { setSnakeOpen } = useAppContext();
 
-    const [isMobile, setIsMobile] = useState(false);
-
     const [soundOn, setSoundOn] = useState(false);
-    const [gameStatus, setGameStatus] = useState<'ready' | 'running' | 'gameOver'>('ready');
+    const [gameStatus, setGameStatus] = useState<'ready' | 'running' | 'gameOver' | 'settings'>('ready');
+    const [previousGameStatus, setPreviousGameStatus] = useState<'ready' | 'running' | 'gameOver' | 'settings'>('ready');
 
     const [score, setScore] = useState(0);
     const [snake, setSnake] = useState([{ x: 10, y: 10 }]);
@@ -106,23 +142,34 @@ export const SnakeGame: React.FC = () => {
     const [snakeColor, setSnakeColor] = useState<snakeColor>(snakeColorMap.default);
     const [snakeColors, setSnakeColors] = useState<string[]>([]);
 
-    const [food, setFood] = useState(getRandomPosition([{ x: 0, y: 0 }], isMobile),);
+    const [food, setFood] = useState(getRandomPosition([{ x: 0, y: 0 }], getGridSize()),);
 
-    const [bottle, setBottle] = useState(getRandomPosition([{ x: 0, y: 0 }], isMobile));
+    const [bottle, setBottle] = useState(getRandomPosition([{ x: 0, y: 0 }], getGridSize()));
     const [showBottle, setShowBottle] = useState(false);
 
-    const [pill, setPill] = useState(getRandomPosition([{ x: 0, y: 0 }], isMobile));
+    const [pill, setPill] = useState(getRandomPosition([{ x: 0, y: 0 }], getGridSize()));
     const [showPill, setShowPill] = useState(false);
     const pillColorIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    const [joint, setJoint] = useState(getRandomPosition([{ x: 0, y: 0 }], isMobile));
+    const [joint, setJoint] = useState(getRandomPosition([{ x: 0, y: 0 }], getGridSize()));
     const [showJoint, setShowJoint] = useState(false);
+
+    const [gridSize, setGridSize] = useState<GridSize>(getGridSize());
+    const [darkModeFix, setDarkModeFix] = useState(false);
+
+    // useEffect(() => {
+    //     setGridSize(getGridSize());
+    //     setFood(getRandomPosition(snake, gridSize));
+    //     setBottle(getRandomPosition(snake, gridSize));
+    //     setPill(getRandomPosition(snake, gridSize));
+    //     setJoint(getRandomPosition(snake, gridSize));
+    // }, [gridSize.width, gridSize.height]);
 
 
     const restartGame = () => {
         hasRestartedRef.current = true;
         setSnake([{ x: 10, y: 10 }]);
-        setFood(getRandomPosition([{ x: 0, y: 0 }], isMobile));
+        setFood(getRandomPosition([{ x: 0, y: 0 }], gridSize));
         setDirection("RIGHT");
         setGameStatus('running');
         setSpeed(INITIAL_SPEED);
@@ -226,9 +273,8 @@ export const SnakeGame: React.FC = () => {
             else if (currentDirection === "LEFT") head.x--;
             else if (currentDirection === "RIGHT") head.x++;
 
-            const isOutOfBounds = head.x < 0 || head.y < 0 || head.x >= GRID_WIDTH || head.y >= GRID_HEIGHT;
-            const isOutOfBoundsMobile = head.x < 0 || head.y < 0 || head.x >= MOBILE_GRID_WIDTH || head.y >= MOBILE_GRID_HEIGHT;
-            if (isMobile ? isOutOfBoundsMobile : isOutOfBounds) {
+            const isOutOfBounds = head.x < 0 || head.y < 0 || head.x >= gridSize.width || head.y >= gridSize.height;
+            if (isOutOfBounds) {
                 if (!wallTimeoutRef.current) {
                     wallTimeoutRef.current = setTimeout(() => {
                         const retryHead = { ...snake[0] };
@@ -236,9 +282,8 @@ export const SnakeGame: React.FC = () => {
                         else if (currentDirection === "DOWN") retryHead.y++;
                         else if (currentDirection === "LEFT") retryHead.x--;
                         else if (currentDirection === "RIGHT") retryHead.x++;
-                        const stillOutOfBounds = retryHead.x < 0 || retryHead.y < 0 || retryHead.x >= GRID_WIDTH || retryHead.y >= GRID_HEIGHT;
-                        const stillOutOfBoundsMobile = retryHead.x < 0 || retryHead.y < 0 || retryHead.x >= MOBILE_GRID_WIDTH || retryHead.y >= MOBILE_GRID_HEIGHT;
-                        if (isMobile ? stillOutOfBoundsMobile : stillOutOfBounds) setGameStatus('gameOver');
+                        const stillOutOfBounds = retryHead.x < 0 || retryHead.y < 0 || retryHead.x >= gridSize.width || retryHead.y >= gridSize.height;
+                        if (stillOutOfBounds) setGameStatus('gameOver');
                         wallTimeoutRef.current = null;
                     }, 150);
                 }
@@ -274,7 +319,7 @@ export const SnakeGame: React.FC = () => {
 
             // Check if snake eats food
             if (head.x === food.x && head.y === food.y) {
-                setFood(getRandomPosition(snake, isMobile));
+                setFood(getRandomPosition(snake, gridSize));
                 setSpeed(prev => Math.min(prev + 1, MAX_SPEED));
                 setLatestEvent('foodEaten');
                 if (!showBottle) setShowBottle(getRandomBottle());
@@ -286,7 +331,7 @@ export const SnakeGame: React.FC = () => {
 
             // Check if snake eats bottle
             if (head.x === bottle.x && head.y === bottle.y && showBottle) {
-                setBottle(getRandomPosition(snake, isMobile));
+                setBottle(getRandomPosition(snake, gridSize));
                 setLatestEvent('bottleEaten');
                 setShowBottle(false);
                 setSpeed(Math.min(Math.random() * (MAX_SPEED - MIN_SPEED - Math.random() * 6) + MIN_SPEED, MAX_SPEED));
@@ -294,7 +339,7 @@ export const SnakeGame: React.FC = () => {
 
             // Check if snake eats pill
             if (head.x === pill.x && head.y === pill.y && showPill) {
-                setPill(getRandomPosition(snake, isMobile));
+                setPill(getRandomPosition(snake, gridSize));
                 setLatestEvent('pillEaten');
                 setShowPill(false);
                 setSpeed(prev => Math.max(prev - 2, MIN_SPEED));
@@ -302,7 +347,7 @@ export const SnakeGame: React.FC = () => {
 
             // Check if snake eats joint
             if (head.x === joint.x && head.y === joint.y && showJoint) {
-                setJoint(getRandomPosition(snake, isMobile));
+                setJoint(getRandomPosition(snake, gridSize));
                 setLatestEvent('jointEaten');
                 setShowJoint(false);
                 setSpeed(8);
@@ -345,15 +390,12 @@ export const SnakeGame: React.FC = () => {
     }, []);
 
     const handleResize = () => {
-        if (window.innerWidth < 768) {
-            setIsMobile(true);
-            setFood(getRandomPosition(snake, isMobile));
-            setBottle(getRandomPosition(snake, isMobile));
-            setPill(getRandomPosition(snake, isMobile));
-            setJoint(getRandomPosition(snake, isMobile));
-        } else {
-            setIsMobile(false);
-        }
+        const newGridSize = getGridSize();
+        setGridSize(newGridSize);
+        setFood(getRandomPosition(snake, newGridSize));
+        setBottle(getRandomPosition(snake, newGridSize));
+        setPill(getRandomPosition(snake, newGridSize));
+        setJoint(getRandomPosition(snake, newGridSize));
     }
 
     useEffect(() => {
@@ -414,7 +456,7 @@ export const SnakeGame: React.FC = () => {
                     <div className="absolute inset-0 flex items-center justify-center z-40 animate-pulse-fade pointer-events-none">
                         <h1 className="text-4xl text-white italic tracking-widest text-center">
                             {
-                                isMobile
+                                gridSize.width < 25
                                     ? "INSERT COIN TO PLAY"
                                     : "PRESS ANY KEY TO START"
                             }
@@ -424,7 +466,16 @@ export const SnakeGame: React.FC = () => {
 
                 {/* HEADER */}
                 <div className="relative z-10 w-full h-11 flex items-center justify-between p-2">
-                    <div className="flex text-center text-2xl font-bold tracking-widest">
+                    <div className="flex items-center text-center text-2xl font-bold tracking-widest p-2 gap-2">
+                        <button
+                            onClick={() => {
+                                const prev = gameStatus;
+                                setPreviousGameStatus(prev);
+                                setGameStatus('settings');
+                            }}
+                        >
+                            <IoSettingsOutline size={26} className="text-white" />
+                        </button>
                         <h2>S: {score}</h2>
                         {newScore && <h2 style={{ color: newScore.color }}>+{newScore.score}</h2>}
                     </div>
@@ -464,8 +515,8 @@ export const SnakeGame: React.FC = () => {
                         className={`grid ${latestEvent === 'bottleEaten' ? 'bg-[#590b02]' : 'bg-black'
                             } transition-colors ease-out`}
                         style={{
-                            width: isMobile ? MOBILE_GRID_WIDTH * CELL_SIZE : GRID_WIDTH * CELL_SIZE,
-                            height: isMobile ? MOBILE_GRID_HEIGHT * CELL_SIZE : GRID_HEIGHT * CELL_SIZE,
+                            width: gridSize.width * CELL_SIZE,
+                            height: gridSize.height * CELL_SIZE,
                             position: 'relative',
                             overflow: 'hidden',
                         }}
@@ -498,6 +549,7 @@ export const SnakeGame: React.FC = () => {
                                 top: food.y * CELL_SIZE,
                                 width: CELL_SIZE,
                                 height: CELL_SIZE,
+                                backgroundColor: darkModeFix ? 'black' : 'white',
                             }}
                         />
 
@@ -558,10 +610,36 @@ export const SnakeGame: React.FC = () => {
                         </button>
                     </div>
                 )}
-            </div>
-            {/* MOBILE CONTROLS */}
 
-            {isMobile && gameStatus !== 'gameOver' &&
+                {/* SETTINGS SCREEN */}
+                {gameStatus === 'settings' && (
+                    <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-white/10 backdrop-blur-md rounded-md border border-white/20 text-white">
+                        <h3 className="text-3xl font-bold mb-4">Settings</h3>
+                        {/* <div className="flex flex-col items-center justify-center p-4 gap-4">
+                            <h2 className="text-2xl">Sound:</h2>
+                            <Checkbox checked={soundOn} onChange={() => toggleSound()} />
+                        </div> */}
+                        <div className="flex flex-col items-center justify-center p-4 gap-4">
+                            <h2 className="text-2xl">Dark Mode Fix (if you can't see the food):</h2>
+                            <Checkbox checked={darkModeFix} onChange={() => setDarkModeFix(!darkModeFix)} />
+                        </div>
+                        <br />
+                        <button
+                            onClick={() => {
+                                const prev = previousGameStatus;
+                                setGameStatus(prev);
+                                setPreviousGameStatus('settings');
+                            }}
+                            className="px-4 py-2 rounded bg-white/20 hover:bg-white/30 transition-all"
+                        >
+                            Back to Game
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {/* MOBILE CONTROLS */}
+            {gridSize.width < 25 && gameStatus !== 'gameOver' &&
                 <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 grid grid-cols-3 p-2 gap-2">
                     <div />
                     <button onClick={() => handleTouchDirection("UP")} className="h-16 w-16 flex items-center justify-center bg-white/40 rounded-full text-white text-xl">
