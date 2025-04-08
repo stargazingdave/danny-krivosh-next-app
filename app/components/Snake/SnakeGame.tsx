@@ -639,7 +639,7 @@ export const SnakeGame: React.FC = () => {
             </div>
 
             {/* MOBILE CONTROLS */}
-            {gridSize.width < 25 && gameStatus !== 'gameOver' &&
+            {gridSize.width < 25 && gameStatus !== 'gameOver' && gameStatus !== 'settings' &&
                 <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 grid grid-cols-3 p-2 gap-2">
                     <div />
                     <button onClick={() => handleTouchDirection("UP")} className="h-16 w-16 flex items-center justify-center bg-white/40 rounded-full text-white text-xl">
