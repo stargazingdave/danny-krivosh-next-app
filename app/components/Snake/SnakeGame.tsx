@@ -513,7 +513,7 @@ export const SnakeGame: React.FC = () => {
                     {/* GAME GRID */}
                     <div
                         className={`grid ${latestEvent === 'bottleEaten' ? 'bg-[#590b02]' : 'bg-black'
-                            } transition-colors ease-out`}
+                            } transition-colors ease-out border border-gray-600`}
                         style={{
                             width: gridSize.width * CELL_SIZE,
                             height: gridSize.height * CELL_SIZE,
@@ -549,7 +549,7 @@ export const SnakeGame: React.FC = () => {
                                 top: food.y * CELL_SIZE,
                                 width: CELL_SIZE,
                                 height: CELL_SIZE,
-                                backgroundColor: darkModeFix ? 'black' : 'white',
+                                backgroundColor: darkModeFix ? '#777777' : 'white',
                             }}
                         />
 
