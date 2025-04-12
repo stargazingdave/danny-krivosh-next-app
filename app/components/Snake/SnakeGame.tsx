@@ -45,6 +45,14 @@ const GRID_SIZES: Record<GridSizeKey, {
     },
 };
 
+const calculateGridSize = (containerWidth: number, containerHeight: number): GridSize => {
+    const isNotMobile = window.innerWidth > 640 ? 0 : 1;
+    return {
+        width: Math.floor((containerWidth - 600 - (isNotMobile * 100)) / CELL_SIZE),
+        height: Math.floor((containerHeight - 300 - (isNotMobile * 200)) / CELL_SIZE),
+    };
+};
+
 const getGridSize = () => {
     const width = window.innerWidth;
     if (width < 400) return GRID_SIZES.xs;
@@ -154,16 +162,33 @@ export const SnakeGame: React.FC = () => {
     const [joint, setJoint] = useState(getRandomPosition([{ x: 0, y: 0 }], getGridSize()));
     const [showJoint, setShowJoint] = useState(false);
 
-    const [gridSize, setGridSize] = useState<GridSize>(getGridSize());
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [gridSize, setGridSize] = useState<GridSize>({ width: 20, height: 20 }); // default before measure
     const [darkModeFix, setDarkModeFix] = useState(false);
 
-    // useEffect(() => {
-    //     setGridSize(getGridSize());
-    //     setFood(getRandomPosition(snake, gridSize));
-    //     setBottle(getRandomPosition(snake, gridSize));
-    //     setPill(getRandomPosition(snake, gridSize));
-    //     setJoint(getRandomPosition(snake, gridSize));
-    // }, [gridSize.width, gridSize.height]);
+    useEffect(() => {
+        const resize = () => {
+            if (containerRef.current) {
+                const rawWidth = containerRef.current.offsetWidth;
+                const rawHeight = containerRef.current.offsetHeight;
+
+                const cols = Math.floor(rawWidth / CELL_SIZE);
+                const rows = Math.floor(rawHeight / CELL_SIZE);
+
+                const newSize = { width: cols, height: rows };
+                setGridSize(newSize);
+
+                setFood(getRandomPosition(snake, newSize));
+                setBottle(getRandomPosition(snake, newSize));
+                setPill(getRandomPosition(snake, newSize));
+                setJoint(getRandomPosition(snake, newSize));
+            }
+        };
+
+        resize();
+        window.addEventListener("resize", resize);
+        return () => window.removeEventListener("resize", resize);
+    }, []);
 
 
     const restartGame = () => {
@@ -247,7 +272,13 @@ export const SnakeGame: React.FC = () => {
 
             if (directionOptions.includes(newKey) && gameStatus === 'running') {
                 const last = directionQueueRef.current.at(-1) || direction;
-                if (newKey !== last && directionQueueRef.current.length < 3) directionQueueRef.current.push(newKey as Direction);
+                if (directionQueueRef.current.length < 3) {
+                    if (newKey !== last) {
+                        directionQueueRef.current.push(newKey as Direction);
+                    } else {
+                        directionQueueRef.current = [newKey as Direction];
+                    }
+                }
             }
         };
         window.addEventListener("keydown", handleKeyDown);
@@ -273,7 +304,8 @@ export const SnakeGame: React.FC = () => {
             else if (currentDirection === "LEFT") head.x--;
             else if (currentDirection === "RIGHT") head.x++;
 
-            const isOutOfBounds = head.x < 0 || head.y < 0 || head.x >= gridSize.width || head.y >= gridSize.height;
+            const isOutOfBounds =
+                head.x < 0 || head.y < 0 || head.x >= gridSize.width || head.y >= gridSize.height;
             if (isOutOfBounds) {
                 if (!wallTimeoutRef.current) {
                     wallTimeoutRef.current = setTimeout(() => {
@@ -390,13 +422,18 @@ export const SnakeGame: React.FC = () => {
     }, []);
 
     const handleResize = () => {
-        const newGridSize = getGridSize();
-        setGridSize(newGridSize);
-        setFood(getRandomPosition(snake, newGridSize));
-        setBottle(getRandomPosition(snake, newGridSize));
-        setPill(getRandomPosition(snake, newGridSize));
-        setJoint(getRandomPosition(snake, newGridSize));
-    }
+        if (containerRef.current) {
+            const { offsetWidth, offsetHeight } = containerRef.current;
+
+            const newGridSize = calculateGridSize(offsetWidth, offsetHeight); // ✅ USE THIS
+            setGridSize(newGridSize);
+
+            setFood(getRandomPosition(snake, newGridSize));
+            setBottle(getRandomPosition(snake, newGridSize));
+            setPill(getRandomPosition(snake, newGridSize));
+            setJoint(getRandomPosition(snake, newGridSize));
+        }
+    };
 
     useEffect(() => {
         handleResize();
@@ -511,156 +548,155 @@ export const SnakeGame: React.FC = () => {
 
                 <div className="relative z-20 flex justify-center w-full h-full">
                     {/* GAME GRID */}
-                    <div
-                        className={`grid ${latestEvent === 'bottleEaten' ? 'bg-[#590b02]' : 'bg-black'
-                            } transition-colors ease-out border border-gray-600`}
-                        style={{
-                            width: gridSize.width * CELL_SIZE,
-                            height: gridSize.height * CELL_SIZE,
-                            position: 'relative',
-                            overflow: 'hidden',
-                        }}
-                    >
-                        {snake.map((s, i) => (
-                            <div
-                                key={i}
-                                style={{
-                                    position: 'absolute',
-                                    left: s.x * CELL_SIZE,
-                                    top: s.y * CELL_SIZE,
-                                    width: CELL_SIZE,
-                                    height: CELL_SIZE,
-                                    backgroundColor:
-                                        snakeColors.length > 0
-                                            ? snakeColors[i % snakeColors.length]
-                                            : i === 0
-                                                ? snakeColor.head
-                                                : snakeColor.body,
-                                    boxShadow: snakeColorMap[latestEvent || 'default'].glow,
-                                }}
-                            />
-                        ))}
-
-                        {/* FOOD */}
+                    <div ref={containerRef} className="w-full h-full relative flex flex-col items-center overflow-hidden">
                         <div
-                            className="snake-food"
+                            className="absolute top-16 transition-colors ease-out border border-gray-600"
                             style={{
-                                left: food.x * CELL_SIZE,
-                                top: food.y * CELL_SIZE,
-                                width: CELL_SIZE,
-                                height: CELL_SIZE,
-                                backgroundColor: darkModeFix ? '#777777' : 'white',
+                                width: gridSize.width * CELL_SIZE,
+                                height: gridSize.height * CELL_SIZE,
+                                backgroundColor: latestEvent === 'bottleEaten' ? '#590b02' : 'black',
                             }}
-                        />
-
-                        {showBottle && (
-                            <FaWineBottle
-                                style={{
-                                    position: 'absolute',
-                                    left: bottle.x * CELL_SIZE,
-                                    top: bottle.y * CELL_SIZE,
-                                    color: '#00ff22d1',
-                                    fontSize: '20px',
-                                }}
-                            />
-                        )}
-
-                        {showPill && (
-                            <TbPillFilled
-                                className="text-red-500"
-                                style={{
-                                    position: 'absolute',
-                                    left: pill.x * CELL_SIZE,
-                                    top: pill.y * CELL_SIZE,
-                                    width: CELL_SIZE,
-                                    height: CELL_SIZE,
-                                }}
-                            />
-                        )}
-
-                        {showJoint && (
-                            <LiaJointSolid
-                                className="text-[pink]"
-                                style={{
-                                    position: 'absolute',
-                                    left: joint.x * CELL_SIZE,
-                                    top: joint.y * CELL_SIZE,
-                                    width: CELL_SIZE,
-                                    height: CELL_SIZE,
-                                }}
-                            />
-                        )}
-                    </div>
-                </div>
-
-                {/* GAME OVER SCREEN */}
-                {gameStatus === 'gameOver' && (
-                    <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-white/10 backdrop-blur-md rounded-md border border-white/20 text-white">
-                        <h3 className="text-3xl font-bold mb-4">Game Over!</h3>
-                        <div className="flex flex-col items-center justify-center p-4 gap-4">
-                            <h2 className="text-2xl">Your score:</h2>
-                            <h1 className="text-6xl font-bold">{score}</h1>
-                        </div>
-                        <br />
-                        <button
-                            onClick={restartGame}
-                            className="px-4 py-2 rounded bg-white/20 hover:bg-white/30 transition-all"
                         >
-                            Restart
-                        </button>
-                    </div>
-                )}
+                            {snake.map((s, i) => (
+                                <div
+                                    key={i}
+                                    style={{
+                                        position: 'absolute',
+                                        left: s.x * CELL_SIZE,
+                                        top: s.y * CELL_SIZE,
+                                        width: CELL_SIZE,
+                                        height: CELL_SIZE,
+                                        backgroundColor:
+                                            snakeColors.length > 0
+                                                ? snakeColors[i % snakeColors.length]
+                                                : i === 0
+                                                    ? snakeColor.head
+                                                    : snakeColor.body,
+                                        boxShadow: snakeColorMap[latestEvent || 'default'].glow,
+                                    }}
+                                />
+                            ))}
 
-                {/* SETTINGS SCREEN */}
-                {gameStatus === 'settings' && (
-                    <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-white/10 backdrop-blur-md rounded-md border border-white/20 text-white">
-                        <h3 className="text-3xl font-bold mb-4">Settings</h3>
-                        {/* <div className="flex flex-col items-center justify-center p-4 gap-4">
+                            {/* FOOD */}
+                            <div
+                                className="snake-food"
+                                style={{
+                                    left: food.x * CELL_SIZE,
+                                    top: food.y * CELL_SIZE,
+                                    width: CELL_SIZE,
+                                    height: CELL_SIZE,
+                                    backgroundColor: darkModeFix ? '#777777' : 'white',
+                                }}
+                            />
+
+                            {showBottle && (
+                                <FaWineBottle
+                                    style={{
+                                        position: 'absolute',
+                                        left: bottle.x * CELL_SIZE,
+                                        top: bottle.y * CELL_SIZE,
+                                        color: '#00ff22d1',
+                                        fontSize: '20px',
+                                    }}
+                                />
+                            )}
+
+                            {showPill && (
+                                <TbPillFilled
+                                    className="text-red-500"
+                                    style={{
+                                        position: 'absolute',
+                                        left: pill.x * CELL_SIZE,
+                                        top: pill.y * CELL_SIZE,
+                                        width: CELL_SIZE,
+                                        height: CELL_SIZE,
+                                    }}
+                                />
+                            )}
+
+                            {showJoint && (
+                                <LiaJointSolid
+                                    className="text-[pink]"
+                                    style={{
+                                        position: 'absolute',
+                                        left: joint.x * CELL_SIZE,
+                                        top: joint.y * CELL_SIZE,
+                                        width: CELL_SIZE,
+                                        height: CELL_SIZE,
+                                    }}
+                                />
+                            )}
+                        </div>
+                    </div>
+
+                    {/* GAME OVER SCREEN */}
+                    {gameStatus === 'gameOver' && (
+                        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-white/10 backdrop-blur-md rounded-md border border-white/20 text-white">
+                            <h3 className="text-3xl font-bold mb-4">Game Over!</h3>
+                            <div className="flex flex-col items-center justify-center p-4 gap-4">
+                                <h2 className="text-2xl">Your score:</h2>
+                                <h1 className="text-6xl font-bold">{score}</h1>
+                            </div>
+                            <br />
+                            <button
+                                onClick={restartGame}
+                                className="px-4 py-2 rounded bg-white/20 hover:bg-white/30 transition-all"
+                            >
+                                Restart
+                            </button>
+                        </div>
+                    )}
+
+                    {/* SETTINGS SCREEN */}
+                    {gameStatus === 'settings' && (
+                        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-white/10 backdrop-blur-md rounded-md border border-white/20 text-white">
+                            <h3 className="text-3xl font-bold mb-4">Settings</h3>
+                            {/* <div className="flex flex-col items-center justify-center p-4 gap-4">
                             <h2 className="text-2xl">Sound:</h2>
                             <Checkbox checked={soundOn} onChange={() => toggleSound()} />
                         </div> */}
-                        <div className="flex flex-col items-center justify-center p-4 gap-4">
-                            <h2 className="text-2xl">Dark Mode Fix (if you can't see the food):</h2>
-                            <Checkbox checked={darkModeFix} onChange={() => setDarkModeFix(!darkModeFix)} />
+                            <div className="flex flex-col items-center justify-center p-4 gap-4">
+                                <h2 className="text-2xl">Dark Mode Fix (if you can't see the food):</h2>
+                                <Checkbox checked={darkModeFix} onChange={() => setDarkModeFix(!darkModeFix)} />
+                            </div>
+                            <br />
+                            <button
+                                onClick={() => {
+                                    const prev = previousGameStatus;
+                                    setGameStatus(prev);
+                                    setPreviousGameStatus('settings');
+                                }}
+                                className="px-4 py-2 rounded bg-white/20 hover:bg-white/30 transition-all"
+                            >
+                                Back to Game
+                            </button>
                         </div>
-                        <br />
-                        <button
-                            onClick={() => {
-                                const prev = previousGameStatus;
-                                setGameStatus(prev);
-                                setPreviousGameStatus('settings');
-                            }}
-                            className="px-4 py-2 rounded bg-white/20 hover:bg-white/30 transition-all"
-                        >
-                            Back to Game
-                        </button>
-                    </div>
-                )}
-            </div>
-
-            {/* MOBILE CONTROLS */}
-            {gridSize.width < 25 && gameStatus !== 'gameOver' && gameStatus !== 'settings' &&
-                <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 grid grid-cols-3 p-2 gap-2">
-                    <div />
-                    <button onClick={() => handleTouchDirection("UP")} className="h-16 w-16 flex items-center justify-center bg-white/40 rounded-full text-white text-xl">
-                        ↑
-                    </button>
-                    <div />
-                    <button onClick={() => handleTouchDirection("LEFT")} className="h-16 w-16 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
-                        ←
-                    </button>
-                    <div />
-                    <button onClick={() => handleTouchDirection("RIGHT")} className="h-16 w-16 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
-                        →
-                    </button>
-                    <div />
-                    <button onClick={() => handleTouchDirection("DOWN")} className="h-16 w-16 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
-                        ↓
-                    </button>
-                    <div />
+                    )}
                 </div>
-            }
 
+                {/* MOBILE CONTROLS */}
+                {gridSize.width < 25 && gameStatus !== 'gameOver' && gameStatus !== 'settings' &&
+                    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 grid grid-cols-3 p-2 gap-2">
+                        <div />
+                        <button onClick={() => handleTouchDirection("UP")} className="h-16 w-16 flex items-center justify-center bg-white/40 rounded-full text-white text-xl">
+                            ↑
+                        </button>
+                        <div />
+                        <button onClick={() => handleTouchDirection("LEFT")} className="h-16 w-16 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
+                            ←
+                        </button>
+                        <div />
+                        <button onClick={() => handleTouchDirection("RIGHT")} className="h-16 w-16 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
+                            →
+                        </button>
+                        <div />
+                        <button onClick={() => handleTouchDirection("DOWN")} className="h-16 w-16 flex items-center justify-center bg-white/20 rounded-full text-white text-xl">
+                            ↓
+                        </button>
+                        <div />
+                    </div>
+                }
+            </div>
         </div>
     );
 };
