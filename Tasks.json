@@ -3,8 +3,8 @@
         "snake": [
             "New food cannot be generated on snake's tail.",
             "When eating a pill while tripping balls, you get 2X points per pill eaten while trippin.",
-            "thunder and rain sounds",
-            "food color in dark theme ???",
-        ]
+            "thunder and rain sounds checkboxes in homepage, not in snake like we tought previously",
+            "joystick 3000":
+        ]"    },"F button bacgrkound set to transparency = 100.
     }
-}
+}""
