@@ -1,74 +1,148 @@
 'use client';
 
-import { FaSpotify } from "react-icons/fa";
+import Link from "next/link";
 import { FaAmazon, FaYoutube } from "react-icons/fa6";
-import { SocialLinkIcons } from "./components/SocialLinkIcons";
 import { IoLogoSoundcloud } from "react-icons/io5";
 
 export default function AboutIndex() {
     const youtubeLink = "https://www.youtube.com/DannyKrivosh";
     const primaryEmail = "GoFor@DannyKrivosh.com";
-    const secondaryEmail = "strifed@gmail.com";
 
     return (
-        <div className="p-4 text-xl text-center">
-            <p className="text-white">
-                <br></br>Originally from Ukraine, <br></br>
-                <br></br>I am the musician behind some songs and author of "Brown, to Brown. - An Anthology".
-            </p>
-            <br />
-            <p className="text-white">
-                I have been writing music throughout my life.
-            </p>
-            <br />
-            <p className="text-white">
-                My music isn't available on all major streaming platforms.
-                <br></br>
-                You can find some  of it on SoundCloud, but most of it is on YouTube.
-                <br></br>
-                I also have an Amazon Author Page.
-            </p>
-            <br />
-            <p className="text-white">
-                We've made this awesome easter-egg-filled site for your conveinience and for our joy.
-                <br>
-                </br>
-                <br>
-                </br>Be sure to try the Recycling Bin (DUMPSTER 3000) feature.<br></br>
-                <br></br>You can contact me at:
-            </p>
-            <p>
-                <a href={`mailto:${primaryEmail}`} className="text-accent text-gray-500">
-                    {primaryEmail}
-                </a>
-            </p>
-            <br />
-            <p className="text-white">
-                You can also find me on <a href={youtubeLink} className="text-accent text-gray-500">YouTube</a>.
-            </p>
-            <br />
-            <br />
-            <SocialLinkIcons data={[
-                {
-                    icon: FaYoutube,
-                    link: youtubeLink,
-                    color: "white",
-                    hoverColor: "red",
-                },
-                {
-                    icon: FaAmazon,
-                    link: "https://www.amazon.com/author/dannykrivosh",
-                    color: "white",
-                    hoverColor: "#ffd600",
-                },
-                {
-                    icon: IoLogoSoundcloud,
-                    link: "https://soundcloud.com/danny-krivosh",
-                    color: "white",
-                    hoverColor: "#ff5408",
-                },
-            ]} />
+        <div
+            style={{
+                minHeight: "100vh",
+                backgroundColor: "rgba(0, 0, 0, 0.6)",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: "40px",
+            }}
+        >
+            <div
+                style={{
+                    width: "100%",
+                    maxWidth: "600px",
+                    background: "linear-gradient(to bottom, #2c2c2c, #1e1e1e)",
+                    border: "2px solid #7a96df",
+                    borderRadius: "6px",
+                    boxShadow: "0 0 20px rgba(0, 0, 0, 0.8)",
+                    fontFamily: "Segoe UI, Tahoma, Geneva, Verdana, sans-serif",
+                    overflow: "hidden",
+                    color: "#fff",
+                }}
+            >
+                {/* Title Bar */}
+                <div
+                    style={{
+                        background: "#000",
+                        color: "#fff",
+                        padding: "6px 10px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        fontWeight: "bold",
+                        fontSize: "14px",
+                        borderBottom: "2px solid #444", // <-- subtle stroke
+                        boxShadow: "inset 0 -1px 0 #555", // <-- subtle inner glow
+                    }}
+                >
+                    <span>About Danny Krivosh</span>
+                    <Link
+                        style={{
+                            width: "24px",
+                            height: "24px",
+                            background: "linear-gradient(to bottom, #f00, #a00)",
+                            border: "1px solid #000",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#fff",
+                            fontWeight: "bold",
+                            cursor: "pointer",
+                            fontSize: "20px", // Bigger X
+                            lineHeight: "1",
+                            transition: "transform 0.1s ease",
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = "scale(1.1)";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = "scale(1)";
+                        }}
+                        href={"/"}
+                        title="Close"
+                    >
+                        ×
+                    </Link>
+
+
+                </div>
+
+                {/* Content */}
+                <div style={{ padding: "20px", fontSize: "15px" }}>
+                    <p>
+                        Originally from Ukraine, I am the musician behind some songs and author of <i>"Brown, to Brown. - An Anthology"</i>.
+                    </p>
+                    <br />
+                    <p>I have been writing music throughout my life.</p>
+                    <br />
+                    <p>
+                        My music isn't available on all major streaming platforms.
+                        <br />
+                        You can find some of it on <b>SoundCloud</b>, but most of it is on <b>YouTube</b>.
+                        <br />
+                        I also have an <b>Amazon Author Page</b>.
+                    </p>
+                    <br />
+                    <p>
+                        We've made this awesome easter-egg-filled site for your convenience and for our joy.
+                        <br />
+                        Be sure to try the <b>Recycling Bin (DUMPSTER 3000)</b> feature.
+                        <br />
+                        You can contact me at:
+                    </p>
+                    <p>
+                        <a href={`mailto:${primaryEmail}`} style={{ color: "#70aaff" }}>
+                            {primaryEmail}
+                        </a>
+                    </p>
+                    <br />
+                    <p>
+                        You can also find me on{" "}
+                        <a href={youtubeLink} style={{ color: "#ff6b6b" }}>
+                            YouTube
+                        </a>.
+                    </p>
+                    <br />
+                    <div style={{ display: "flex", gap: "20px", justifyContent: "center" }}>
+                        <a href={youtubeLink} target="_blank" rel="noreferrer" title="YouTube">
+                            <FaYoutube size={32} color="#ff4444" />
+                        </a>
+                        <a href="https://www.amazon.com/author/dannykrivosh" target="_blank" rel="noreferrer" title="Amazon">
+                            <FaAmazon size={32} color="#e2e2e2" />
+                        </a>
+                        <a href="https://soundcloud.com/danny-krivosh" target="_blank" rel="noreferrer" title="SoundCloud">
+                            <IoLogoSoundcloud size={32} color="#ff5408" />
+                        </a>
+                    </div>
+                    <hr
+                        style={{
+                            border: "none",
+                            borderTop: "1px solid #555",
+                            margin: "30px 0 15px",
+                        }}
+                    />
+                    <div style={{ fontSize: "13px", color: "#aaa", textAlign: "left", lineHeight: "1.6" }}>
+                        <p><b>Version:</b> DK-H2IL (Danny Krivosh – Hebrew Intl. Edition)</p>
+                        <p><b>HTML Engine:</b> v5.2.1</p>
+                        <p><b>CSS Shell:</b> DarkGlass X</p>
+                        <p><b>Build Date:</b> April 2025</p>
+                        <p><b>Codename:</b> Dumpster3000</p>
+                    </div>
+
+                </div>
+            </div>
         </div>
     );
 }
-
