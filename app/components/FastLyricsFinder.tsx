@@ -85,13 +85,13 @@ export const FastLyricsFinder: FC<FastLyricsFinderProps> = () => {
             </div>
 
             {isOpen && (
-                <div className='fixed bottom-14 left-[calc(50%-12rem)] w-96 max-w-5/6 z-50 border border-gray-600 bg-black text-white shadow-[4px_4px_0px_#000]'>
+                <div className='fixed bottom-14 left-[calc(50%-12rem)] resize-x overflow-auto w-96 min-w-96 max-w-[90vw] z-50 border border-gray-600 bg-black text-white shadow-[4px_4px_0px_#000]'>
                     <div className="flex p-1 gap-4 justify-between items-center bg-black border-b border-gray-700">
                         <FaWindowMinimize className="w-8 h-8 text-white p-2 border cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
                         <h1 className="w-full text-xl text-center text-white">FAST LYRICS FINDER</h1>
                     </div>
 
-                    <div className="flex flex-col items-center h-96 overflow-auto gap-4 px-4 py-2 bg-black">
+                    <div className="flex flex-col items-center h-96 overflow-auto gap-4 px-2 py-2 bg-black">
                         <p className="text-center text-sm text-gray-300">There may be lyrics available for this song. Click here!</p>
 
                         {status === 'ready' && (

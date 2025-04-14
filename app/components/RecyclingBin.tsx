@@ -2,23 +2,58 @@
 
 import { FC, useEffect, useRef, useState } from "react";
 import { SongData } from "../types/SongData";
-import { TbTrashXFilled } from "react-icons/tb";
-import { FaPause, FaPlay, FaShuffle, FaWindowMinimize } from "react-icons/fa6";
+import { FaShuffle, FaWindowMinimize } from "react-icons/fa6";
+import { HiOutlineTrash } from "react-icons/hi2";
 import { useAppContext } from "../AppContext";
 import { PlayPauseButton } from "./PlaybackControls/PlayPauseButton";
 import Image from "next/image";
-import { HiOutlineTrash } from "react-icons/hi2";
 
 const widthUnit = 13;
 const heightUnit = 12;
+
+const MiniEqualizer: FC = () => (
+    <div
+        style={{
+            display: 'flex',
+            alignItems: 'flex-end',
+            gap: '2px',
+            width: '22px',
+            height: '18px',
+            marginLeft: '4px',
+        }}
+    >
+        {[...Array(5)].map((_, i) => (
+            <div
+                key={i}
+                style={{
+                    width: '3px',
+                    background: 'linear-gradient(to top, #ffc400, transparent)',
+                    height: `${6 + Math.random() * 10}px`,
+                    animation: `eqAnim .3s ease-in-out ${i * 0.1}s infinite alternate`,
+                    borderRadius: '2px',
+                }}
+            />
+        ))}
+    </div>
+);
+
+if (typeof window !== 'undefined') {
+    const style = document.createElement('style');
+    style.innerHTML = `
+    @keyframes eqAnim {
+      0% { transform: scaleY(0.5); opacity: 0.4; }
+      50% { transform: scaleY(1.8); opacity: 1; }
+      100% { transform: scaleY(0.7); opacity: 0.6; }
+    }
+  `;
+    document.head.appendChild(style);
+}
 
 interface RecyclingBinProps {
     isTouchDraggedOver?: boolean;
 }
 
-export const RecyclingBin: FC<RecyclingBinProps> = ({
-    isTouchDraggedOver = false,
-}) => {
+export const RecyclingBin: FC<RecyclingBinProps> = ({ isTouchDraggedOver = false }) => {
     const {
         addSongToRecycle,
         removeSongsFromRecycle,
@@ -31,59 +66,40 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({
         togglePlay,
         currentSong,
     } = useAppContext();
+
     const [isOpen, setIsOpen] = useState(false);
     const [isDraggedOver, setIsDraggedOver] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
 
-    const handleResize = () => {
-        if (window.innerWidth <= 768) {
-            setIsMobile(true);
-        } else {
-            setIsMobile(false);
-        }
-    }
-
     useEffect(() => {
-        handleResize(); // Set initial state
-        window.addEventListener("resize", handleResize); // Add event listener
-        return () => {
-            window.removeEventListener("resize", handleResize); // Cleanup event listener
-        };
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
     }, []);
+
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+
     const dragTimeout = useRef<NodeJS.Timeout | null>(null);
 
     const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         setIsDraggedOver(true);
-
-        // Clear any previous timeout to prevent premature reset
-        if (dragTimeout.current) {
-            clearTimeout(dragTimeout.current);
-        }
-
-        // Set a new timeout to reset isDraggedOver if no drag events occur for a short time
-        dragTimeout.current = setTimeout(() => {
-            setIsDraggedOver(false);
-        }, 200);
+        if (dragTimeout.current) clearTimeout(dragTimeout.current);
+        dragTimeout.current = setTimeout(() => setIsDraggedOver(false), 200);
     };
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         const songData = e.dataTransfer.getData("song");
         if (!songData) return;
-
         const droppedSong: SongData = JSON.parse(songData);
-        addSongToRecycle(droppedSong); // Add song to parent component
+        addSongToRecycle(droppedSong);
         setIsDraggedOver(false);
     };
 
     if (!isOpen) {
         return (
-            <div
-                id="recycle-bin-dropzone"
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-            >
+            <div id="recycle-bin-dropzone" onDragOver={handleDragOver} onDrop={handleDrop}>
                 <Image
                     src="/images/recycle-bin-icon.png"
                     alt="Recycle Bin"
@@ -91,8 +107,9 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({
                     height={(isDraggedOver || isTouchDraggedOver) ? 150 : 135}
                     className="p-2 cursor-pointer transition-all duration-300 ease-in-out"
                     style={{
-                        filter: (isDraggedOver || isTouchDraggedOver) ? "drop-shadow(0 0 24px rgb(255 0 0))" : "drop-shadow(0 0.5rem 0.5rem rgb(0 0 0))",
-                        // objectFit: "fill", // <-- this allows distorting the aspect ratio
+                        filter: (isDraggedOver || isTouchDraggedOver)
+                            ? "drop-shadow(0 0 18px #e0b300)"
+                            : "drop-shadow(0 0.5rem 0.5rem rgba(0,0,0,0.5))",
                         width: widthUnit * ((isDraggedOver || isTouchDraggedOver) ? 12 : 10),
                         height: heightUnit * ((isDraggedOver || isTouchDraggedOver) ? 12 : 10),
                         margin: isMobile ? "0" : "2rem",
@@ -106,95 +123,138 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({
     const onShuffleClick = () => {
         setPlaylists(playlists.map(playlist => {
             if (playlist.id === 'recycle') {
-                const shuffledSongs = [...playlist?.songs].sort(() => Math.random() - 0.5);
+                const shuffledSongs = [...playlist.songs].sort(() => Math.random() - 0.5);
                 return { ...playlist, songs: shuffledSongs };
             }
             return playlist;
-        }
-        ));
+        }));
         setRandomOrder('recycle');
     };
 
     const handleListPlayPause = () => {
-        if (currentPlaylist.id === "recycle") {
-            togglePlay();
-        } else {
-            startPlaylist("recycle");
-        }
+        if (currentPlaylist.id === "recycle") togglePlay();
+        else startPlaylist("recycle");
     };
 
     const handleSongPlayPause = (song: SongData) => {
-        if (currentPlaylist.id === "recycle" && currentSong?.id === song.id) {
-            togglePlay();
-        } else {
-            startPlaylist("recycle", playlists[1].songs.findIndex(s => s.id === song.id));
-        }
-    }
+        if (currentPlaylist.id === "recycle" && currentSong?.id === song.id) togglePlay();
+        else startPlaylist("recycle", playlists[1].songs.findIndex(s => s.id === song.id));
+    };
 
-    const recyclePlaylist = playlists.find(playlist => playlist.id === "recycle");
-    if (!recyclePlaylist) return null; // Ensure recycle playlist exists
+    const recyclePlaylist = playlists.find(p => p.id === "recycle");
+    if (!recyclePlaylist) return null;
 
     const handleDeleteAllSongs = () => {
-        if (playlists[1].songs.length > 0) {
-            removeSongsFromRecycle(recyclePlaylist.songs); // Remove all songs from recycle bin
-        }
-        setPlaylists(playlists.map(playlist => {
-            if (playlist.id === 'recycle') {
-                return { ...playlist, songs: [] };
-            }
-            return playlist;
-        }));
+        if (playlists[1].songs.length > 0) removeSongsFromRecycle(recyclePlaylist.songs);
+        setPlaylists(playlists.map(p => p.id === 'recycle' ? { ...p, songs: [] } : p));
     };
 
     return (
-        <div id="recycle-bin-dropzone"
-            className='fixed bottom-14 left-0 w-fit min-w-64 z-50'
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-        >
+        <div id="recycle-bin-dropzone" className='fixed bottom-14 left-0 w-[28rem] min-w-64 z-50' onDragOver={handleDragOver} onDrop={handleDrop}>
+            {/* Toolbar */}
             <div
-                className="flex p-1 gap-8 justify-between bg-black"
+                className="flex p-1 gap-8 justify-between items-center"
                 style={{
-                    backgroundColor: "#000000b0",
-                    backdropFilter: "blur(10px)",
+                    background: "linear-gradient(to right, #0a0a0a, #1a1a1a)",
+                    borderBottom: "1px solid #aa8800",
+                    boxShadow: "inset 0 -1px 2px #e3b80055, 0 1px 3px #000",
+                    fontFamily: "Tahoma, sans-serif",
+                    textTransform: "uppercase",
+                    padding: "6px 10px",
                 }}
             >
                 <div className="flex gap-2 items-center">
-                    <FaWindowMinimize className="w-8 h-8 text-white p-2 border cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
-                    <FaShuffle className="w-8 h-8 text-white p-2 border cursor-pointer" onClick={onShuffleClick} />
-                    <PlayPauseButton onClick={() => handleListPlayPause()} isPlaying={isPlaying && currentPlaylist.id === "recycle"} />
-                    <HiOutlineTrash className="w-8 h-8 text-white cursor-pointer" onClick={handleDeleteAllSongs} />
+                    {[{
+                        icon: <FaWindowMinimize />,
+                        onClick: () => setIsOpen(false)
+                    }, {
+                        icon: <FaShuffle />,
+                        onClick: onShuffleClick
+                    }, {
+                        icon: <HiOutlineTrash />,
+                        onClick: handleDeleteAllSongs
+                    }].map(({ icon, onClick }, idx) => (
+                        <button
+                            key={idx}
+                            onClick={onClick}
+                            style={{
+                                background: "linear-gradient(to bottom, #222, #111)",
+                                border: "1px solid #444",
+                                borderRadius: "3px",
+                                boxShadow: "inset 0 0 1px #fff3, 0 1px 2px #000",
+                                padding: "4px 6px",
+                                color: "#f3c400",
+                                transition: "all 0.2s",
+                                cursor: "pointer",
+                            }}
+                            onMouseOver={(e) => {
+                                (e.currentTarget.style.background = "linear-gradient(to bottom, #333, #1b1b1b)");
+                            }}
+                            onMouseOut={(e) => {
+                                (e.currentTarget.style.background = "linear-gradient(to bottom, #222, #111)");
+                            }}
+                        >
+                            {icon}
+                        </button>
+                    ))}
+                    {/* <PlayPauseButton onClick={handleListPlayPause} isPlaying={isPlaying && currentPlaylist.id === "recycle"} /> */}
                 </div>
-
-                <h1 className="w-fit text-2xl">DUMPSTER 3000</h1>
+                <h1 style={{
+                    fontSize: "26px",
+                    fontWeight: "bold",
+                    color: "#f3c400",
+                    textShadow: "0 0 4px #000, 0 0 8px #e3b80055",
+                    fontFamily: "Impact, Tahoma, sans-serif",
+                    letterSpacing: "2.5px"
+                }}>
+                    DUMPSTER 3000
+                </h1>
             </div>
 
+            {/* Song list */}
             <div
-                className="flex flex-col h-64 overflow-auto bg-black"
+                className="flex flex-col h-64 overflow-auto"
                 style={{
-                    backgroundColor: "#000000b0",
-                    backdropFilter: "blur(10px)",
+                    background: "repeating-linear-gradient(to bottom, #101010 0px, #181818 2px, #101010 4px)",
+                    borderTop: "1px solid #aa880022",
+                    boxShadow: "inset 0 0 10px #aa880033",
+                    padding: "6px",
+                    color: "#f0eac7",
+                    fontFamily: "Courier New, monospace",
+                    fontSize: "18px",
                 }}
             >
-                {
-                    playlists[1].songs.length === 0 &&
+                {playlists[1].songs.length === 0 && (
                     <div className="flex justify-center items-center h-full">
-                        <p className="text-white">Dump Here</p>
+                        <p style={{ fontFamily: "Tahoma", fontSize: "14px", color: "#888" }}>
+                            Dump Here
+                        </p>
                     </div>
-                }
-                {
-                    playlists[1].songs.map((song, index) =>
-                        <div key={index} className="font-light flex gap-1 p-2 shadow-md">
-                            <div className="flex justify-between w-full">
-                                <div className="flex gap-3">
-                                    <p>{`${index + 1}.`}</p>
-                                    <p>{song.title}</p>
-                                </div>
-                                <PlayPauseButton onClick={() => handleSongPlayPause(song)} isPlaying={isPlaying && currentPlaylist.id === "recycle" && currentSong?.id === song.id} />
+                )}
+                {playlists[1].songs.map((song, index) => {
+                    const isActive = isPlaying && currentPlaylist.id === "recycle" && currentSong?.id === song.id;
+                    return (
+                        <div
+                            key={index}
+                            className="flex justify-between items-center gap-2 mb-1 px-3 py-2"
+                            style={{
+                                background: "#1b1b1b",
+                                border: "1px solid #aa880022",
+                                borderRadius: "4px",
+                                boxShadow: "inset 0 0 6px #e3b80033",
+                            }}
+                        >
+                            <div className="flex gap-3 items-center">
+                                <p style={{ fontWeight: 'bold' }}>{`${index + 1}.`}</p>
+                                <p style={{ fontWeight: 'bold' }}>{song.title}</p>
+                            </div>
+                            <div className="flex gap-8 items-center">
+                                {isActive && <MiniEqualizer />}
+                                <PlayPauseButton onClick={() => handleSongPlayPause(song)} isPlaying={isActive} winampStyle size={18}/>
                             </div>
                         </div>
-                    )
-                }
+                    );
+                })}
             </div>
         </div>
     );

@@ -29,9 +29,9 @@ export const Navbar: FC = () => {
 
 
     const tabs: Tab[] = [
-        { name: "snake", label: <GiSnakeTongue />, onClick: () => setSnakeOpen(true) },
-        { name: "home", label: <IoHomeSharp />, onClick: () => router.push('/') },
-        { name: "about", label: <BsQuestionLg />, onClick: () => router.push('/about') },
+        { name: "snake", label: <Image className="m-1" src={"/images/snake/snakexl-logo.svg"} alt="snake" width={30} height={30} />, onClick: () => setSnakeOpen(true) },
+        { name: "home", label: <IoHomeSharp size={30} />, onClick: () => router.push('/') },
+        { name: "about", label: <BsQuestionLg size={32}/>, onClick: () => router.push('/about') },
     ];
 
     const onTabClick = (tab: Tab) => {
@@ -68,7 +68,7 @@ export const Navbar: FC = () => {
         <div className="w-full h-full">
             <nav className="relative flex justify-end items-center h-full">
                 <div
-                    className="absolute left-2 top-2 cursor-pointer w-64 z-55 h-13"
+                    className="absolute left-2 top-0 cursor-pointer w-[22rem] z-55 h-[5rem]"
                     onClick={() => router.push("/")}
                 >
                     <Image

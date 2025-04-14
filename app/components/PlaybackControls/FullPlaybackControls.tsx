@@ -31,7 +31,7 @@ export const FullPlaybackControls: FC<FullPlaybackControlsProps> = ({
             >
                 <IoPlaySkipBack />
             </button>
-            <PlayPauseButton isPlaying={isPlaying} onClick={onPlayPause} />
+            <PlayPauseButton isPlaying={isPlaying} onClick={onPlayPause} size={26} />
             <button
                 onClick={onNext}
                 className="text-white text-2xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
