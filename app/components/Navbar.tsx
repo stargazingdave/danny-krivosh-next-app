@@ -27,11 +27,28 @@ export const Navbar: FC = () => {
     const router = useRouter();
     const pathname = usePathname();
 
+    const [isMobile, setIsMobile] = useState(false);
+
+    const handleResize = () => {
+        if (window.innerWidth <= 768) {
+            setIsMobile(true);
+        } else {
+            setIsMobile(false);
+        }
+    };
+
+    useEffect(() => {
+        handleResize();
+        window.addEventListener("resize", handleResize);
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
+    }, []);
 
     const tabs: Tab[] = [
-        { name: "snake", label: <Image className="m-1" src={"/images/snake/snakexl-logo.svg"} alt="snake" width={30} height={30} />, onClick: () => setSnakeOpen(true) },
-        { name: "home", label: <IoHomeSharp size={30} />, onClick: () => router.push('/') },
-        { name: "about", label: <BsQuestionLg size={32}/>, onClick: () => router.push('/about') },
+        { name: "snake", label: <Image className="m-1" src={"/images/snake/snakexl-logo.svg"} alt="snake" width={isMobile ? 24 : 30} height={30} />, onClick: () => setSnakeOpen(true) },
+        { name: "home", label: <IoHomeSharp size={isMobile ? 24 : 30} />, onClick: () => router.push('/') },
+        { name: "about", label: <BsQuestionLg size={isMobile ? 26 : 32}/>, onClick: () => router.push('/about') },
     ];
 
     const onTabClick = (tab: Tab) => {
@@ -66,9 +83,9 @@ export const Navbar: FC = () => {
 
     return (
         <div className="w-full h-full">
-            <nav className="relative flex justify-end items-center h-full">
+            <nav className={`relative flex justify-end ${isMobile ? '' : 'items-center'} h-full`}>
                 <div
-                    className="absolute left-2 top-0 cursor-pointer w-[22rem] z-55 h-[5rem]"
+                    className="absolute left-2 top-0 cursor-pointer w-[14rem] h-[3rem] sm:w-[22rem] sm:h-[5rem] z-55"
                     onClick={() => router.push("/")}
                 >
                     <Image
@@ -79,7 +96,7 @@ export const Navbar: FC = () => {
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                 </div>
-                <div className='absolute top-4 w-64 justify-center gap-4 hidden sm:flex' style={{ left: 'calc(50% - 8rem)' }}>
+                <div className='absolute top-4 w-64 justify-center gap-4 hidden lg:flex' style={{ left: 'calc(50% - 8rem)' }}>
                     <Checkbox
                         label="Original"
                         checked={!isRandom[playlistId]}
@@ -115,14 +132,14 @@ interface TabProps {
 }
 
 const Tabs: FC<TabProps> = ({ tabs, onTabClick, pathname }) => {
-    return <div className="flex gap-4">
+    return <div className="h-fit flex gap-4">
         {tabs.map((tab) => (
             <button
                 key={tab.name}
                 className={`cursor-pointer border-transparent border-b hover:border-white transition-all duration-700 ${pathname === "/" && tab.name === "home"
-                    ? "text-white text-2xl"
+                    ? "text-white text-xl sm:text-2xl"
                     : pathname.split("/")[1] === tab.name
-                        ? "text-white text-2xl"
+                        ? "text-white text-xl sm:text-2xl"
                         : "text-white"
                     }`}
                 onClick={() => onTabClick(tab)}

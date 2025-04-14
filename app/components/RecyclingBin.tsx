@@ -150,7 +150,7 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ isTouchDraggedOver = false
     };
 
     return (
-        <div id="recycle-bin-dropzone" className='fixed bottom-14 left-0 w-[28rem] min-w-64 z-50' onDragOver={handleDragOver} onDrop={handleDrop}>
+        <div id="recycle-bin-dropzone" className='fixed bottom-14 left-0 w-[28rem] max-w-full z-50' onDragOver={handleDragOver} onDrop={handleDrop}>
             {/* Toolbar */}
             <div
                 className="flex p-1 gap-8 justify-between items-center"

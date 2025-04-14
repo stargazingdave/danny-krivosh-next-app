@@ -137,7 +137,7 @@ export const SongGrid: FC = () => {
                 </div>
             )}
 
-            <div className="flex gap-4 sm:hidden">
+            <div className="flex gap-4 lg:hidden">
                 <Checkbox
                     label="Original"
                     checked={!isRandom[playlistId]}
