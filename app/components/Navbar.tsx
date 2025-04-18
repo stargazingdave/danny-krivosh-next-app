@@ -46,9 +46,18 @@ export const Navbar: FC = () => {
     }, []);
 
     const tabs: Tab[] = [
-        { name: "snake", label: <Image className="m-1" src={"/images/snake/snakexl-logo.svg"} alt="snake" width={isMobile ? 24 : 30} height={30} />, onClick: () => setSnakeOpen(true) },
+        {
+            name: "snake", label: <Image className="m-1"
+                src="/images/snake/snakexl-logo.svg"
+                alt="snake"
+                width={isMobile ? 24 : 30}
+                height={30}
+                priority
+                unoptimized={false} // If you want to enable Next.js optimization
+            />, onClick: () => setSnakeOpen(true)
+        },
         { name: "home", label: <IoHomeSharp size={isMobile ? 24 : 30} />, onClick: () => router.push('/') },
-        { name: "about", label: <BsQuestionLg size={isMobile ? 26 : 32}/>, onClick: () => router.push('/about') },
+        { name: "about", label: <BsQuestionLg size={isMobile ? 26 : 32} />, onClick: () => router.push('/about') },
     ];
 
     const onTabClick = (tab: Tab) => {

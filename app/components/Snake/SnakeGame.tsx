@@ -72,19 +72,22 @@ const MIN_SPEED = 2;
 const directionOptions: Key[] = ["UP", "DOWN", "LEFT", "RIGHT"];
 
 const getRandomPosition = (
-    blocked: { x: number; y: number }[],
+    blocked: Position[],
     gridSize: GridSize
 ) => {
-    let x: number, y: number;
-    const width = gridSize.width;
-    const height = gridSize.height;
-
-    do {
-        x = Math.floor(Math.random() * width);
-        y = Math.floor(Math.random() * height);
-    } while (blocked.some(p => p.x === x && p.y === y));
-
-    return { x, y };
+    const blockedSet = new Set(blocked.map(p => `${p.x},${p.y}`));
+    let attempts = 0;
+    while (attempts < 1000) {
+        const x = Math.floor(Math.random() * gridSize.width);
+        const y = Math.floor(Math.random() * gridSize.height);
+        const key = `${x},${y}`;
+        if (!blockedSet.has(key)) {
+            return { x, y };
+        }
+        attempts++;
+    }
+    // fallback if grid is full (shouldn't happen)
+    return { x: 0, y: 0 };
 };
 
 
@@ -166,29 +169,29 @@ export const SnakeGame: React.FC = () => {
     const [gridSize, setGridSize] = useState<GridSize>({ width: 20, height: 20 }); // default before measure
     const [darkModeFix, setDarkModeFix] = useState(false);
 
-    useEffect(() => {
-        const resize = () => {
-            if (containerRef.current) {
-                const rawWidth = containerRef.current.offsetWidth;
-                const rawHeight = containerRef.current.offsetHeight;
+    // useEffect(() => {
+    //     const resize = () => {
+    //         if (containerRef.current) {
+    //             const rawWidth = containerRef.current.offsetWidth;
+    //             const rawHeight = containerRef.current.offsetHeight;
 
-                const cols = Math.floor(rawWidth / CELL_SIZE);
-                const rows = Math.floor(rawHeight / CELL_SIZE);
+    //             const cols = Math.floor(rawWidth / CELL_SIZE);
+    //             const rows = Math.floor(rawHeight / CELL_SIZE);
 
-                const newSize = { width: cols, height: rows };
-                setGridSize(newSize);
+    //             const newSize = { width: cols, height: rows };
+    //             setGridSize(newSize);
 
-                setFood(getRandomPosition(snake, newSize));
-                setBottle(getRandomPosition(snake, newSize));
-                setPill(getRandomPosition(snake, newSize));
-                setJoint(getRandomPosition(snake, newSize));
-            }
-        };
+    //             setFood(getRandomPosition(snake, newSize));
+    //             setBottle(getRandomPosition(snake, newSize));
+    //             setPill(getRandomPosition(snake, newSize));
+    //             setJoint(getRandomPosition(snake, newSize));
+    //         }
+    //     };
 
-        resize();
-        window.addEventListener("resize", resize);
-        return () => window.removeEventListener("resize", resize);
-    }, []);
+    //     resize();
+    //     window.addEventListener("resize", resize);
+    //     return () => window.removeEventListener("resize", resize);
+    // }, []);
 
 
     const restartGame = () => {
@@ -351,7 +354,7 @@ export const SnakeGame: React.FC = () => {
 
             // Check if snake eats food
             if (head.x === food.x && head.y === food.y) {
-                setFood(getRandomPosition(snake, gridSize));
+                setFood(getRandomPosition(newSnake, gridSize));
                 setSpeed(prev => Math.min(prev + 1, MAX_SPEED));
                 setLatestEvent('foodEaten');
                 if (!showBottle) setShowBottle(getRandomBottle());
@@ -363,7 +366,7 @@ export const SnakeGame: React.FC = () => {
 
             // Check if snake eats bottle
             if (head.x === bottle.x && head.y === bottle.y && showBottle) {
-                setBottle(getRandomPosition(snake, gridSize));
+                setBottle(getRandomPosition(newSnake, gridSize));
                 setLatestEvent('bottleEaten');
                 setShowBottle(false);
                 setSpeed(Math.min(Math.random() * (MAX_SPEED - MIN_SPEED - Math.random() * 6) + MIN_SPEED, MAX_SPEED));
@@ -371,7 +374,7 @@ export const SnakeGame: React.FC = () => {
 
             // Check if snake eats pill
             if (head.x === pill.x && head.y === pill.y && showPill) {
-                setPill(getRandomPosition(snake, gridSize));
+                setPill(getRandomPosition(newSnake, gridSize));
                 setLatestEvent('pillEaten');
                 setShowPill(false);
                 setSpeed(prev => Math.max(prev - 2, MIN_SPEED));
@@ -379,7 +382,7 @@ export const SnakeGame: React.FC = () => {
 
             // Check if snake eats joint
             if (head.x === joint.x && head.y === joint.y && showJoint) {
-                setJoint(getRandomPosition(snake, gridSize));
+                setJoint(getRandomPosition(newSnake, gridSize));
                 setLatestEvent('jointEaten');
                 setShowJoint(false);
                 setSpeed(8);
