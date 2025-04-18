@@ -168,3 +168,21 @@ body {
   position: absolute;
   border-radius: 50%;
 }
+
+@keyframes scan {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 0 100%;
+  }
+}
+
+.animate-scanlines {
+  animation: scan 2s linear infinite;
+}
+
+.touch-none {
+  touch-action: none;
+}

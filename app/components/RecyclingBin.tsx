@@ -1,59 +1,19 @@
 'use client';
 
-import { FC, useEffect, useRef, useState } from "react";
-import { SongData } from "../types/SongData";
-import { FaShuffle, FaWindowMinimize } from "react-icons/fa6";
-import { HiOutlineTrash } from "react-icons/hi2";
-import { useAppContext } from "../AppContext";
-import { PlayPauseButton } from "./PlaybackControls/PlayPauseButton";
-import Image from "next/image";
-
-const widthUnit = 13;
-const heightUnit = 12;
-
-const MiniEqualizer: FC = () => (
-    <div
-        style={{
-            display: 'flex',
-            alignItems: 'flex-end',
-            gap: '2px',
-            width: '22px',
-            height: '18px',
-            marginLeft: '4px',
-        }}
-    >
-        {[...Array(5)].map((_, i) => (
-            <div
-                key={i}
-                style={{
-                    width: '3px',
-                    background: 'linear-gradient(to top, #ffc400, transparent)',
-                    height: `${6 + Math.random() * 10}px`,
-                    animation: `eqAnim .3s ease-in-out ${i * 0.1}s infinite alternate`,
-                    borderRadius: '2px',
-                }}
-            />
-        ))}
-    </div>
-);
-
-if (typeof window !== 'undefined') {
-    const style = document.createElement('style');
-    style.innerHTML = `
-    @keyframes eqAnim {
-      0% { transform: scaleY(0.5); opacity: 0.4; }
-      50% { transform: scaleY(1.8); opacity: 1; }
-      100% { transform: scaleY(0.7); opacity: 0.6; }
-    }
-  `;
-    document.head.appendChild(style);
-}
+import { FC, useState } from 'react';
+import { SongData } from '../types/SongData';
+import { useAppContext } from '../AppContext';
+import Image from 'next/image';
+import { PlayPauseButton } from './PlaybackControls/PlayPauseButton';
+import { FaShuffle, FaWindowMinimize } from 'react-icons/fa6';
+import { HiOutlineTrash } from 'react-icons/hi2';
 
 interface RecyclingBinProps {
     isTouchDraggedOver?: boolean;
+    binRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-export const RecyclingBin: FC<RecyclingBinProps> = ({ isTouchDraggedOver = false }) => {
+export const RecyclingBin: FC<RecyclingBinProps> = ({ isTouchDraggedOver = false, binRef }) => {
     const {
         addSongToRecycle,
         removeSongsFromRecycle,
@@ -68,194 +28,139 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ isTouchDraggedOver = false
     } = useAppContext();
 
     const [isOpen, setIsOpen] = useState(false);
-    const [isDraggedOver, setIsDraggedOver] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
-
-    useEffect(() => {
-        handleResize();
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
-
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
-
-    const dragTimeout = useRef<NodeJS.Timeout | null>(null);
-
-    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        setIsDraggedOver(true);
-        if (dragTimeout.current) clearTimeout(dragTimeout.current);
-        dragTimeout.current = setTimeout(() => setIsDraggedOver(false), 200);
-    };
+    const recyclePlaylist = playlists.find(p => p.id === 'recycle');
 
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
-        const songData = e.dataTransfer.getData("song");
+        const songData = e.dataTransfer.getData('song');
         if (!songData) return;
         const droppedSong: SongData = JSON.parse(songData);
+        if (!droppedSong.url) return;
         addSongToRecycle(droppedSong);
-        setIsDraggedOver(false);
     };
 
-    if (!isOpen) {
-        return (
-            <div id="recycle-bin-dropzone" onDragOver={handleDragOver} onDrop={handleDrop}>
-                <Image
-                    src="/images/recycle-bin-icon.png"
-                    alt="Recycle Bin"
-                    width={(isDraggedOver || isTouchDraggedOver) ? 210 : 200}
-                    height={(isDraggedOver || isTouchDraggedOver) ? 150 : 135}
-                    className="p-2 cursor-pointer transition-all duration-300 ease-in-out"
-                    style={{
-                        filter: (isDraggedOver || isTouchDraggedOver)
-                            ? "drop-shadow(0 0 18px #e0b300)"
-                            : "drop-shadow(0 0.5rem 0.5rem rgba(0,0,0,0.5))",
-                        width: widthUnit * ((isDraggedOver || isTouchDraggedOver) ? 12 : 10),
-                        height: heightUnit * ((isDraggedOver || isTouchDraggedOver) ? 12 : 10),
-                        margin: isMobile ? "0" : "2rem",
-                    }}
-                    onClick={() => setIsOpen(true)}
-                />
-            </div>
-        );
-    }
-
-    const onShuffleClick = () => {
-        setPlaylists(playlists.map(playlist => {
-            if (playlist.id === 'recycle') {
-                const shuffledSongs = [...playlist.songs].sort(() => Math.random() - 0.5);
-                return { ...playlist, songs: shuffledSongs };
-            }
-            return playlist;
-        }));
+    const shuffleRecycle = () => {
+        if (!recyclePlaylist) return;
+        const shuffled = [...recyclePlaylist.songs].sort(() => Math.random() - 0.5);
+        setPlaylists(playlists.map(p => p.id === 'recycle' ? { ...p, songs: shuffled } : p));
         setRandomOrder('recycle');
     };
 
-    const handleListPlayPause = () => {
-        if (currentPlaylist.id === "recycle") togglePlay();
-        else startPlaylist("recycle");
-    };
-
-    const handleSongPlayPause = (song: SongData) => {
-        if (currentPlaylist.id === "recycle" && currentSong?.id === song.id) togglePlay();
-        else startPlaylist("recycle", playlists[1].songs.findIndex(s => s.id === song.id));
-    };
-
-    const recyclePlaylist = playlists.find(p => p.id === "recycle");
-    if (!recyclePlaylist) return null;
-
-    const handleDeleteAllSongs = () => {
-        if (playlists[1].songs.length > 0) removeSongsFromRecycle(recyclePlaylist.songs);
+    const clearRecycle = () => {
+        if (!recyclePlaylist) return;
+        removeSongsFromRecycle(recyclePlaylist.songs);
         setPlaylists(playlists.map(p => p.id === 'recycle' ? { ...p, songs: [] } : p));
     };
 
-    return (
-        <div id="recycle-bin-dropzone" className='fixed bottom-14 left-0 w-[28rem] max-w-full z-50' onDragOver={handleDragOver} onDrop={handleDrop}>
-            {/* Toolbar */}
-            <div
-                className="flex p-1 gap-8 justify-between items-center"
-                style={{
-                    background: "linear-gradient(to right, #0a0a0a, #1a1a1a)",
-                    borderBottom: "1px solid #aa8800",
-                    boxShadow: "inset 0 -1px 2px #e3b80055, 0 1px 3px #000",
-                    fontFamily: "Tahoma, sans-serif",
-                    textTransform: "uppercase",
-                    padding: "6px 10px",
-                }}
-            >
-                <div className="flex gap-2 items-center">
-                    {[{
-                        icon: <FaWindowMinimize />,
-                        onClick: () => setIsOpen(false)
-                    }, {
-                        icon: <FaShuffle />,
-                        onClick: onShuffleClick
-                    }, {
-                        icon: <HiOutlineTrash />,
-                        onClick: handleDeleteAllSongs
-                    }].map(({ icon, onClick }, idx) => (
-                        <button
-                            key={idx}
-                            onClick={onClick}
-                            style={{
-                                background: "linear-gradient(to bottom, #222, #111)",
-                                border: "1px solid #444",
-                                borderRadius: "3px",
-                                boxShadow: "inset 0 0 1px #fff3, 0 1px 2px #000",
-                                padding: "4px 6px",
-                                color: "#f3c400",
-                                transition: "all 0.2s",
-                                cursor: "pointer",
-                            }}
-                            onMouseOver={(e) => {
-                                (e.currentTarget.style.background = "linear-gradient(to bottom, #333, #1b1b1b)");
-                            }}
-                            onMouseOut={(e) => {
-                                (e.currentTarget.style.background = "linear-gradient(to bottom, #222, #111)");
-                            }}
-                        >
-                            {icon}
-                        </button>
-                    ))}
-                    {/* <PlayPauseButton onClick={handleListPlayPause} isPlaying={isPlaying && currentPlaylist.id === "recycle"} /> */}
-                </div>
-                <h1 style={{
-                    fontSize: "26px",
-                    fontWeight: "bold",
-                    color: "#f3c400",
-                    textShadow: "0 0 4px #000, 0 0 8px #e3b80055",
-                    fontFamily: "Impact, Tahoma, sans-serif",
-                    letterSpacing: "2.5px"
-                }}>
-                    DUMPSTER 3000
-                </h1>
-            </div>
+    if (!recyclePlaylist) return null;
 
-            {/* Song list */}
-            <div
-                className="flex flex-col h-64 overflow-auto"
-                style={{
-                    background: "repeating-linear-gradient(to bottom, #101010 0px, #181818 2px, #101010 4px)",
-                    borderTop: "1px solid #aa880022",
-                    boxShadow: "inset 0 0 10px #aa880033",
-                    padding: "6px",
-                    color: "#f0eac7",
-                    fontFamily: "Courier New, monospace",
-                    fontSize: "18px",
-                }}
-            >
-                {playlists[1].songs.length === 0 && (
-                    <div className="flex justify-center items-center h-full">
-                        <p style={{ fontFamily: "Tahoma", fontSize: "14px", color: "#888" }}>
-                            Dump Here
-                        </p>
-                    </div>
-                )}
-                {playlists[1].songs.map((song, index) => {
-                    const isActive = isPlaying && currentPlaylist.id === "recycle" && currentSong?.id === song.id;
-                    return (
-                        <div
-                            key={index}
-                            className="flex justify-between items-center gap-2 mb-1 px-3 py-2"
-                            style={{
-                                background: "#1b1b1b",
-                                border: "1px solid #aa880022",
-                                borderRadius: "4px",
-                                boxShadow: "inset 0 0 6px #e3b80033",
-                            }}
-                        >
-                            <div className="flex gap-3 items-center">
-                                <p style={{ fontWeight: 'bold' }}>{`${index + 1}.`}</p>
-                                <p style={{ fontWeight: 'bold' }}>{song.title}</p>
-                            </div>
-                            <div className="flex gap-8 items-center">
-                                {isActive && <MiniEqualizer />}
-                                <PlayPauseButton onClick={() => handleSongPlayPause(song)} isPlaying={isActive} winampStyle size={18}/>
-                            </div>
+    return (
+        <div
+            ref={binRef}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleDrop}
+            className={isOpen ? 'fixed bottom-14 left-0 w-[28rem] max-w-full z-50' : ''}
+        >
+            {!isOpen ? (
+                <div className="flex justify-center items-center w-32 h-full overflow-visible">
+                    <Image
+                        src="/images/recycle-bin-icon.png"
+                        alt="Recycle Bin"
+                        width={isTouchDraggedOver ? 170 : 120}
+                        height={isTouchDraggedOver ? 150 : 135}
+                        className="p-2 cursor-pointer transition-all duration-300 ease-in-out"
+                        style={{
+                            filter: isTouchDraggedOver
+                                ? 'drop-shadow(0 0 18px #e31919)'
+                                : 'drop-shadow(0 0.5rem 0.5rem rgba(0,0,0,0.5))',
+                        }}
+                        onClick={() => setIsOpen(true)}
+                    />
+                </div>
+            ) : (
+                <div className="relative rounded-md p-1 border-4 border-[#2a2a2a] shadow-[inset_0_0_12px_#000] bg-[#0b0b0b] overflow-hidden">
+                    {/* Texture Overlays */}
+                    <div className="pointer-events-none absolute inset-0 z-0 bg-[url('/images/noise.png')] mix-blend-overlay opacity-[0.04] bg-repeat" />
+                    <div className="pointer-events-none absolute inset-0 z-0 bg-[url('/images/scanlines.png')] animate-scanlines mix-blend-soft-light opacity-[0.08] bg-repeat bg-[length:100%_4px]" />
+                    <div className="pointer-events-none absolute inset-0 z-0 backdrop-blur-[0.4px] opacity-[0.03]" />
+
+                    {/* Header */}
+                    <div className="z-10 relative flex justify-between items-center px-3 py-1.5 bg-[#1a1a1a] border-b border-yellow-500 shadow-[inset_0_1px_0_#333,inset_0_-1px_0_#000]">
+                        <div className="flex gap-1">
+                            <button
+                                onClick={() => setIsOpen(false)}
+                                className="border border-yellow-600 bg-[#111] px-2 py-1 text-yellow-300 text-sm shadow-[2px_2px_0_#000] hover:bg-yellow-700 hover:text-black active:shadow-[inset_2px_2px_2px_#000] transition-all"
+                            >
+                                <FaWindowMinimize />
+                            </button>
+                            <button
+                                onClick={shuffleRecycle}
+                                className="border border-yellow-600 bg-[#111] px-2 py-1 text-yellow-300 text-sm shadow-[2px_2px_0_#000] hover:bg-yellow-700 hover:text-black active:shadow-[inset_2px_2px_2px_#000] transition-all"
+                            >
+                                <FaShuffle />
+                            </button>
+                            <button
+                                onClick={clearRecycle}
+                                className="border border-red-700 bg-[#111] px-2 py-1 text-red-400 text-sm shadow-[2px_2px_0_#000] hover:bg-red-600 hover:text-black active:shadow-[inset_2px_2px_2px_#000] transition-all flex items-center gap-1"
+                            >
+                                <HiOutlineTrash className="scale-[1.4]" />
+                                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_6px_#ff0000]" />
+                            </button>
                         </div>
-                    );
-                })}
-            </div>
+                        <h2 className="text-lg font-bold tracking-wide uppercase text-yellow-300 drop-shadow-[1px_1px_0_#000]">Dumpster 3000</h2>
+                    </div>
+
+                    {/* Song List */}
+                    <div className="z-10 relative h-64 overflow-y-auto bg-black bg-opacity-90 px-3 py-2 text-yellow-100 text-[13px] leading-tight">
+                        {recyclePlaylist.songs.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-full opacity-60 tracking-wider">
+                                <Image
+                                    src="/images/recycle-bin-icon.png"
+                                    alt="Recycle Bin"
+                                    width={130}
+                                    height={130}
+                                    className="w-[130px] h-[130px] object-contain mb-2 drop-shadow-[0_0_12px_rgba(255,255,0,0.3)]"
+                                />
+                                <div>DUMP HERE</div>
+                            </div>
+                        ) : <div className="relative h-full">
+                            <div className="absolute flex flex-col items-center justify-center h-full w-full opacity-60 tracking-wider">
+                                <Image
+                                    src="/images/recycle-bin-icon.png"
+                                    alt="Recycle Bin"
+                                    width={130}
+                                    height={130}
+                                    className="w-[130px] h-[130px] object-contain mb-2 drop-shadow-[0_0_12px_rgba(255,255,0,0.3)] opacity-30"
+                                />
+                            </div>
+                            {recyclePlaylist.songs.map((song, idx) => {
+                                const isActive =
+                                    isPlaying &&
+                                    currentPlaylist.id === 'recycle' &&
+                                    currentSong?.id === song.id;
+                                return (
+                                    <div
+                                        key={song.id}
+                                        className="relative flex justify-between items-center py-1 border-b border-yellow-900/40"
+                                    >
+                                        <div className={isActive ? 'text-white font-bold' : ''}>
+                                            {String(idx + 1).padStart(2, '0')}. {song.title}
+                                        </div>
+                                        <PlayPauseButton
+                                            isPlaying={isActive}
+                                            onClick={() =>
+                                                isActive ? togglePlay() : startPlaylist('recycle', idx)
+                                            }
+                                            winampStyle
+                                            size={16}
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </div>}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

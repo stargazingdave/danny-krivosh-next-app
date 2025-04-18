@@ -122,8 +122,7 @@ export const FastLyricsFinder: FC<FastLyricsFinderProps> = () => {
                                         step={1}
                                         value={fontSize}
                                         onChange={handleFontSizeChange}
-                                        // label="Font Size"
-                                        className="w-full"
+                                        className="w-full touch-none" // <- touch-none for smoother mobile use
                                         thumbColor="#d0d0d0"
                                         thumbShape="square"
                                     />

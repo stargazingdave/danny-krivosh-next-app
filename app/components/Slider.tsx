@@ -1,4 +1,6 @@
-import React, { useRef, useState } from 'react';
+'use client';
+
+import React, { useRef, useState, useEffect } from 'react';
 
 interface CustomSliderProps {
     min?: number;
@@ -32,13 +34,11 @@ const CustomSlider: React.FC<CustomSliderProps> = ({
 
     const handleMove = (clientX: number) => {
         if (!trackRef.current) return;
-
         const rect = trackRef.current.getBoundingClientRect();
         const x = clientX - rect.left;
         let ratio = x / rect.width;
         ratio = Math.max(0, Math.min(1, ratio));
         const newValue = Math.round((min + ratio * (max - min)) / step) * step;
-
         onChange?.(newValue);
     };
 
@@ -47,34 +47,49 @@ const CustomSlider: React.FC<CustomSliderProps> = ({
         handleMove(e.clientX);
     };
 
+    const handleTouchStart = (e: React.TouchEvent) => {
+        setIsDragging(true);
+        handleMove(e.touches[0].clientX);
+    };
+
     const handleMouseMove = (e: MouseEvent) => {
         if (isDragging) handleMove(e.clientX);
     };
 
-    const handleMouseUp = () => setIsDragging(false);
+    const handleTouchMove = (e: TouchEvent) => {
+        if (isDragging) handleMove(e.touches[0].clientX);
+    };
 
-    React.useEffect(() => {
+    const stopDragging = () => setIsDragging(false);
+
+    useEffect(() => {
         if (isDragging) {
             window.addEventListener('mousemove', handleMouseMove);
-            window.addEventListener('mouseup', handleMouseUp);
+            window.addEventListener('mouseup', stopDragging);
+            window.addEventListener('touchmove', handleTouchMove);
+            window.addEventListener('touchend', stopDragging);
         } else {
             window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseup', handleMouseUp);
+            window.removeEventListener('mouseup', stopDragging);
+            window.removeEventListener('touchmove', handleTouchMove);
+            window.removeEventListener('touchend', stopDragging);
         }
 
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseup', handleMouseUp);
+            window.removeEventListener('mouseup', stopDragging);
+            window.removeEventListener('touchmove', handleTouchMove);
+            window.removeEventListener('touchend', stopDragging);
         };
     }, [isDragging]);
 
     return (
         <div className={`text-white select-none ${className}`}>
             {label && <div className="text-sm mb-1">{label}</div>}
-
             <div
                 ref={trackRef}
                 onMouseDown={handleMouseDown}
+                onTouchStart={handleTouchStart}
                 className="relative h-4 w-full rounded"
                 style={{
                     background: `
@@ -89,6 +104,7 @@ const CustomSlider: React.FC<CustomSliderProps> = ({
                     `,
                     border: '1px solid #111',
                     boxShadow: 'inset 0 1px 2px #0008, inset 0 -1px 1px #fff2',
+                    touchAction: 'none',
                 }}
             >
                 <div
@@ -110,17 +126,9 @@ const CustomSlider: React.FC<CustomSliderProps> = ({
                         `,
                         borderRadius: thumbShape === 'circle' ? '50%' : '2px',
                         border: '1px solid #000',
-                        // boxShadow: `
-                        //     inset 1px 1px 2px #fff4,
-                        //     inset -1px -1px 2px #0008,
-                        //     0 0 4px rgba(0,0,0,0.6),
-                        //     ${isDragging ? '0 0 8px #00ffaa' : ''}
-                        // `,
-                        // transition: 'box-shadow 0.15s ease-in-out',
                     }}
                 />
             </div>
-
             <div className="text-xs text-right mt-1 text-gray-400">{value}</div>
         </div>
     );
