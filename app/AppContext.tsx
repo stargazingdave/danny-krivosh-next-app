@@ -284,6 +284,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({
     };
 
     const handlePlaySong = (song: SongData, playlistId: string) => {
+        const isSameSong = currentSong?.id === song.id;
+        const isSamePlaylist = currentPlaylistId === playlistId;
+        if (isSameSong && isSamePlaylist) {
+            togglePlay();
+            return;
+        }
+
         const playlist = playlists.find((p) => p.id === playlistId);
         if (playlist) {
             setCurrentPlaylistId(playlist.id);

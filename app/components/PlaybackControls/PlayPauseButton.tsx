@@ -1,23 +1,29 @@
+import { useAppContext } from "@/app/AppContext";
 import { IoPause, IoPlay } from "react-icons/io5";
 
 interface PlayPauseButtonProps {
-    isPlaying: boolean;
-    onClick: () => void;
+    isActive: boolean;
+    onClick?: () => void;
     size?: number;
     winampStyle?: boolean;
 }
 
 export const PlayPauseButton = ({
-    isPlaying,
+    isActive,
     onClick,
     size = 24,
     winampStyle = false,
 }: PlayPauseButtonProps) => {
     const baseStyles = "text-4xl relative inline-block cursor-pointer transition-all";
 
+    const handleClick = () => {
+        onClick?.();
+    }
+    
+
     return (
         <button
-            onClick={onClick}
+            onClick={handleClick}
             className={baseStyles}
             style={
                 winampStyle
@@ -46,7 +52,7 @@ export const PlayPauseButton = ({
                         : {}}
                 />
                 <div className="absolute inset-0 z-0 flex items-center justify-center bg-transparent">
-                    {isPlaying ? <IoPause className="w-full h-full" /> : <IoPlay className="w-full h-full" />}
+                    {isActive ? <IoPause className="w-full h-full" /> : <IoPlay className="w-full h-full" />}
                 </div>
             </div>
         </button>

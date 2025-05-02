@@ -8,17 +8,15 @@ import {
 import { PlayPauseButton } from "./PlayPauseButton";
 
 interface FullPlaybackControlsProps {
+    onPlayPause?: () => void;
     songActive: boolean;
-    isPlaying: boolean;
-    onPlayPause: () => void;
     onNext: () => void;
     onPrevious: () => void;
 }
 
 export const FullPlaybackControls: FC<FullPlaybackControlsProps> = ({
-    songActive,
-    isPlaying,
     onPlayPause,
+    songActive,
     onNext,
     onPrevious,
 }) => {
@@ -31,7 +29,7 @@ export const FullPlaybackControls: FC<FullPlaybackControlsProps> = ({
             >
                 <IoPlaySkipBack />
             </button>
-            <PlayPauseButton isPlaying={isPlaying} onClick={onPlayPause} size={26} />
+            <PlayPauseButton isActive={songActive} size={26} onClick={onPlayPause} />
             <button
                 onClick={onNext}
                 className="text-white text-2xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"

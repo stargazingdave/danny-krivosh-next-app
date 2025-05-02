@@ -20,11 +20,11 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ isTouchDraggedOver = false
         playlists,
         setPlaylists,
         setRandomOrder,
-        startPlaylist,
         isPlaying,
         currentPlaylist,
         togglePlay,
         currentSong,
+        handlePlaySong,
     } = useAppContext();
 
     const [isOpen, setIsOpen] = useState(false);
@@ -71,7 +71,7 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ isTouchDraggedOver = false
                         className="p-2 cursor-pointer transition-all duration-300 ease-in-out"
                         style={{
                             filter: isTouchDraggedOver
-                                ? 'drop-shadow(0 0 18px #e31919)'
+                                ? 'drop-shadow(0 0 18px oklch(.905 .182 98.111))'
                                 : 'drop-shadow(0 0.5rem 0.5rem rgba(0,0,0,0.5))',
                         }}
                         onClick={() => setIsOpen(true)}
@@ -147,9 +147,9 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ isTouchDraggedOver = false
                                             {String(idx + 1).padStart(2, '0')}. {song.title}
                                         </div>
                                         <PlayPauseButton
-                                            isPlaying={isActive}
+                                            isActive={isActive}
                                             onClick={() =>
-                                                isActive ? togglePlay() : startPlaylist('recycle', idx)
+                                                handlePlaySong(song, 'recycle')
                                             }
                                             winampStyle
                                             size={16}

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FaAmazon, FaYoutube } from "react-icons/fa6";
+import { HiXMark } from "react-icons/hi2";
 import { IoLogoSoundcloud } from "react-icons/io5";
 
 export default function AboutIndex() {
@@ -21,8 +22,7 @@ export default function AboutIndex() {
         >
             <div
                 style={{
-                    width: "100%",
-                    maxWidth: "600px",
+                    width: "70%",
                     background: "linear-gradient(to bottom, #2c2c2c, #1e1e1e)",
                     border: "2px solid #7a96df",
                     borderRadius: "6px",
@@ -73,58 +73,50 @@ export default function AboutIndex() {
                         href={"/"}
                         title="Close"
                     >
-                        ×
+                        <HiXMark size={20} />
                     </Link>
 
 
                 </div>
 
                 {/* Content */}
-                <div style={{ padding: "20px", fontSize: "15px" }}>
-                    <p>
-                        Originally from Ukraine, I am the musician behind some songs and author of <i>"Brown, to Brown. - An Anthology"</i>.
-                    </p>
-                    <br />
-                    <p>I have been writing music throughout my life.</p>
-                    <br />
-                    <p>
-                        My music isn't available on all major streaming platforms.
+                <div style={{ padding: "20px", fontSize: "15px", display: "flex", justifyContent: "center", gap: "20px" }} className="flex-col lg:flex-row">
+                    <div style={{ width: "80%" }}>
+                        <p>
+                            Originally from Ukraine, I am the musician behind some songs and author of <i>"Brown, to Brown. - An Anthology"</i>.
+                        </p>
                         <br />
-                        You can find some of it on <b>SoundCloud</b>, but most of it is on <b>YouTube</b>.
+                        <p>I have been writing music throughout my life.</p>
                         <br />
-                        I also have an <b>Amazon Author Page</b>.
-                    </p>
-                    <br />
-                    <p>
-                        We've made this awesome easter-egg-filled site for your convenience and for our joy.
+                        <p>
+                            My music isn't available on all major streaming platforms.
+                            <br />
+                            You can find some of it on <b>SoundCloud</b>, but most of it is on <b>YouTube</b>.
+                            <br />
+                            I also have an <b>Amazon Author Page</b>.
+                        </p>
                         <br />
-                        Be sure to try the <b>Recycling Bin (DUMPSTER 3000)</b> feature.
+                        <p>
+                            We've made this awesome easter-egg-filled site for your convenience and for our joy.
+                            <br />
+                            Be sure to try the <b>Recycling Bin (DUMPSTER 3000)</b> feature.
+                            <br />
+                            You can contact me at:
+                        </p>
+                        <p>
+                            <a href={`mailto:${primaryEmail}`} style={{ color: "#70aaff" }}>
+                                {primaryEmail}
+                            </a>
+                        </p>
                         <br />
-                        You can contact me at:
-                    </p>
-                    <p>
-                        <a href={`mailto:${primaryEmail}`} style={{ color: "#70aaff" }}>
-                            {primaryEmail}
-                        </a>
-                    </p>
-                    <br />
-                    <p>
-                        You can also find me on{" "}
-                        <a href={youtubeLink} style={{ color: "#ff6b6b" }}>
-                            YouTube
-                        </a>.
-                    </p>
-                    <br />
-                    <div style={{ display: "flex", gap: "20px", justifyContent: "center" }}>
-                        <a href={youtubeLink} target="_blank" rel="noreferrer" title="YouTube">
-                            <FaYoutube size={32} color="#ff4444" />
-                        </a>
-                        <a href="https://www.amazon.com/author/dannykrivosh" target="_blank" rel="noreferrer" title="Amazon">
-                            <FaAmazon size={32} color="#e2e2e2" />
-                        </a>
-                        <a href="https://soundcloud.com/danny-krivosh" target="_blank" rel="noreferrer" title="SoundCloud">
-                            <IoLogoSoundcloud size={32} color="#ff5408" />
-                        </a>
+                        <p>
+                            You can also find me on{" "}
+                            <a href={youtubeLink} style={{ color: "#ff6b6b" }}>
+                                YouTube
+                            </a>.
+                        </p>
+                        <br />
+                        
                     </div>
                     <hr
                         style={{
@@ -133,14 +125,25 @@ export default function AboutIndex() {
                             margin: "30px 0 15px",
                         }}
                     />
-                    <div style={{ fontSize: "13px", color: "#aaa", textAlign: "left", lineHeight: "1.6" }}>
+                    <div style={{ position: "relative", display: "flex", flexDirection: "column", fontSize: "13px", color: "#aaa", textAlign: "left", lineHeight: "1.6" }}>
                         <p><b>Version:</b> DK-H2IL (Danny Krivosh – Hebrew Intl. Edition)</p>
                         <p><b>HTML Engine:</b> v5.2.1</p>
                         <p><b>CSS Shell:</b> DarkGlass X</p>
                         <p><b>Build Date:</b> April 2025</p>
                         <p><b>Codename:</b> Dumpster3000</p>
+                        
+                        <div style={{ flexGrow: "1", display: "flex", gap: "20px", alignItems: "center", justifyContent: "center", padding: "10px 0" }}>
+                            <a href={youtubeLink} target="_blank" rel="noreferrer" title="YouTube">
+                                <FaYoutube size={32} color="#ff4444" />
+                            </a>
+                            <a href="https://www.amazon.com/author/dannykrivosh" target="_blank" rel="noreferrer" title="Amazon">
+                                <FaAmazon size={32} color="#e2e2e2" />
+                            </a>
+                            <a href="https://soundcloud.com/danny-krivosh" target="_blank" rel="noreferrer" title="SoundCloud">
+                                <IoLogoSoundcloud size={32} color="#ff5408" />
+                            </a>
+                        </div>
                     </div>
-
                 </div>
             </div>
         </div>

@@ -9,17 +9,17 @@ import { FastLyricsFinder } from "./FastLyricsFinder";
 
 export const AudioPlayer: FC = () => {
     const {
-        currentSong,
         isPlaying,
+        currentSong,
         progress,
         duration,
         audioRef,
-        togglePlay,
         handleSeek,
         handleTimeUpdate,
         handleLoadedMetadata,
         playNextSong,
         playPrevSong,
+        togglePlay,
     } = useAppContext();
 
 
@@ -30,11 +30,10 @@ export const AudioPlayer: FC = () => {
 
             {/* Playback Controls */}
             <FullPlaybackControls
-                songActive={!!currentSong}
-                isPlaying={isPlaying}
-                onPlayPause={togglePlay}
+                songActive={isPlaying}
                 onNext={playNextSong}
                 onPrevious={playPrevSong}
+                onPlayPause={togglePlay}
             />
 
             {/* Current Time */}
