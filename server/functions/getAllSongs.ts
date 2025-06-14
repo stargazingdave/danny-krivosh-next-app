@@ -5,16 +5,6 @@ import { SongData } from "@/app/types/SongData";
 const allSongs: SongData[] = [
     {
         id: "1",
-        title: "Answers None",
-        description: "Instrumental, Atmospheric, Noise",
-        length: 180,
-        url: "/song_files/answers_none.mp3",
-        generes: ["rock", "pop"],
-        image: "/song_images/answers-none.webp",
-        definition: "hd",
-    },
-    {
-        id: "2",
         title: "8",
         description: "Instrumental, rock",
         length: 240,
@@ -24,7 +14,7 @@ const allSongs: SongData[] = [
         definition: "hd",
     },
     {
-        id: "3",
+        id: "2",
         title: "A Reflection of You",
         description: "Slowbeat, rock, psychedelic",
         length: 200,
@@ -34,7 +24,7 @@ const allSongs: SongData[] = [
         definition: "hd",
     },
     {
-        id: "4",
+        id: "3",
         title: "Yours Truly",
         description: "Instrumental, folk",
         length: 220,
@@ -43,7 +33,7 @@ const allSongs: SongData[] = [
         image: "/song_images/no-country.jpg",
     },
     {
-        id: "5",
+        id: "4",
         title: "Under",
         description: "Metal, Atmospheric",
         length: 190,
@@ -53,7 +43,7 @@ const allSongs: SongData[] = [
         definition: "hd",
     },
     {
-        id: "6",
+        id: "5",
         title: "Halomot Sheniganti",
         description: "Ballad, Rock",
         length: 210,
@@ -63,7 +53,7 @@ const allSongs: SongData[] = [
         definition: "hd",
     },
     {
-        id: "7",
+        id: "6",
         title: "Serenade",
         description: "Atmospheric",
         length: 230,
@@ -73,7 +63,7 @@ const allSongs: SongData[] = [
         definition: "hd",
     },
     {
-        id: "8",
+        id: "7",
         title: "Son of God",
         description: "Acoustic, Ballad",
         length: 250,
@@ -81,7 +71,7 @@ const allSongs: SongData[] = [
         image: "/song_images/son-of-god.webp",
     },
     {
-        id: "9",
+        id: "8",
         title: "Laundromat",
         description: "Electronic, Rock",
         length: 260,
@@ -91,7 +81,7 @@ const allSongs: SongData[] = [
         definition: "hd",
     },
     {
-        id: "10",
+        id: "9",
         title: "Static",
         description: "Instrumental",
         length: 270,
@@ -100,7 +90,7 @@ const allSongs: SongData[] = [
         image: "/song_images/static.webp",
     },
     {
-        id: "11",
+        id: "10",
         title: "Taste",
         description: "Metal, Soundtrack",
         length: 280,
@@ -110,7 +100,7 @@ const allSongs: SongData[] = [
         definition: "hd",
     },
     {
-        id: "12",
+        id: "11",
         title: "The Extra Color",
         description: "Ballad, Rock",
         length: 290,
@@ -120,7 +110,7 @@ const allSongs: SongData[] = [
         definition: "hd",
     },
     {
-        id: "13",
+        id: "12",
         title: "Thought of a Kid (Part 1)",
         description: "Electronic, Rock",
         length: 300,
@@ -129,7 +119,7 @@ const allSongs: SongData[] = [
         image: "/song_images/thought-of-a-kid-part-1.webp",
     },
     {
-        id: "14",
+        id: "13",
         title: "Thought of a Kid (Part 2)",
         description: "Electronic, Mood",
         length: 310,
@@ -139,7 +129,7 @@ const allSongs: SongData[] = [
         definition: "hd",
     },
     {
-        id: "15",
+        id: "14",
         title: "Use Art",
         description: "Slowbeat, Rock",
         length: 320,
@@ -149,7 +139,7 @@ const allSongs: SongData[] = [
         definition: "hd",
     },
     {
-        id: "16",
+        id: "15",
         title: "Vitality",
         description: "Instrumental, Electronic",
         length: 330,
@@ -159,7 +149,7 @@ const allSongs: SongData[] = [
         definition: "hd",
     },
     {
-        id: "17",
+        id: "16",
         title: "Feel",
         description: "Indie, Folk",
         length: 340,
@@ -167,7 +157,7 @@ const allSongs: SongData[] = [
         image: "/song_images/feel.jpg",
     },
     {
-        id: "18",
+        id: "17",
         title: "In & Out",
         description: "Instrumental, Chillstep",
         length: 350,
@@ -177,13 +167,23 @@ const allSongs: SongData[] = [
         definition: "hd",
     },
     {
-        id: "19",
+        id: "18",
         title: "Reason 1",
         description: "Rock",
         length: 360,
         url: "/song_files/reason_1.mp3",
         generes: ["rock", "pop"],
         image: "/song_images/reason-1.jpg",
+    },
+    {
+        id: "19",
+        title: "Answers None",
+        description: "Instrumental, Atmospheric, Noise",
+        length: 180,
+        url: "/song_files/answers_none.mp3",
+        generes: ["rock", "pop"],
+        image: "/song_images/answers-none.webp",
+        definition: "hd",
     },
     {
         id: "20",
