@@ -100,9 +100,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({
 
     React.useEffect(() => {
         if (audioRef.current) {
-            audioRef.current.play().catch(() => {
-                console.warn('Autoplay failed, user interaction required.');
-            });
+            if (isPlaying) {
+                audioRef.current.play().catch(() => {
+                    console.warn('Autoplay failed, user interaction required.');
+                });
+            }
         }
     }, [currentSong]);
 

@@ -20,9 +20,8 @@ export default function AboutIndex() {
                 padding: "40px",
             }}
         >
-            <div
+            <div className="w-full md:w-[70%]"
                 style={{
-                    width: "70%",
                     background: "linear-gradient(to bottom, #2c2c2c, #1e1e1e)",
                     border: "2px solid #7a96df",
                     borderRadius: "6px",
@@ -116,7 +115,7 @@ export default function AboutIndex() {
                             </a>.
                         </p>
                         <br />
-                        
+
                     </div>
                     <hr
                         style={{
@@ -131,7 +130,7 @@ export default function AboutIndex() {
                         <p><b>CSS Shell:</b> DarkGlass X</p>
                         <p><b>Build Date:</b> April 2025</p>
                         <p><b>Codename:</b> Dumpster3000</p>
-                        
+
                         <div style={{ flexGrow: "1", display: "flex", gap: "20px", alignItems: "center", justifyContent: "center", padding: "10px 0" }}>
                             <a href={youtubeLink} target="_blank" rel="noreferrer" title="YouTube">
                                 <FaYoutube size={32} color="#ff4444" />

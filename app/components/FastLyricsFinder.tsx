@@ -6,7 +6,7 @@ import { HiXMark } from "react-icons/hi2";
 import { FaWindowMinimize } from "react-icons/fa6";
 import CustomSlider from "./Slider";
 
-interface FastLyricsFinderProps {}
+interface FastLyricsFinderProps { }
 
 export const FastLyricsFinder: FC<FastLyricsFinderProps> = () => {
   const { currentSong } = useAppContext();

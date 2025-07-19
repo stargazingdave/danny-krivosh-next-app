@@ -78,7 +78,7 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ isTouchDraggedOver = false
                     />
                 </div>
             ) : (
-                <div className="relative rounded-md p-1 border-4 border-[#2a2a2a] shadow-[inset_0_0_12px_#000] bg-[#0b0b0b] overflow-hidden">
+                <div style={{ height: "422px" }} className="relative rounded-md p-1 border-4 border-[#2a2a2a] shadow-[inset_0_0_12px_#000] bg-[#0b0b0b] overflow-hidden">
                     {/* Texture Overlays */}
                     <div className="pointer-events-none absolute inset-0 z-0 bg-[url('/images/noise.png')] mix-blend-overlay opacity-[0.04] bg-repeat" />
                     <div className="pointer-events-none absolute inset-0 z-0 bg-[url('/images/scanlines.png')] animate-scanlines mix-blend-soft-light opacity-[0.08] bg-repeat bg-[length:100%_4px]" />
@@ -111,7 +111,7 @@ export const RecyclingBin: FC<RecyclingBinProps> = ({ isTouchDraggedOver = false
                     </div>
 
                     {/* Song List */}
-                    <div className="z-10 relative h-64 overflow-y-auto bg-black bg-opacity-90 px-3 py-2 text-yellow-100 text-[13px] leading-tight">
+                    <div className="z-10 relative h-full overflow-y-auto bg-black bg-opacity-90 px-3 py-2 text-yellow-100 text-[13px] leading-tight">
                         {recyclePlaylist.songs.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-full opacity-60 tracking-wider">
                                 <Image
