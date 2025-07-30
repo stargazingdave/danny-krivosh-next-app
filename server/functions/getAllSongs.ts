@@ -1,201 +1,28 @@
 'use server';
 
-import { SongData } from "@/app/types/SongData";
+import supabase from '@/lib/supabaseAdmin';
+import { SongData } from '@/app/types/SongData';
 
-const allSongs: SongData[] = [
-    {
-        id: "1",
-        title: "8",
-        description: "Instrumental, rock",
-        url: "/song_files/8.mp3",
-        generes: ["rock"],
-        image: "/song_images/8.webp",
-        definition: "hd",
-    },
-    {
-        id: "2",
-        title: "A Reflection of You",
-        description: "Slowbeat, rock, psychedelic",
-        url: "/song_files/a_reflection_of_you.mp3",
-        generes: ["rock"],
-        image: "/song_images/a-reflection-of-you.jpg",
-        definition: "hd",
-    },
-    {
-        id: "3",
-        title: "Yours Truly",
-        description: "Instrumental, folk",
-        url: "/song_files/yours_truly.mp3",
-        generes: ["rock", "pop"],
-        image: "/song_images/no-country.jpg",
-    },
-    {
-        id: "4",
-        title: "Under",
-        description: "Metal, Atmospheric",
-        url: "/song_files/under.mp3",
-        generes: ["pop"],
-        image: "/song_images/under.webp",
-        definition: "hd",
-    },
-    {
-        id: "5",
-        title: "Halomot Sheniganti",
-        description: "Ballad, Rock",
-        url: "/song_files/halomot_sheniganti.mp3",
-        generes: ["rock"],
-        image: "/song_images/poor-mans-vision.webp",
-        definition: "hd",
-    },
-    {
-        id: "6",
-        title: "Serenade",
-        description: "Atmospheric",
-        url: "/song_files/serenade.mp3",
-        generes: ["rock", "pop"],
-        image: "/song_images/serenade.webp",
-        definition: "hd",
-    },
-    {
-        id: "7",
-        title: "Son of God",
-        description: "Acoustic, Ballad",
-        generes: ["pop"],
-        image: "/song_images/son-of-god.webp",
-    },
-    {
-        id: "8",
-        title: "Laundromat",
-        description: "Electronic, Rock",
-        url: "/song_files/laundromat.mp3",
-        generes: ["rock"],
-        image: "/song_images/remain-unfold.jpg",
-        definition: "hd",
-    },
-    {
-        id: "9",
-        title: "Static",
-        description: "Instrumental",
-        url: "/song_files/static.mp3",
-        generes: ["rock", "pop"],
-        image: "/song_images/static.webp",
-    },
-    {
-        id: "10",
-        title: "Taste",
-        description: "Metal, Soundtrack",
-        url: "/song_files/taste.mp3",
-        generes: ["pop"],
-        image: "/song_images/taste.webp",
-        definition: "hd",
-    },
-    {
-        id: "11",
-        title: "The Extra Color",
-        description: "Ballad, Rock",
-        url: "/song_files/the_extra_color.mp3",
-        generes: ["rock"],
-        image: "/song_images/the-extra-color.webp",
-        definition: "hd",
-    },
-    {
-        id: "12",
-        title: "Thought of a Kid (Part 1)",
-        description: "Electronic, Rock",
-        url: "/song_files/thought_of_a_kid_p-1.mp3",
-        generes: ["rock", "pop"],
-        image: "/song_images/thought-of-a-kid-part-1.webp",
-    },
-    {
-        id: "13",
-        title: "Thought of a Kid (Part 2)",
-        description: "Electronic, Mood",
-        url: "/song_files/thought_of_a_kid_p-2.mp3",
-        generes: ["pop"],
-        image: "/song_images/thought-of-a-kid-part-2.jpg",
-        definition: "hd",
-    },
-    {
-        id: "14",
-        title: "Use Art",
-        description: "Slowbeat, Rock",
-        url: "/song_files/use_art.mp3",
-        generes: ["rock"],
-        image: "/song_images/use-art.webp",
-        definition: "hd",
-    },
-    {
-        id: "15",
-        title: "Vitality",
-        description: "Instrumental, Electronic",
-        url: "/song_files/vitality.mp3",
-        generes: ["rock", "pop"],
-        image: "/song_images/vitality.webp",
-        definition: "hd",
-    },
-    {
-        id: "16",
-        title: "Feel",
-        description: "Indie, Folk",
-        url: "/song_files/feel.jpg",
-        generes: ["pop"],
-        image: "/song_images/feel.jpg",
-    },
-    {
-        id: "17",
-        title: "In & Out",
-        description: "Instrumental, Chillstep",
-        url: "/song_files/in_and_out.mp3",
-        generes: ["rock"],
-        image: "/song_images/in-and-out.webp",
-        definition: "hd",
-    },
-    {
-        id: "18",
-        title: "Reason 1",
-        description: "Rock",
-        url: "/song_files/reason_1.mp3",
-        generes: ["rock", "pop"],
-        image: "/song_images/reason-1.jpg",
-    },
-    {
-        id: "19",
-        title: "Answers None",
-        description: "Instrumental, Atmospheric, Noise",
-        url: "/song_files/answers_none.mp3",
-        generes: ["rock", "pop"],
-        image: "/song_images/answers-none.webp",
-        definition: "hd",
-    },
-    {
-        id: "20",
-        title: "Otto Hapachad",
-        description: "Neo-Racict, Punk-Metal",
-        url: "/song_files/otto_hapachad.mp3",
-        generes: ["pop"],
-        image: "/song_images/otto-hapachad.png",
-        definition: "hd",
-    },
-    {
-        id: "21",
-        title: "DIEM",
-        description: "Worldly, Atmospheric, Heavy Rock",
-        url: "/song_files/diem.mp3",
-        generes: ["rock"],
-        image: "/song_images/diem.png",
-        definition: "hd",
-    },
-    {
-        id: "22",
-        title: "Erev Rav",
-        description: "Noise, Metal, Trash, New-Wave",
-        url: "/song_files/erev_rav.mp3",
-        generes: ["rock", "pop"],
-        image: "/song_images/erev-rav.png",
-        definition: "hd",
-    },
-];
+export async function getAllSongs(): Promise<SongData[]> {
+    const { data, error } = await supabase
+        .from('songs')
+        .select('*')
+        .order('order', { ascending: true });
 
-export async function getAllSongs() {
-    return allSongs;
+    if (error) {
+        console.error('Error fetching songs:', error);
+        return [];
+    }
+
+    return data.map((song) => ({
+        id: song.id,
+        title: song.title,
+        description: song.description,
+        genres: song.genres,
+        definition: song.definition,
+        url: song.audio_url,
+        image: song.image_url,
+        lyrics: song.lyrics_text,
+        createdAt: song.created_at,
+    }));
 }

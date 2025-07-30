@@ -10,7 +10,6 @@ export const Visualization: FC<VisualizationProps> = ({ type = "waveform", barCo
     const {
         currentSong,
         analyserRef,
-        audioRef,
     } = useAppContext();
 
     const localCanvasRef = useRef<HTMLCanvasElement>(null);

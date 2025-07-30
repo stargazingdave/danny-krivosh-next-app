@@ -55,8 +55,10 @@ export const AudioPlayer: FC = () => {
 
             {/* Audio Element */}
             <audio
+                key={currentSong?.id}
                 ref={audioRef}
                 src={currentSong?.url}
+                crossOrigin="anonymous"
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
             />

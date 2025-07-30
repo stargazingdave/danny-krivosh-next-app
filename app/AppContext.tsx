@@ -68,35 +68,57 @@ export const AppProvider: React.FC<AppProviderProps> = ({
     const [originalOrders, setOriginalOrders] = React.useState<Record<string, SongData[]>>({});
     const [shuffledOrders, setShuffledOrders] = React.useState<Record<string, SongData[]>>({});
     const [playlists, setPlaylists] = React.useState<Playlist[]>(initialPlaylists);
+    const [audioElement, setAudioElement] = React.useState<HTMLAudioElement | null>(null);
+
+
 
     const audioRef = React.useRef<HTMLAudioElement>(null);
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
     const audioCtxRef = React.useRef<AudioContext | null>(null);
     const analyserRef = React.useRef<AnalyserNode | null>(null);
+    const mediaSourceRef = React.useRef<MediaElementAudioSourceNode | null>(null);
+
+    React.useEffect(() => {
+        setAudioElement(audioRef.current ?? null);
+    }, [currentSong?.id]);
 
     React.useEffect(() => {
         const audio = audioRef.current;
-        if (!audio || audioCtxRef.current) return;
+        if (!audio) return;
+
+        // Cleanup old
+        if (mediaSourceRef.current) {
+            try {
+                mediaSourceRef.current.disconnect();
+            } catch { }
+            mediaSourceRef.current = null;
+        }
+        if (audioCtxRef.current) {
+            try {
+                audioCtxRef.current.close();
+            } catch { }
+            audioCtxRef.current = null;
+        }
 
         const audioCtx = new AudioContext();
         const analyser = audioCtx.createAnalyser();
-        const source = audioCtx.createMediaElementSource(audio);
 
-        source.connect(analyser);
-        analyser.connect(audioCtx.destination);
+        try {
+            const source = audioCtx.createMediaElementSource(audio);
+            source.connect(analyser);
+            analyser.connect(audioCtx.destination);
 
-        audioCtxRef.current = audioCtx;
-        analyserRef.current = analyser;
+            audioCtxRef.current = audioCtx;
+            analyserRef.current = analyser;
+            mediaSourceRef.current = source;
+        } catch (e) {
+            console.error("Failed setting up audio chain", e);
+        }
 
-        const resumeAudio = () => {
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
+        return () => {
+            audioCtx.close();
         };
-
-        window.addEventListener('click', resumeAudio);
-        return () => window.removeEventListener('click', resumeAudio);
-    }, []);
+    }, [currentSong?.id]);
 
     React.useEffect(() => {
         if (audioRef.current) {
@@ -195,6 +217,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({
             }
         }
     };
+
+
 
     const handleTimeUpdate = () => {
         const audio = audioRef.current;

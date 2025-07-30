@@ -3,9 +3,9 @@ import { Aguafina_Script, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "./components/Navbar";
 import { AppProvider } from "./AppContext";
-import { getAllSongs } from "@/server/functions/getAllSongs";
 import { getPlaylists } from "@/server/functions/getPlaylists";
 import { AudioPlayer } from "./components/AudioPlayer";
+import { getAllSongs } from "../server/functions/getAllSongs";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -70,7 +70,9 @@ export default async function RootLayout({
 
             {/* Main content scrolls under navbar */}
             <div className="flex flex-col h-fit z-0">
-              {children}
+              <div style={{ minHeight: "calc(100vh - 13rem)", }}>
+                {children}
+              </div>
 
               <footer className="h-fit flex flex-col flex-wrap items-center justify-center text-sm text-center p-2">
                 <p>{`© dannykrivosh.com ${year}. All Rights Reserved.`}</p>
