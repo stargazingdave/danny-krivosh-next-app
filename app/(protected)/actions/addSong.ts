@@ -8,7 +8,7 @@ export async function addSong(formData: FormData) {
     const description = formData.get('description') as string;
     const genres = (formData.get('genres') as string)?.split(',').map(g => g.trim());
     const definition = formData.get('definition') as string;
-    const lyricsText = formData.get('lyrics') as string;
+    const lyrics = formData.get('lyrics') as string;
 
 
     const audio = formData.get('audio') as File;
@@ -57,7 +57,7 @@ export async function addSong(formData: FormData) {
         definition,
         audio_url: audioUrl,
         image_url: imageUrl,
-        lyrics_text: lyricsText,
+        lyrics,
         order: maxOrder + 1,
     });
 }

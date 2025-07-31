@@ -48,24 +48,15 @@ export const FastLyricsFinder: FC<FastLyricsFinderProps> = () => {
   };
 
   const handleClickFind = () => {
+    console.log('currentSong.lyrics =', currentSong?.lyrics);
+
     if (!currentSongId) return;
     setStatus("searching");
 
-    fetch(`/lyrics/${currentSongId}.lrc`)
-      .then((res) => {
-        if (!res.ok) throw new Error("File not found");
-        return res.text();
-      })
-      .then((raw) => {
-        const cleanedLines = raw
-          .split("\n")
-          .filter((line) => !line.startsWith("#"))
-          .map((line) =>
-            line.replace(/^\[\d{2}:\d{2}(?:\.\d{2})?\]\s?/, "")
-          );
-        setLyrics(cleanedLines);
-      })
-      .catch(() => setLyrics(null));
+    if (currentSong?.lyrics)
+      setLyrics(currentSong.lyrics.split('\n').filter(line => line.trim() !== ''));
+    else
+      setLyrics(null);
   };
 
   return (

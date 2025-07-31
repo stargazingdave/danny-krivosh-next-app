@@ -22,7 +22,7 @@ export async function getAllSongs(): Promise<SongData[]> {
         definition: song.definition,
         url: song.audio_url,
         image: song.image_url,
-        lyrics: song.lyrics_text,
+        lyrics: song.lyrics,
         createdAt: song.created_at,
     }));
 }
