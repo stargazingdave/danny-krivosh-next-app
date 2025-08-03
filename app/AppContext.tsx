@@ -79,44 +79,50 @@ export const AppProvider: React.FC<AppProviderProps> = ({
     const mediaSourceRef = React.useRef<MediaElementAudioSourceNode | null>(null);
 
     React.useEffect(() => {
-        setAudioElement(audioRef.current ?? null);
-    }, [currentSong?.id]);
-
-    React.useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
 
-        // Cleanup old
+        // Create or reuse AudioContext
+        if (!audioCtxRef.current) {
+            audioCtxRef.current = new AudioContext();
+        }
+
+        const audioCtx = audioCtxRef.current;
+
+        // Resume if needed
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume().catch(err => {
+                console.warn('AudioContext resume failed:', err);
+            });
+        }
+
+        // Disconnect old source
         if (mediaSourceRef.current) {
             try {
                 mediaSourceRef.current.disconnect();
             } catch { }
             mediaSourceRef.current = null;
         }
-        if (audioCtxRef.current) {
-            try {
-                audioCtxRef.current.close();
-            } catch { }
-            audioCtxRef.current = null;
-        }
 
-        const audioCtx = new AudioContext();
+        // Create new analyser and media source
         const analyser = audioCtx.createAnalyser();
-
+        let source: MediaElementAudioSourceNode | null = null;
         try {
-            const source = audioCtx.createMediaElementSource(audio);
+            source = audioCtx.createMediaElementSource(audio);
             source.connect(analyser);
             analyser.connect(audioCtx.destination);
 
-            audioCtxRef.current = audioCtx;
             analyserRef.current = analyser;
             mediaSourceRef.current = source;
         } catch (e) {
-            console.error("Failed setting up audio chain", e);
+            console.error("Failed setting up audio graph", e);
         }
 
         return () => {
-            audioCtx.close();
+            // Disconnect on cleanup
+            try {
+                source?.disconnect();
+            } catch { }
         };
     }, [currentSong?.id]);
 

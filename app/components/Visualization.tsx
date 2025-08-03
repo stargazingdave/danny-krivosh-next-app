@@ -3,7 +3,7 @@ import { useAppContext } from "../AppContext";
 
 interface VisualizationProps {
     type?: "waveform" | "spectrum";
-    barCount?: number; // optional prop to control bar count
+    barCount?: number;
 }
 
 export const Visualization: FC<VisualizationProps> = ({ type = "waveform", barCount = 32 }) => {
@@ -15,6 +15,22 @@ export const Visualization: FC<VisualizationProps> = ({ type = "waveform", barCo
     const localCanvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+
+    useEffect(() => {
+        const AudioCtx = (window.AudioContext || (window as any).webkitAudioContext) as typeof AudioContext;
+        const audioCtx = new AudioCtx();
+
+        if (audioCtx.state === "suspended") {
+            audioCtx.resume().catch((err) => {
+                console.warn("AudioContext resume failed:", err);
+            });
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+            const resume = () => audioCtx.resume();
+            window.addEventListener('click', resume, { once: true });
+            return () => window.removeEventListener('click', resume);
+        }
+    }, []);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -52,7 +68,7 @@ export const Visualization: FC<VisualizationProps> = ({ type = "waveform", barCo
 
         const clampedBarCount = Math.max(barCount, 3);
         const previousHeights = new Array(clampedBarCount).fill(0);
-        const decayFactor = 0.8; // higher = smoother decay
+        const decayFactor = 0.8;
 
         const draw = () => {
             ctx.clearRect(0, 0, canvasSize.width, canvasSize.height);
@@ -60,18 +76,17 @@ export const Visualization: FC<VisualizationProps> = ({ type = "waveform", barCo
             if (type === "spectrum") {
                 analyser.getByteFrequencyData(rawData);
 
-
                 const barWidth = canvasSize.width / clampedBarCount;
 
                 const getSkewedIndex = (
                     i: number,
                     total: number,
-                    skewPower = 1, // 👈 try 1.2–2.0 for more skew
+                    skewPower = 1.5,
                     minPercent = 0.05,
                     maxPercent = 0.7
                 ) => {
                     const percent = i / (total - 1);
-                    const skewed = 1 - Math.pow(1 - percent, skewPower); // 👈 reversed skew
+                    const skewed = 1 - Math.pow(1 - percent, skewPower);
                     const startBin = Math.floor(rawData.length * minPercent);
                     const endBin = Math.floor(rawData.length * maxPercent);
                     const usableBins = endBin - startBin;
@@ -81,7 +96,6 @@ export const Visualization: FC<VisualizationProps> = ({ type = "waveform", barCo
                     );
                 };
 
-                // Fade out previous frame (trailing effect)
                 ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
                 ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
 
@@ -101,10 +115,9 @@ export const Visualization: FC<VisualizationProps> = ({ type = "waveform", barCo
                     );
                     const barHeight = previousHeights[i];
 
-                    // 🔮 Dynamic color using HSL:
-                    const hue = 0 + (i / clampedBarCount) * 50; // range: 0 to 50 (colors: red to yellow)
+                    const hue = 0 + (i / clampedBarCount) * 50;
                     const saturation = 100;
-                    const lightness = 50 + (val / 255) * 50; // 30% to 80% based on intensity
+                    const lightness = 50 + (val / 255) * 50;
                     ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 
                     ctx.fillRect(i * barWidth, canvasSize.height - barHeight, barWidth, barHeight);
@@ -134,7 +147,7 @@ export const Visualization: FC<VisualizationProps> = ({ type = "waveform", barCo
 
         draw();
         return () => cancelAnimationFrame(animationFrameId);
-    }, [currentSong?.id, canvasSize, type, barCount]);
+    }, [analyserRef.current, currentSong?.id, canvasSize, type, barCount]);
 
     return (
         <div ref={containerRef} className="relative w-full h-full">
