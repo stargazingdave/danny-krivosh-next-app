@@ -2,6 +2,15 @@ import { NextResponse } from "next/server";
 import supabase from "@/lib/supabaseAdmin";
 import { randomUUID } from "crypto";
 
+export const runtime = "nodejs";
+
+export const config = {
+    api: {
+        bodyParser: false,
+        sizeLimit: "100mb",
+    },
+};
+
 export async function POST(req: Request) {
     try {
         const formData = await req.formData();
