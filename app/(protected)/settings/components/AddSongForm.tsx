@@ -16,27 +16,38 @@ export default function AddSongForm({ onUpload }: AddSongFormProps) {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [lyrics, setLyrics] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!title || !audioFile || !imageFile) {
-      alert('Title, audio, image, and lyrics are required');
-      return;
+    setSubmitting(true);
+
+    try {
+      e.preventDefault();
+      if (!title || !audioFile || !imageFile) {
+        alert('Title, audio, image, and lyrics are required');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('description', description);
+      formData.append('genres', genres);
+      formData.append('definition', definition);
+      formData.append('lyrics', lyrics);
+      formData.append('audio', audioFile);
+      formData.append('image', imageFile);
+
+
+      await uploadSong(formData);
+      alert('Song added!');
+      onUpload?.();
+    } catch (error) {
+      console.error("Error uploading song:", error);
+      alert('Failed to add song');
+    } finally {
+      setSubmitting(false);
     }
 
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
-    formData.append('genres', genres);
-    formData.append('definition', definition);
-    formData.append('lyrics', lyrics);
-    formData.append('audio', audioFile);
-    formData.append('image', imageFile);
-
-
-    await uploadSong(formData);
-    alert('Song added!');
-    onUpload?.();
   };
 
   return (
@@ -126,10 +137,34 @@ export default function AddSongForm({ onUpload }: AddSongFormProps) {
       {/* Submit */}
       <button
         type="submit"
-        className="bg-amber-800 px-6 py-2 rounded text-white hover:bg-amber-700 transition"
+        className="bg-amber-800 px-6 py-2 rounded text-white hover:bg-amber-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={submitting}
       >
+        {submitting && <LoadingSpinner />}
         Add Song
       </button>
     </form>
   );
 }
+
+const LoadingSpinner = () => (
+  <svg
+    className="animate-spin h-5 w-5 mr-3 inline-block text-white"
+    viewBox="0 0 24 24"
+  >
+    <circle
+      className="opacity-25"
+      cx="12"
+      cy="12"
+      r="10"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="4"
+    />
+    <path
+      className="opacity-75"
+      fill="currentColor"
+      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+    />
+  </svg>
+);
