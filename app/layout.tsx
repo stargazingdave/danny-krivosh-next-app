@@ -7,6 +7,8 @@ import { getPlaylists } from "@/server/functions/getPlaylists";
 import { AudioPlayer } from "./components/AudioPlayer";
 import { getAllSongs } from "../server/functions/getAllSongs";
 
+export const dynamic = "force-dynamic";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
