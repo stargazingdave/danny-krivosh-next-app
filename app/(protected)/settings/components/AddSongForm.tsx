@@ -3,6 +3,7 @@
 import { useState, FormEvent } from 'react';
 import { addSong } from '../../actions/addSong';
 import { uploadSong } from '../../functions/uploadSong';
+import { uploadFullSongClient } from '../../functions/uploadFullSongClient';
 
 interface AddSongFormProps {
   onUpload?: () => void;
@@ -38,7 +39,16 @@ export default function AddSongForm({ onUpload }: AddSongFormProps) {
       formData.append('image', imageFile);
 
 
-      await uploadSong(formData);
+      await uploadFullSongClient({
+        title,
+        description,
+        genres,
+        definition,
+        lyrics,
+        audioFile,
+        imageFile,
+      });
+
       alert('Song added!');
       onUpload?.();
     } catch (error) {
