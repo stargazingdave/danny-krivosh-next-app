@@ -1,7 +1,7 @@
 'use server';
 
 import { randomUUID } from 'crypto';
-import supabaseAdmin from '@/lib/supabaseAdmin';
+import supabaseAdmin from '@/lib/supabase/clients/supabaseAdmin';
 
 /**
  * Creates signed *upload* tokens for audio + image in bucket "songs".

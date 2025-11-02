@@ -1,7 +1,7 @@
 // app/api/songs/init/route.ts
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
-import supabase from "@/lib/supabaseAdmin";
+import supabase from "@/lib/supabase/clients/supabaseAdmin";
 
 export const runtime = "nodejs";
 

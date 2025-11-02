@@ -3,8 +3,6 @@
 'use client';
 
 import { useAppContext } from "@/app/AppContext";
-import { createRainSound } from "@/app/functions/createRainSound";
-import { playThunder } from "@/app/functions/playThunder";
 import React, { useEffect, useRef, useState } from "react";
 import { FaWineBottle } from "react-icons/fa6";
 import { HiX } from "react-icons/hi";
@@ -447,16 +445,16 @@ export const SnakeGame: React.FC = () => {
     const audioCtxRef = useRef<AudioContext | null>(null)
 
     const startSound = () => {
-        const ctx = new AudioContext()
-        audioCtxRef.current = ctx
-        createRainSound(ctx)
+        // const ctx = new AudioContext()
+        // audioCtxRef.current = ctx
+        // createRainSound(ctx)
 
-        // random thunder every 5-15 seconds
-        const interval = setInterval(() => {
-            playThunder(ctx)
-        }, Math.random() * 10000 + 5000)
+        // // random thunder every 5-15 seconds
+        // const interval = setInterval(() => {
+        //     playThunder(ctx)
+        // }, Math.random() * 10000 + 5000)
 
-        return () => clearInterval(interval)
+        // return () => clearInterval(interval)
     }
 
     const stopSound = () => {

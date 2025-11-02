@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
-import { addSong } from '../../actions/addSong';
-import { uploadSong } from '../../functions/uploadSong';
 import { uploadFullSongClient } from '../../functions/uploadFullSongClient';
 
 interface AddSongFormProps {
@@ -20,25 +18,14 @@ export default function AddSongForm({ onUpload }: AddSongFormProps) {
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!title || !audioFile || !imageFile) {
+      alert('Title, audio, and image are required');
+      return;
+    }
+
     setSubmitting(true);
-
     try {
-      e.preventDefault();
-      if (!title || !audioFile || !imageFile) {
-        alert('Title, audio, image, and lyrics are required');
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('description', description);
-      formData.append('genres', genres);
-      formData.append('definition', definition);
-      formData.append('lyrics', lyrics);
-      formData.append('audio', audioFile);
-      formData.append('image', imageFile);
-
-
       await uploadFullSongClient({
         title,
         description,
@@ -52,12 +39,11 @@ export default function AddSongForm({ onUpload }: AddSongFormProps) {
       alert('Song added!');
       onUpload?.();
     } catch (error) {
-      console.error("Error uploading song:", error);
+      console.error('Error uploading song:', error);
       alert('Failed to add song');
     } finally {
       setSubmitting(false);
     }
-
   };
 
   return (

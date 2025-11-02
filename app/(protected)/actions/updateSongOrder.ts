@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/lib/supabaseAdmin";
+import supabase from "@/lib/supabase/clients/supabaseAdmin";
 
 export async function updateSongOrder(idsInOrder: string[]) {
     for (let index = 0; index < idsInOrder.length; index++) {

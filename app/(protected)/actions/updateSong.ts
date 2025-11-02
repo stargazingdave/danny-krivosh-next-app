@@ -1,6 +1,6 @@
 'use server';
 
-import supabase from '@/lib/supabaseAdmin';
+import supabase from '@/lib/supabase/clients/supabaseAdmin';
 import { randomUUID } from 'crypto';
 
 export async function updateSong(formData: FormData, songId: string) {

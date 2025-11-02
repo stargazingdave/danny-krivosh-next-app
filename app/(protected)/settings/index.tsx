@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import AddSongForm from './components/AddSongForm';
 import { logout } from '../actions/login';
 import { SongData } from '@/app/types/SongData';
-import { getAllSongs } from '../../../server/functions/getAllSongs'; // you’ll create this
+import { getAllSongs } from '../../../lib/supabase/actions/getAllSongs'; // you’ll create this
 import { updateSongOrder } from '../actions/updateSongOrder';
 import { motion } from "motion/react";
 import SongEditForm from './components/SongEditForm';

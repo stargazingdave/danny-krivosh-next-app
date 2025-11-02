@@ -1,6 +1,6 @@
 'use server';
 
-import supabaseAdmin from '@/lib/supabaseAdmin';
+import supabaseAdmin from '@/lib/supabase/clients/supabaseAdmin';
 
 export async function finalizeSongUpload(params: {
     songId: string;

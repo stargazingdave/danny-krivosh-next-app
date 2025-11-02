@@ -3,9 +3,9 @@ import { Aguafina_Script, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "./components/Navbar";
 import { AppProvider } from "./AppContext";
-import { getPlaylists } from "@/server/functions/getPlaylists";
+import { getPlaylists } from "@/app/functions/getPlaylists";
 import { AudioPlayer } from "./components/AudioPlayer";
-import { getAllSongs } from "../server/functions/getAllSongs";
+import { getAllSongs } from "../lib/supabase/actions/getAllSongs";
 
 export const dynamic = "force-dynamic";
 

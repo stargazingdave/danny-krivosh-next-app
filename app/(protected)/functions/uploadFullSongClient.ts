@@ -1,15 +1,8 @@
 'use client';
 
-import { createClient } from '@supabase/supabase-js';
+import { upload } from '@vercel/blob/client';
 import { finalizeSongUpload } from '../actions/finalizeSongUpload';
-import { initSongUpload } from '../actions/initSongUpload';
 
-/**
- * Full flow from the client:
- * 1) Ask server for signed upload tokens/paths
- * 2) Upload files to those signed URLs
- * 3) Tell server to insert the DB row
- */
 export async function uploadFullSongClient({
     title,
     description,
@@ -27,59 +20,41 @@ export async function uploadFullSongClient({
     audioFile: File;
     imageFile: File;
 }) {
-    // 1) Get signed upload tokens from server
-    const initRes = await initSongUpload({
-        audioName: audioFile.name,
-        audioType: audioFile.type || 'application/octet-stream',
-        imageName: imageFile.name,
-        imageType: imageFile.type || 'application/octet-stream',
-    });
+    if (!audioFile || !imageFile) throw new Error('Audio and image are required');
 
-    const {
-        songId,
-        audio: { path: audioPath, token: audioToken, contentType: audioContentType, publicUrl: audioPublicUrl },
-        image: { path: imagePath, token: imageToken, contentType: imageContentType, publicUrl: imagePublicUrl },
-    } = initRes;
+    const songId = crypto.randomUUID();
 
-    // 2) Upload using the *client* Supabase with ANON key
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    // AUDIO
+    const audioBlob = await upload(`${songId}-${audioFile.name}`, audioFile, {
+        access: 'public',
+        handleUploadUrl: '/api/vercel/blob',
+        multipart: true,
+        contentType: audioFile.type || 'application/octet-stream',
+        dir: 'songs',
+        allowedContentTypes: ['audio/wav', 'audio/mpeg', 'audio/mp4', 'audio/ogg', 'audio/webm'],
+        clientPayload: JSON.stringify({ kind: 'audio', songId }),
+    } as any);
 
-    // Audio
-    {
-        const { error } = await supabase.storage
-            .from('songs')
-            .uploadToSignedUrl(audioPath, audioToken, audioFile, { contentType: audioContentType });
-        if (error) {
-            console.error('uploadToSignedUrl(audio) error:', error);
-            throw new Error('Audio upload failed');
-        }
-    }
+    // IMAGE
+    const imageBlob = await upload(`${songId}-${imageFile.name}`, imageFile, {
+        access: 'public',
+        handleUploadUrl: '/api/vercel/blob',
+        multipart: true,
+        contentType: imageFile.type || 'application/octet-stream',
+        dir: 'song_images',
+        allowedContentTypes: ['image/png', 'image/jpeg', 'image/webp'],
+        clientPayload: JSON.stringify({ kind: 'image', songId }),
+    } as any);
 
-    // Image
-    {
-        const { error } = await supabase.storage
-            .from('songs')
-            .uploadToSignedUrl(imagePath, imageToken, imageFile, { contentType: imageContentType });
-        if (error) {
-            console.error('uploadToSignedUrl(image) error:', error);
-            throw new Error('Image upload failed');
-        }
-    }
-
-    // 3) Finalize in DB (uses server-side service role)
-    const res = await finalizeSongUpload({
+    // Finalize in DB (same action you already have)
+    return await finalizeSongUpload({
         songId,
         title,
         description,
         genres,
         definition,
         lyrics,
-        audioUrl: audioPublicUrl,
-        imageUrl: imagePublicUrl,
+        audioUrl: audioBlob.url,
+        imageUrl: imageBlob.url,
     });
-
-    return res; // { success: true, id, ... }
 }
